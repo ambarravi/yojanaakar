@@ -18,6 +18,12 @@ jobs:
         uses: actions/setup-node@v3  # Use v3 for latest support
         with:
           node-version: '20'  # Explicitly set Node.js version 20
+      
+      - name: Check AWS credentials
+        run: |
+            echo "AWS Access Key ID: ${{ secrets.AWS_ACCESS_KEY_ID }}"
+            echo "AWS Secret Access Key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}"
+        
 
       - name: Set up AWS CLI
         uses: aws-actions/configure-aws-credentials@v2  # Use v2 for latest support
