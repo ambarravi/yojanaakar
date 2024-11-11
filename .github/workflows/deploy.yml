@@ -1,0 +1,38 @@
+name: Deploy Application
+
+on:
+  push:
+    branches:
+      - dev
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up AWS CLI
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ github.ref == 'refs/heads/main' && 'eu-west-1' }}
+
+      - name: Install dependencies
+        run: npm install
+  
+      - name: Build React app
+        run: npm run build
+  
+      - name: Deploy to S3
+        run: |
+            aws s3 sync build/ s3://${{ secrets.S3_BUCKET_NAME }} --delete --acl public-read
+
+      - name: Deploy to AWS
+        run: |
+          # Add your deployment commands for the application here
+          # Example: AWS CLI commands to deploy to Lambda, API Gateway, or other services
+          # aws cloudformation deploy --template-file cloudformation.yml --stack-name yojanaakar
