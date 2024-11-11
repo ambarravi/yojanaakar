@@ -23,6 +23,7 @@ jobs:
         run: |
             echo "AWS Access Key ID: ${{ secrets.AWS_ACCESS_KEY_ID }}"
             echo "AWS Secret Access Key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}"
+            echo "AWS Secret Access Key: ${{ secrets.S3_BUCKET_NAME }}"
         
 
       - name: Set up AWS CLI
