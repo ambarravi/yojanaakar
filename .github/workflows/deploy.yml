@@ -12,10 +12,15 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3  # Updated to v3 to use the latest version
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3  # Added Node.js setup
+        with:
+          node-version: '20'  # You can set this to 20 if you prefer Node.js 20
 
       - name: Set up AWS CLI
-        uses: aws-actions/configure-aws-credentials@v1
+        uses: aws-actions/configure-aws-credentials@v2  # Updated to v2
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
@@ -23,10 +28,10 @@ jobs:
 
       - name: Install dependencies
         run: npm install
-  
+
       - name: Build React app
         run: npm run build
-  
+
       - name: Deploy to S3
         run: |
             aws s3 sync build/ s3://${{ secrets.S3_BUCKET_NAME }} --delete --acl public-read
