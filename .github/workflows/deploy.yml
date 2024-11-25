@@ -44,6 +44,12 @@ jobs:
             aws s3 sync build/ s3://${{ secrets.S3_BUCKET_NAME }} --delete 
 
       - name: Deploy to AWS
+        env:
+          REACT_APP_COGNITO_USER_POOL_ID: ${{ secrets.COGNITO_USER_POOL_ID }}
+          REACT_APP_COGNITO_USER_POOL_CLIENT_ID: ${{ secrets.APP_COGNITO_USER_POOL_CLIENT_ID }}
+          REACT_APP_COGNITO_DOMAIN: ${{ secrets.COGNITO_DOMAIN }}
+          REACT_APP_COGNITO_REDIRECTSIGNIN: ${{ secrets.COGNITO_REDIRECTSIGNIN }}
+          REACT_APP_COGNITO_REDIRECTSIGNOUT: ${{ secrets.COGNITO_REDIRECTSIGNOUT }}
         run: |
           # Add your deployment commands for the application here
           # Example: AWS CLI commands to deploy to Lambda, API Gateway, or other services

@@ -9,16 +9,16 @@ import { Amplify } from 'aws-amplify'; // Correct way to import Amplify in recen
 Amplify.configure({
   Auth: {
     Cognito: {
-      userPoolClientId: '3apts80kiph7bafapf28ltu3vl',
-      userPoolId: 'eu-west-1_hgUDdjyRr',
+      userPoolClientId: process.env.REACT_APP_COGNITO_USER_POOL_CLIENT_ID,
+      userPoolId: process.env.REACT_APP_COGNITO_USER_POOL_ID,
 	      mandatorySignIn: true, // Forces sign-in
         hostedUI: true,
       loginWith: { // Optional
         oauth: {
-          domain: 'eventmgmt.auth.eu-west-1.amazoncognito.com',
+          domain:process.env.REACT_APP_COGNITO_OAUTH_DOMAIN,
           scopes:  ['email', 'openid', 'profile'],
-          redirectSignIn: ['http://localhost:3000/landing'], 
-          redirectSignOut:  ['http://localhost:3000/'],
+          redirectSignIn: [process.env.REACT_APP_COGNITO_REDIRECT_SIGN_IN], 
+          redirectSignOut:  [process.env.REACT_APP_COGNITO_REDIRECT_SIGN_OUT],
           responseType: 'code'
         },
         username: 'true'
