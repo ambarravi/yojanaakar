@@ -15,6 +15,12 @@ import '../src/styles/GlobalStyles.css';
 import { AuthProvider } from './context/AuthContext.js'; // Import AuthProvider
 
 function App() {
+  console.log(process.env.REACT_APP_COGNITO_REDIRECT_SIGN_IN)
+  console.log(process.env.REACT_APP_COGNITO_REDIRECT_SIGN_OUT)
+  console.log(process.env.REACT_APP_COGNITO_USER_POOL_CLIENT_ID)
+  console.log(process.env.REACT_APP_COGNITO_OAUTH_DOMAIN)
+  console.log(process.env.REACT_APP_COGNITO_USER_POOL_CLIENT_ID)
+  
   return (
     <ThemeProvider theme={defaultTheme}>
        <AuthProvider>
