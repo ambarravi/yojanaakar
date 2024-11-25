@@ -34,24 +34,26 @@ jobs:
         run: npm install
 
       - name: Build React app
-        run: npm run build
-
-      - name: Deploy to S3
-        run: |
-            aws s3 sync build/ s3://${{ secrets.S3_BUCKET_NAME }} --delete 
-
-      - name: Deploy to AWS
         env:
           REACT_APP_COGNITO_USER_POOL_ID: ${{ secrets.COGNITO_USER_POOL_ID }}
           REACT_APP_COGNITO_USER_POOL_CLIENT_ID: ${{ secrets.APP_COGNITO_USER_POOL_CLIENT_ID }}
           REACT_APP_COGNITO_OAUTH_DOMAIN: ${{ secrets.COGNITO_DOMAIN }}
           REACT_APP_COGNITO_REDIRECT_SIGN_IN: ${{ secrets.COGNITO_REDIRECTSIGNIN }}
-          REACT_APP_COGNITO_REDIRECT_SIGN_OUT: ${{ secrets.COGNITO_REDIRECTSIGNOUT }}
+          REACT_APP_COGNITO_REDIRECT_SIGN_OUT: ${{ secrets.COGNITO_REDIRECTSIGNOUT }}  
         run: |
-            echo "COGNITO_USER_POOL_ID: ${{ secrets.COGNITO_USER_POOL_ID }}"
-            echo "APP_COGNITO_USER_POOL_CLIENT_ID: ${{ secrets.APP_COGNITO_USER_POOL_CLIENT_ID }}"
-            echo "COGNITO_DOMAIN: ${{ secrets.COGNITO_DOMAIN }}"
-            echo "COGNITO_REDIRECTSIGNIN: ${{ secrets.COGNITO_REDIRECTSIGNIN }}"
-            echo "COGNITO_REDIRECTSIGNOUT: ${{ secrets.COGNITO_REDIRECTSIGNOUT }}"
+          npm run build
+          echo "COGNITO_USER_POOL_ID: ${{ secrets.COGNITO_USER_POOL_ID }}"
+          echo "APP_COGNITO_USER_POOL_CLIENT_ID: ${{ secrets.APP_COGNITO_USER_POOL_CLIENT_ID }}"
+          echo "COGNITO_DOMAIN: ${{ secrets.COGNITO_DOMAIN }}"
+          echo "COGNITO_REDIRECTSIGNIN: ${{ secrets.COGNITO_REDIRECTSIGNIN }}"
+          echo "COGNITO_REDIRECTSIGNOUT: ${{ secrets.COGNITO_REDIRECTSIGNOUT }}"
+
+      - name: Deploy to S3
+        run: |
+            aws s3 sync build/ s3://${{ secrets.S3_BUCKET_NAME }} --delete 
+
+
+      - name: Deploy to AWS
+        run: |
           # Example: AWS CLI commands to deploy to Lambda, API Gateway, or other services
           # aws cloudformation deploy --template-file cloudformation.yml --stack-name yojanaakar

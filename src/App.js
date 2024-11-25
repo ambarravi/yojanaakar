@@ -19,8 +19,8 @@ function App() {
   console.log(process.env.REACT_APP_COGNITO_REDIRECT_SIGN_OUT)
   console.log(process.env.REACT_APP_COGNITO_USER_POOL_CLIENT_ID)
   console.log(process.env.REACT_APP_COGNITO_OAUTH_DOMAIN)
-  console.log(process.env.REACT_APP_COGNITO_USER_POOL_CLIENT_ID)
-  
+  console.log(process.env.REACT_APP_COGNITO_USER_POOL_ID)
+
   return (
     <ThemeProvider theme={defaultTheme}>
        <AuthProvider>
