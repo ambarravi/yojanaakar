@@ -1,0 +1,139 @@
+/* Main container for consistent padding */
+.container {
+    padding: 0 20px; /* Adds padding on left and right */
+    margin: 0 auto; /* Centers the container */
+    max-width: 1200px; /* Max width to avoid too wide content on larger screens */
+    border: 1px solid #e0e0e0;  /* Light gray border */
+}
+
+/* Amplify styled header section */
+.events-header {
+    width: 100%;
+    height: 70px; /* Increased height to match Amplify theme */
+    padding: 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #fff;
+    font-size: 1rem;
+    margin-top: 0;
+    border-radius: 0;
+    box-sizing: border-box;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Light shadow */
+}
+
+/* Hero Image styles */
+.hero-image {
+    width: 100%;
+    height: 300px;  /* Hero image height */
+    background-image: url('../assets/images/hero-bg.jpg'); /* Replace with your image path */
+    background-size: cover;
+    background-position: center;
+    margin-top: 5px; /* Optional: Adds a little space below the header */
+    border-radius: 15px; /* Apply rounded corners */
+}
+
+/* Main content styles */
+.events-content {
+    padding: 20px 0;  /* Vertical padding for the content */
+    font-family: Arial, sans-serif;
+}
+
+/* Footer styles */
+.footer {
+    padding: 20px 0;  /* Vertical padding for footer */
+    background-color: #f8f9fa;
+    text-align: center;
+    margin-top: 20px; /* Space above the footer */
+}
+
+/* Sign Out Button - Updated style to align with Amplify's design */
+.sign-out-button {
+    padding: 5px 10px;
+    font-size: 1rem;
+    border-radius: 5px;
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.3s, transform 0.2s;
+}
+
+.sign-out-button:hover {
+    background-color: #0056b3;
+    transform: scale(1.05);
+}
+
+.sign-out-button:focus {
+    outline: 2px solid #0056b3;
+    outline-offset: 2px;
+}
+
+.events-header h1 {
+    flex-grow: 1; /* Ensures the title takes up available space */
+    margin: 0; /* Remove any margin */
+    font-size: 1.5rem;
+    color: #333; /* Slightly darker to match the theme */
+}
+
+/* Event Boxes Section */
+.event-box-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); /* 4 or 5 boxes depending on screen size */
+    gap: 20px; /* Space between boxes */
+    padding: 20px 0; /* Vertical padding */
+    margin-top: 20px; /* Space between hero image and the event boxes */
+}
+
+/* Individual event box */
+.event-box {
+    background-color: #ffffff; /* Box background color */
+    border-radius: 15px; /* Rounded corners */
+    padding: 15px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+    text-align: center; /* Center the text */
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* Hover effect for event box */
+.event-box:hover {
+    transform: translateY(-5px); /* Lift the box on hover */
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15); /* Increase shadow on hover */
+}
+
+/* Event box title */
+.event-box h3 {
+    font-size: 1.2rem; /* Event title font size */
+    color: #333;
+    margin-bottom: 10px;
+}
+
+/* Event box description */
+.event-box p {
+    font-size: 1rem;
+    color: #666;
+}
+
+/* Mobile responsiveness */
+@media screen and (max-width: 768px) {
+    .container {
+        padding: 0 10px; /* Less padding on mobile */
+    }
+
+    .events-header {
+        height: 60px; /* Adjusted header height for mobile */
+        font-size: 0.9rem; /* Adjust font size for mobile */
+    }
+
+    .hero-image {
+        height: 250px; /* Smaller hero image on mobile */
+    }
+
+    .events-content {
+        padding: 10px 0; /* Reduced vertical padding for mobile */
+    }
+
+    .footer {
+        padding: 15px 0; /* Less padding for footer */
+    }
+}

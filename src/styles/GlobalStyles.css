@@ -1,0 +1,463 @@
+/* src/styles/globalStyles.css */
+
+/* General Page Styles */
+body {
+  font-family: Arial, sans-serif;
+  margin: 0;
+  padding: 0;
+}
+
+.container {
+  padding: 20px; /* Add uniform padding around the container */
+  margin: 20px auto; /* Center the container with vertical spacing */
+  max-width: 1200px; /* Restrict maximum width for readability */
+  border: 1px solid #e0e0e0; /* Light gray border for subtle distinction */
+  border-radius: 8px; /* Rounded corners for a polished look */
+  background-color: #f7fbff; /* Light background color for clarity */
+ box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05); /* Soft shadow for depth */
+  position: relative; /* Keep child elements relative to this container */
+}
+
+
+.ongoing-event {
+font-size: 1.5rem;
+font-weight: 600;
+color: #333; /* Dark gray for subtlety */
+text-align: left;
+border-bottom: 2px solid #007BFF; /* Blue underline for emphasis */
+padding-bottom: 5px;
+}
+
+/* Header Section */
+.landing-header {
+  color: rgb(83, 82, 85);
+  padding: 5px 0;
+  text-align: center;
+  height: 75px;
+}
+
+/* Filter Bar */
+.filter-bar {
+  width: calc(100% + 40px); /* Stretch to account for container padding */
+  margin: 0 -20px; /* Offset container's padding */
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  padding: 10px 20px;
+ 
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  margin-bottom: 20px;
+  position: relative;
+  z-index: 1; /* Ensure it appears above content */
+}
+
+.filter-link {
+  margin-right: 15px;
+  font-size: 1rem;
+  color: #007bff;
+  text-decoration: none;
+  transition: color 0.3s;
+}
+
+.filter-link:hover {
+  color: #0056b3;
+}
+
+.city-dropdown {
+  margin-left: auto;
+  padding: 5px;
+  font-size: 1rem;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  cursor: pointer;
+}
+/* Event Boxes Section */
+.event-box-container {
+display: grid;
+gap: 10px; /* Keep a small gap for professional spacing */
+padding: 0 10px; /* Adjust padding for compact layout */
+justify-content: start; /* Maintain left alignment for the grid */
+align-items: stretch; /* Ensure consistent vertical alignment */
+justify-items: stretch; /* Stretch grid items to fill available space and avoid unintended gaps */
+display: grid;
+grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); /* Responsive grid */
+
+
+}
+
+
+
+
+.event-box {
+background-color: #ffffff;
+border-radius: 15px;
+padding: 15px;
+box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+transition: transform 0.3s ease, box-shadow 0.3s ease;
+
+display: flex;
+flex-direction: column;
+justify-content: space-between;
+overflow: hidden;
+
+width: 100%; /* Flexible width */
+height: 350px; /* Fixed height for consistency */
+}
+
+
+.event-box:hover {
+transform: translateY(-5px);
+box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+}
+
+
+
+.event-box h3 {
+font-size: 1.1rem;
+color: #333;
+margin-bottom: 10px;
+white-space: nowrap;
+overflow: hidden;
+text-overflow: ellipsis;
+}
+
+/* Event Description and Other Text 
+.event-box p {
+font-size: 0.9rem;
+color: #666;
+margin: 5px 0; 
+}
+*/
+
+.event-box p {
+font-size: 0.9rem;
+color: #666;
+margin-bottom: 10px;
+display: -webkit-box;
+-webkit-line-clamp: 2;
+-webkit-box-orient: vertical;
+overflow: hidden;
+text-overflow: ellipsis;
+}
+
+.event-box img {
+width: 100%;
+height: 150px;
+object-fit: cover;
+border-radius: 10px;
+}
+
+/* Mobile Responsiveness */
+@media screen and (max-width: 768px) {
+
+  .container {
+      padding: 0 10px; /* Less padding on mobile */
+  }
+
+  .filter-bar {
+      flex-direction: column;
+      align-items: flex-start;
+      width: calc(100% + 20px); /* Adjust width for smaller padding */
+      margin: 0 -10px; /* Adjust for smaller padding */
+  }
+
+  .filter-link {
+      margin-bottom: 10px;
+  }
+
+  .city-dropdown {
+      margin-left: 0;
+  }
+
+  .event-box-container {
+      grid-template-columns: 1fr;
+  }
+}
+
+/* Add a city label inside event boxes */
+.event-box p strong {
+  color: #007bff; /* Amplify theme color */
+  font-weight: bold;
+}
+
+/* Styling for the event card */
+.event-details-card {
+  padding: 20px;
+  background-color: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+/* Styling for the event title */
+.event-details-title {
+  font-size: 24px;
+  font-weight: bold;
+  margin-bottom: 20px;
+}
+
+/* Styling for the event details table */
+.event-details-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 20px;
+}
+
+.event-details-table td {
+  padding: 8px 12px;
+  border: 1px solid #ddd;
+}
+
+.event-details-table td:first-child {
+  font-weight: bold;
+}
+
+/* Banner image styling */
+.banner-box {
+  max-width: 300px;
+  flex-shrink: 0;
+}
+
+.banner-box img {
+  width: 100%;
+  border-radius: 8px;
+}
+
+
+
+/* Form styling */
+form {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.form-group label {
+  font-weight: bold;
+  margin-bottom: 5px;
+}
+
+form input, form select {
+  padding: 8px;
+  border-radius: 4px;
+  border: 1px solid #ccc;
+}
+
+
+
+
+/* Popup Modal styling */
+.popup-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.popup-content {
+  background-color: white;
+  padding: 20px;
+  border-radius: 8px;
+  text-align: center;
+  width: 300px;
+}
+
+
+/* Profile Page Styles */
+.profile-container {
+  display: flex;
+  flex-wrap: wrap; /* Ensure responsiveness on smaller screens */
+  gap: 20px;
+  background-color: #fff;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  padding: 20px;
+  margin-top: 20px;
+}
+
+
+
+.profile-picture {
+width: 150px;
+height: 150px;
+border-radius: 50%; /* Makes the picture circular */
+object-fit: cover; /* Ensures the image doesn't stretch */
+border: 2px solid #e0e0e0; /* Optional border for aesthetics */
+}
+
+
+.profile-left {
+  flex: 1 1 300px; /* Flexible width with a minimum of 300px */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  text-align: center;
+  border-right: 1px solid #e0e0e0; /* Separation between sections */
+}
+.profile-picture {
+  width: 150px;
+  height: 150px;
+  border-radius: 50%; /* Circular image */
+  object-fit: cover;
+  border: 2px solid #e0e0e0; /* Aesthetic border */
+  margin-bottom: 10px;
+}
+
+
+.profile-email {
+  font-size: 18px;
+  font-weight: bold;
+  color: #333;
+}
+
+.profile-right {
+  flex: 2 1 500px; /* Flexible width with a minimum of 500px */
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+.profile-field {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.profile-label {
+  width: 120px; /* Consistent width for labels */
+  font-weight: bold;
+}
+
+.profile-input,
+.profile-textarea {
+  resize: none; /* Prevent resizing for consistent design */
+}
+
+.profile-update-button {
+  padding: 10px 20px;
+  background-color: #007bff;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  align-self: flex-end;
+}
+
+.profile-update-button:hover {
+  background-color: #0056b3;
+}
+.profile-container {
+display: flex;
+border: 1px solid #ccc;
+border-radius: 8px;
+padding: 20px;
+margin-top: 20px;
+}
+
+.profile-left,
+.profile-right {
+flex: 1;
+padding: 20px;
+}
+
+.profile-left {
+display: flex;
+flex-direction: column;
+align-items: center;
+border-right: 1px solid #ccc;
+}
+
+.profile-right {
+padding-left: 20px;
+}
+
+.profile-picture {
+width: 150px;
+height: 150px;
+border-radius: 50%;
+margin-bottom: 20px;
+}
+
+.vertical-line {
+width: 1px;
+background-color: #ccc;
+margin: 0 20px;
+}
+
+/* Main Content Styling */
+.main-content {
+display: flex;
+gap: 20px; /* Space between the containers */
+margin-top: 20px;
+}
+
+/* Left and Right Containers */
+.left-container, .right-container {
+flex: 1; /* Equal width for both containers */
+background-color: #ffffff; /* Light background for containers */
+border: 1px solid #e0e0e0; /* Border for separation */
+border-radius: 8px; /* Rounded corners */
+padding: 20px; /* Inner padding for content */
+box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
+}
+
+/* Ensure responsiveness */
+@media screen and (max-width: 768px) {
+.main-content {
+  flex-direction: column; /* Stack containers vertically on smaller screens */
+}
+}
+
+@media (max-width: 480px) {
+.event-box-container {
+    grid-template-columns: 1fr; /* Single column layout for very small screens */
+}
+
+.event-box {
+    height: auto; /* Allow height to adjust if needed */
+}
+}
+
+@media (max-width: 768px) {
+.event-box-container {
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); /* Smaller boxes for narrow screens */
+    gap: 10px;
+}
+
+.event-box {
+    height: 300px; /* Reduce height for smaller screens */
+    padding: 10px;
+}
+
+.event-box h3 {
+    font-size: 1rem;
+}
+
+.event-box p {
+    font-size: 0.8rem;
+}
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+  .profile-container {
+      flex-direction: column; /* Stack sections vertically on smaller screens */
+  }
+
+  .profile-left {
+      border-right: none; /* Remove the separator on small screens */
+      border-bottom: 1px solid #e0e0e0; /* Optional: Add a bottom border for separation */
+      padding-bottom: 20px;
+  }
+}
+
+

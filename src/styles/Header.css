@@ -1,0 +1,48 @@
+/* Header.css */
+.header {
+  display: flex;
+  justify-content: space-between;
+  padding: 1rem 2rem;
+  background-color: #fff;
+}
+
+.header h1 {
+  font-size: 1.5rem;
+}
+
+.header nav a {
+  margin: 0 1rem;
+  color: #333;
+  text-decoration: none;
+}
+
+/* Ensuring specific class styling for events header */
+.events-header {
+  display: flex;
+  justify-content: space-between; /* Ensures space between title and button */
+  padding: 10px 20px; /* Adds padding on left and right */
+  align-items: center; /* Vertically centers content */
+  background-color: #fff;
+  font-size: 1rem;
+  margin-top: 0;
+  box-sizing: border-box;
+  color: #333;
+}
+
+.events-header h1 {
+  font-size: 1.5rem;
+  color: #7f7f7f;
+  margin: 0;
+}
+
+.sign-in-button {
+  padding: 8px 20px;
+  font-size: 1rem;
+  border-radius: 5px;
+  background-color: #007bff;
+  color: #fff;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.3s, transform 0.2s;
+  margin-left: auto;  /* Pushes the button to the right */
+}

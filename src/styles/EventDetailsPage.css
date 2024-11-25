@@ -1,0 +1,99 @@
+.event-details-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+  font-family: 'Amazon Ember', Arial, sans-serif; /* Amplify's default font */
+  background-color: #fff;
+  border-radius: 8px;
+  border: 1px solid #e0e0e0; /* Light gray border */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Add soft shadow for the container */
+}
+
+.header-box {
+
+  width: calc(100% + 40px); /* Stretch to account for container padding */
+  margin: 0 -20px; /* Offset container's padding */
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  padding: 10px 20px;
+ 
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  margin-bottom: 20px;
+  position: relative;
+  z-index: 1; /* Ensure it appears above content */
+
+}
+.event-details-content {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap; /* Ensure the layout is responsive */
+  justify-content: space-between;
+}
+
+.details-box {
+  flex: 1;
+  min-width: 300px; /* Ensure it doesn't get too narrow on small screens */
+  padding: 20px;
+  background-color: #fff;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05); /* Soft shadow around the details box */
+}
+
+.banner-box {
+  flex: 0 1 300px; /* Ensures banner box is fixed width */
+  padding: 20px;
+  background-color: #fff;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  text-align: center;
+  margin-top: 20px;
+}
+
+.banner-box img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 4px;
+}
+
+.details-box p {
+  margin: 10px 0;
+}
+
+.details-box strong {
+  color: #333;
+}
+
+/* Mobile responsiveness */
+@media (max-width: 768px) {
+  .event-details-content {
+    flex-direction: column; /* Stack the details and banner boxes */
+    align-items: center; /* Center-align the content */
+  }
+
+  .details-box {
+    width: 100%; /* Make the details box take full width */
+    margin-bottom: 20px; /* Add some space between the details and banner */
+  }
+
+  .banner-box {
+    width: 100%; /* Make the banner box take full width */
+    margin-top: 0; /* Remove top margin for mobile */
+  }
+}
+
+@media (max-width: 480px) {
+  .header-box {
+    padding: 8px 15px; /* Further reduce padding for very small devices */
+  }
+
+  .event-details-container {
+    padding: 10px; /* Reduce padding for small devices */
+  }
+
+  .banner-box img {
+    max-height: 200px; /* Limit the height of the banner image on very small screens */
+  }
+}

@@ -1,0 +1,125 @@
+/* General Page Styles */
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+}
+
+.container {
+    padding: 0 20px; /* Adds padding on left and right */
+    margin: 0 auto; /* Centers the container */
+    max-width: 1200px; /* Max width to avoid too wide content on larger screens */
+    border: 1px solid #e0e0e0; /* Light gray border */
+    position: relative; /* Allow child elements to position relative to this */
+    border-radius: 8px;
+}
+
+/* Header Section */
+.landing-header {
+    color: rgb(83, 82, 85);
+    padding: 5px 0;
+    text-align: center;
+    height: 75px;
+}
+
+/* Filter Bar */
+.filter-bar {
+    width: calc(100% + 40px); /* Stretch to account for container padding */
+    margin: 0 -20px; /* Offset container's padding */
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    padding: 10px 20px;
+   
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    margin-bottom: 20px;
+    position: relative;
+    z-index: 1; /* Ensure it appears above content */
+}
+
+.filter-link {
+    margin-right: 15px;
+    font-size: 1rem;
+    color: #007bff;
+    text-decoration: none;
+    transition: color 0.3s;
+}
+
+.filter-link:hover {
+    color: #0056b3;
+}
+
+.city-dropdown {
+    margin-left: auto;
+    padding: 5px;
+    font-size: 1rem;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+/* Event Boxes Section */
+.event-box-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 20px;
+    padding: 0 20px;
+}
+
+.event-box {
+    background-color: #ffffff;
+    border-radius: 15px;
+    padding: 20px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    text-align: center;
+}
+
+.event-box:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+}
+
+.event-box h3 {
+    font-size: 1.2rem;
+    color: #333;
+    margin-bottom: 10px;
+}
+
+.event-box p {
+    font-size: 1rem;
+    color: #666;
+}
+
+/* Mobile Responsiveness */
+@media screen and (max-width: 768px) {
+
+    .container {
+        padding: 0 10px; /* Less padding on mobile */
+    }
+
+    .filter-bar {
+        flex-direction: column;
+        align-items: flex-start;
+        width: calc(100% + 20px); /* Adjust width for smaller padding */
+        margin: 0 -10px; /* Adjust for smaller padding */
+    }
+
+    .filter-link {
+        margin-bottom: 10px;
+    }
+
+    .city-dropdown {
+        margin-left: 0;
+    }
+
+    .event-box-container {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Add a city label inside event boxes */
+.event-box p strong {
+    color: #007bff; /* Amplify theme color */
+    font-weight: bold;
+}
