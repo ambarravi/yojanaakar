@@ -21,9 +21,6 @@ jobs:
       
       - name: Check AWS credentials
         run: |
-            echo "AWS Access Key ID: ${{ secrets.AWS_ACCESS_KEY_ID }}"
-            echo "AWS Secret Access Key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}"
-            echo "AWS Secret Access Key: ${{ secrets.S3_BUCKET_NAME }}"
         
 
       - name: Set up AWS CLI
@@ -51,6 +48,10 @@ jobs:
           REACT_APP_COGNITO_REDIRECT_SIGN_IN: ${{ secrets.COGNITO_REDIRECTSIGNIN }}
           REACT_APP_COGNITO_REDIRECT_SIGN_OUT: ${{ secrets.COGNITO_REDIRECTSIGNOUT }}
         run: |
-          # Add your deployment commands for the application here
+          #   echo "AWS Access Key ID: ${{ secrets.COGNITO_USER_POOL_ID }}"
+              echo "AWS Secret Access Key: ${{ secrets.APP_COGNITO_USER_POOL_CLIENT_ID }}"
+               echo "AWS Access Key ID: ${{ secrets.COGNITO_DOMAIN }}"
+                echo "AWS Access Key ID: ${{ secrets.COGNITO_REDIRECTSIGNIN }}"
+                 echo "AWS Access Key ID: ${{ secrets.COGNITO_REDIRECTSIGNOUT }}"
           # Example: AWS CLI commands to deploy to Lambda, API Gateway, or other services
           # aws cloudformation deploy --template-file cloudformation.yml --stack-name yojanaakar
