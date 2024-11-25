@@ -42,11 +42,15 @@ jobs:
           REACT_APP_COGNITO_REDIRECT_SIGN_OUT: ${{ secrets.COGNITO_REDIRECTSIGNOUT }}  
         run: |
           npm run build
-          echo "COGNITO_USER_POOL_ID: ${{ secrets.COGNITO_USER_POOL_ID }}"
-          echo "APP_COGNITO_USER_POOL_CLIENT_ID: ${{ secrets.APP_COGNITO_USER_POOL_CLIENT_ID }}"
-          echo "COGNITO_DOMAIN: ${{ secrets.COGNITO_DOMAIN }}"
-          echo "COGNITO_REDIRECTSIGNIN: ${{ secrets.COGNITO_REDIRECTSIGNIN }}"
+
+      - name: Debug Environment Variables
+        run: |
+          echo "::add-mask::$REACT_APP_COGNITO_USER_POOL_ID"
+          echo "User Pool ID: $REACT_APP_COGNITO_USER_POOL_ID"
+          echo "Client ID: $REACT_APP_COGNITO_USER_POOL_CLIENT_ID"
           echo "COGNITO_REDIRECTSIGNOUT: ${{ secrets.COGNITO_REDIRECTSIGNOUT }}"
+        
+
 
       - name: Deploy to S3
         run: |
