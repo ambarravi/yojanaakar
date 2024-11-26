@@ -46,6 +46,7 @@ jobs:
       - name: Debug Environment Variables
         run: |
           echo "::add-mask::$REACT_APP_COGNITO_USER_POOL_ID"
+          echo "COGNITO_USER_POOL_ID: ${{ secrets.COGNITO_USER_POOL_ID }}"
           echo "User Pool ID: $REACT_APP_COGNITO_USER_POOL_ID"
           echo "Client ID: $REACT_APP_COGNITO_USER_POOL_CLIENT_ID"
           echo "COGNITO_REDIRECTSIGNOUT: ${{ secrets.COGNITO_REDIRECTSIGNOUT }}"
