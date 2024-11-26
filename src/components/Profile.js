@@ -139,14 +139,14 @@ const ProfilePage = () => {
               name="birthdate"
               value={user.birthdate}
               onChange={handleInputChange}
-              style={{ flex: 1, minWidth: "225px" }}
+              style={{ flex: 1 }}
             />
             <SelectField
               label="Gender"
               name="gender"
               value={user.gender}
               onChange={handleInputChange}
-              style={{ flex: 1, minWidth: "225px" }}
+              style={{ flex: 1 }}
             >
               <option value="">Select Gender</option>
               <option value="M">Male</option>
