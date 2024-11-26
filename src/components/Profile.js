@@ -132,27 +132,27 @@ const ProfilePage = () => {
             />
           </Flex>
 
-          <Flex direction="row" gap="20px">
-            <TextField
-              label="Birthdate"
-              type="date"
-              name="birthdate"
-              value={user.birthdate}
-              onChange={handleInputChange}
-              style={{ flex: 1 }}
-            />
-            <SelectField
-              label="Gender"
-              name="gender"
-              value={user.gender}
-              onChange={handleInputChange}
-              style={{ flex: 1 }}
-            >
-              <option value="">Select Gender</option>
-              <option value="M">Male</option>
-              <option value="F">Female</option>
-            </SelectField>
-          </Flex>
+          <Flex direction="row" gap="20px" wrap="wrap">
+  <TextField
+    label="Birthdate"
+    type="date"
+    name="birthdate"
+    value={user.birthdate}
+    onChange={handleInputChange}
+    style={{ flex: 1, minWidth: "150px" }}
+  />
+  <SelectField
+    label="Gender"
+    name="gender"
+    value={user.gender}
+    onChange={handleInputChange}
+    style={{ flex: 1, minWidth: "150px" }}
+  >
+    <option value="">Select Gender</option>
+    <option value="M">Male</option>
+    <option value="F">Female</option>
+  </SelectField>
+</Flex>
 
           <Flex direction="row" gap="20px">
             <TextField
