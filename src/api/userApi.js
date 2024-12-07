@@ -1,5 +1,5 @@
 import { fetchAuthSession } from '@aws-amplify/auth'; // Ensure correct import path
-import API_CONFIG from '../config/apiConfig'; 
+
 
 export const updateRole = async (username, tempRole) => {
   try {
