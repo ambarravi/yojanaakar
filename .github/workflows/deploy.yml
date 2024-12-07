@@ -40,6 +40,8 @@ jobs:
           REACT_APP_COGNITO_OAUTH_DOMAIN: ${{ secrets.COGNITO_DOMAIN }}
           REACT_APP_COGNITO_REDIRECT_SIGN_IN: ${{ secrets.COGNITO_REDIRECTSIGNIN }}
           REACT_APP_COGNITO_REDIRECT_SIGN_OUT: ${{ secrets.COGNITO_REDIRECTSIGNOUT }}  
+          REACT_APP_API_BASE_URL: ${{ secrets.BASE_API_URL }}  
+          REACT_APP_STAGE: ${{ secrets.APP_STAGE }}  
         run: |
           npm run build
 

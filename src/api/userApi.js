@@ -10,7 +10,7 @@ export const updateRole = async (username, tempRole) => {
     const jwt = session.tokens.idToken.toString();
     console.log(jwt);
 
-    const apiUrl =`${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.UPDATE_ROLE}`;
+    const apiUrl = process.env.REACT_APP_API_BASE_URL + process.env.REACT_APP_STAGE + '//update-role'
 console.log(apiUrl);
     // Make the API request
     const response = await fetch(apiUrl, {
