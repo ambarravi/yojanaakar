@@ -6,7 +6,7 @@ export const updateRole = async (username, tempRole) => {
     // Fetch the current session
 
     const session = await fetchAuthSession(); // Retrieves the session object
-    const token = session.tokens.idToken; // Access the ID token
+   // const token = session.tokens.idToken; // Access the ID token
     const jwt = session.tokens.idToken.toString();
     console.log(jwt);
 
