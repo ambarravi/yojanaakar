@@ -1,0 +1,105 @@
+.organizer-login-page {
+    background-color: #f7f9fc;
+    padding: 20px;
+  }
+  
+  .organizer-login-heading {
+    color: #333;
+    margin-bottom: 20px;
+    text-align: center;
+  }
+  
+  .organizer-login-input {
+    width: 300px;
+    margin: 10px 0;
+  }
+  
+  .organizer-login-button {
+    font-size: 1rem;
+    padding: 10px 20px;
+    background-color: #0073e6;
+    color: white;
+    border-radius: 5px;
+    transition: all 0.3s ease;
+  }
+  
+  .organizer-login-button:hover {
+    background-color: #005bb5;
+  }
+  
+  .organizer-register-button {
+    font-size: 1rem;
+    color: #0073e6;
+    text-decoration: underline;
+  }
+  
+  .organizer-register-button:hover {
+    color: #005bb5;
+  }
+
+  .organizer-landing {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px;
+    background-color: #f9f9f9;
+    height: 100vh;
+  }
+  
+  .organizer-header h1 {
+    font-size: 2rem;
+    margin-bottom: 20px;
+    color: #333;
+  }
+  
+  .organizer-nav {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+  }
+  
+  .organizer-nav button {
+    font-size: 1rem;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    background-color: #007bff;
+    color: white;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+  
+  .organizer-nav button:hover {
+    background-color: #0056b3;
+  }
+
+  .organizer-login,
+.organizer-register {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px;
+}
+
+.organizer-login h1,
+.organizer-register h1 {
+  font-size: 2rem;
+  margin-bottom: 20px;
+}
+
+.register-link {
+  margin-top: 15px;
+}
+
+.register-link a {
+  color: #007bff;
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+.register-link a:hover {
+  color: #0056b3;
+}
+
+  
+  

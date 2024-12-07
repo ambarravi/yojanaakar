@@ -137,3 +137,25 @@
         padding: 15px 0; /* Less padding for footer */
     }
 }
+
+.custom-signin-button {
+    font-size: 1rem;
+    padding: 8px 20px;
+    border-radius: 5px;
+    background-color: var(--amplify-colors-button-primary);
+    color: var(--amplify-colors-font-primary);
+    font-weight: 500;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    transition: background-color 0.3s ease, transform 0.2s ease;
+  }
+  
+  .custom-signin-button:hover {
+    background-color: var(--amplify-colors-button-primary-hover);
+    transform: scale(1.05);
+  }
+  
+  .custom-signin-button:focus {
+    outline: none; /* Removes the default outline */
+    transform: scale(1.05);
+  }
+  

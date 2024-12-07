@@ -1,0 +1,38 @@
+import { fetchAuthSession } from '@aws-amplify/auth'; // Ensure correct import path
+import API_CONFIG from '../config/apiConfig'; 
+
+export const updateRole = async (username, tempRole) => {
+  try {
+    // Fetch the current session
+
+    const session = await fetchAuthSession(); // Retrieves the session object
+    const token = session.tokens.idToken; // Access the ID token
+    const jwt = session.tokens.idToken.toString();
+    console.log(jwt);
+
+    const apiUrl =`${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.UPDATE_ROLE}`;
+console.log(apiUrl);
+    // Make the API request
+    const response = await fetch(apiUrl, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${jwt}`, // Pass the token in the Authorization header
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        username,
+        tempRole,
+      }),
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.message || 'Failed to update role');
+    }
+
+    return await response.json(); // Return the API response if needed
+  } catch (error) {
+    console.error('Error updating role:', error.message);
+    throw error;
+  }
+};

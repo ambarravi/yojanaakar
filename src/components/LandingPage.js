@@ -60,6 +60,8 @@ const events = [
 
 
 function LandingPage() {
+
+  console.log("Hiiiiiiiiiii")
   const [selectedCity, setSelectedCity] = useState('');
 
   // Filter events based on selected city

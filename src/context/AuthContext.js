@@ -11,6 +11,10 @@ export const AuthProvider = ({ children }) => {
     try {
       const session = await fetchAuthSession();
       const payload = session.tokens.idToken.payload; // Access the payload
+        //console.log(session.tokens.idToken);
+     //   console.log(payload);
+      //  console.log( session);
+      
       setUser({
         email: payload.email,
         firstName: payload.given_name,
