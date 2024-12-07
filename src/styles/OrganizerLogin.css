@@ -101,5 +101,19 @@
   color: #0056b3;
 }
 
+.link-button {
+  background: none;
+  border: none;
+  color: blue;
+  text-decoration: underline;
+  cursor: pointer;
+  font: inherit;
+}
+
+.link-button:hover {
+  color: darkblue;
+}
+
+
   
   

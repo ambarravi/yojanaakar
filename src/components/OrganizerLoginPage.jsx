@@ -18,7 +18,15 @@ function OrganizerLogin() {
         }}
       </Authenticator>
       <div className="register-link">
-        <p>Don't have an account? <a onClick={() => navigate('/organizer-register')}>Register here</a></p>
+        <p>
+          Don't have an account?{' '}
+          <button 
+            className="link-button" 
+            onClick={() => navigate('/organizer-register')}
+          >
+            Register here
+          </button>
+        </p>
       </div>
     </div>
   );
