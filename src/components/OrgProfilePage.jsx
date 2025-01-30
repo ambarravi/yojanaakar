@@ -28,7 +28,7 @@ function OrgProfilePage({ user, signOut }) {
       try {
         setIsLoading(true);
         const [cityData] = await Promise.all([GetCityList()]);
-        console.log("From API ", cityData[0]);
+        //  console.log("From API ", cityData[0]);
         setCities(cityData);
         sessionStorage.setItem("cityDataSession", JSON.stringify(cityData));
       } catch (error) {
@@ -45,7 +45,7 @@ function OrgProfilePage({ user, signOut }) {
       setIsLoading(true);
       try {
         const profile = await fetchProfileDetails();
-        console.log("Profile details stringify:", JSON.stringify(profile));
+        //  console.log("Profile details stringify:", JSON.stringify(profile));
 
         if (profile && profile.record) {
           const record = profile.record;
@@ -90,7 +90,7 @@ function OrgProfilePage({ user, signOut }) {
         formData.collegeSearchText.toLowerCase()
       );
 
-      console.log(collegeData);
+      //  console.log(collegeData);
       if (collegeData.length === 0) {
         alert(
           "Can't find your college? Help us improve our services by sharing your college or university details. Contact us at: tikto@gmail.com or call us at 9860719197"
@@ -182,9 +182,9 @@ function OrgProfilePage({ user, signOut }) {
     });
 
     try {
-      console.log("formData", formData);
+      //   console.log("formData", formData);
       const sessionCityData = sessionStorage.getItem("cityDataSession");
-      console.log("sessionCityData", JSON.parse(sessionCityData));
+      //   console.log("sessionCityData", JSON.parse(sessionCityData));
       const parsedData = JSON.parse(sessionCityData);
       const dataTOCheck = {};
       for (const [key, value] of formDataToSubmit.entries()) {
@@ -192,7 +192,7 @@ function OrgProfilePage({ user, signOut }) {
       }
 
       if (!dataTOCheck.cityName && dataTOCheck.cityID) {
-        console.log("CityID", dataTOCheck.cityID);
+        // console.log("CityID", dataTOCheck.cityID);
 
         const nameofCity = parsedData.find(
           (item) => item.CityID === dataTOCheck.cityID
@@ -203,7 +203,7 @@ function OrgProfilePage({ user, signOut }) {
       }
       const result = await submitProfile(formDataToSubmit, formData.logo);
       alert("Profile Updated Successfully!");
-      console.log("API Response:", result);
+      // console.log("API Response:", result);
     } catch (error) {
       alert("Error updating profile: " + error.message);
     } finally {

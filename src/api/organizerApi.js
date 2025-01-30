@@ -8,9 +8,9 @@ export const fetchProfileDetails = async () => {
     console.log("Fetch Profiles details started");
 
     const session = await fetchAuthSession(); // Retrieves the session object
-    const jwt = session.tokens.idToken.toString();
+    // const jwt = session.tokens.idToken.toString();
     const username = session.tokens.idToken.payload["cognito:username"];
-    console.log("userName", username);
+    // console.log("userName", username);
 
     // Prepare the JSON object
     const dataToSend = { username }; // Initialize with `username`
@@ -21,7 +21,7 @@ export const fetchProfileDetails = async () => {
       process.env.REACT_APP_API_BASE_URL +
       process.env.REACT_APP_STAGE +
       "/get-profile-by-id";
-    console.log(apiUrl);
+    //  console.log(apiUrl);
 
     // Make the API request to save profile data
     const response = await fetch(apiUrl, {
@@ -41,7 +41,7 @@ export const fetchProfileDetails = async () => {
     const result = await response.json();
 
     if (response.status === 200) {
-      console.log("API Response:", result);
+      //   console.log("API Response:", result);
 
       console.log("Data fecthed successfully!");
     } else {
@@ -57,13 +57,13 @@ export const fetchProfileDetails = async () => {
 export const submitProfile = async (profileData, logo) => {
   try {
     // Fetch the current session
-    console.log("Update Role started");
-    console.log("UpdateAPI Logo image", logo);
+    //  console.log("Update Role started");
+    //  console.log("UpdateAPI Logo image", logo);
 
     const session = await fetchAuthSession(); // Retrieves the session object
-    const jwt = session.tokens.idToken.toString();
+    //  const jwt = session.tokens.idToken.toString();
     const username = session.tokens.idToken.payload["cognito:username"];
-    console.log("userName", username);
+    //   console.log("userName", username);
 
     // Prepare the JSON object
     const dataToSend = { username }; // Initialize with `username`
@@ -76,13 +76,13 @@ export const submitProfile = async (profileData, logo) => {
       dataToSend.logoFileType = logo.type;
     }
 
-    console.log("dataToSend contents:", JSON.stringify(dataToSend));
+    //  console.log("dataToSend contents:", JSON.stringify(dataToSend));
 
     const apiUrl =
       process.env.REACT_APP_API_BASE_URL +
       process.env.REACT_APP_STAGE +
       "/submit-profile";
-    console.log(apiUrl);
+    //   console.log(apiUrl);
 
     // Make the API request to save profile data
     const response = await fetch(apiUrl, {
@@ -101,12 +101,12 @@ export const submitProfile = async (profileData, logo) => {
 
     const result = await response.json(); // Assume the API returns the pre-signed URL
     if (result.statusCode === 200) {
-      console.log("API Response:", result);
+      //  console.log("API Response:", result);
       const responseBody = JSON.parse(result.body); // Parse the JSON string in the body
 
       if (responseBody.presignedUrl) {
         const uploadUrl = responseBody.presignedUrl; // Pre-signed URL for file upload
-        console.log("Upload URL:", uploadUrl);
+        //  console.log("Upload URL:", uploadUrl);
 
         // Upload the logo file to S3 using the pre-signed URL
         const uploadResponse = await fetch(uploadUrl, {

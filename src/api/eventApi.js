@@ -14,8 +14,6 @@ export const GetCityList = () => {
 
       const apiUrl = `${baseUrl}${stage}/get-city-list`;
 
-      console.log("apiUrl", apiUrl);
-
       const response = await fetch(apiUrl, {
         method: "GET",
         headers: {
@@ -26,7 +24,7 @@ export const GetCityList = () => {
 
       if (response.status === 200) {
         const data = await response.json();
-        console.log("API Response Data:", data);
+
         resolve(data);
       } else {
         console.error(`Error: Received status code ${response.status}`);
@@ -62,7 +60,7 @@ export const GetCategory = () => {
 
       if (response.status === 200) {
         const data = await response.json();
-        console.log("API Response Data:", data);
+
         resolve(data);
       } else {
         console.error(`Error: Received status code ${response.status}`);
@@ -90,7 +88,7 @@ export const GetCollegeList = (city, searchText) => {
       }
 
       const apiUrl = `${baseUrl}${stage}/get-college?city=${city}&searchText=${searchText}`;
-      console.log(apiUrl);
+
       const response = await fetch(apiUrl, {
         method: "GET",
         headers: {
@@ -101,7 +99,7 @@ export const GetCollegeList = (city, searchText) => {
 
       if (response.status === 200) {
         const data = await response.json();
-        console.log("API Response: COllege List Data:", data);
+
         resolve(data);
       } else {
         console.error(`Error: Received status code ${response.status}`);
@@ -119,12 +117,9 @@ export const GetCollegeList = (city, searchText) => {
 export const submitEvent = (eventData) => {
   return new Promise(async (resolve, reject) => {
     try {
-      console.log("EventAPI Function ", eventData);
       const session = await fetchAuthSession(); // Retrieves the session object
-      const jwt = session.tokens.idToken.toString();
+      // const jwt = session.tokens.idToken.toString();
       const username = session.tokens.idToken.payload["cognito:username"];
-      console.log("userName", username);
-      console.log("Images ", eventData.images);
 
       const imageArray = []; // Change to an array to store multiple image details
       if (Array.isArray(eventData.images)) {
@@ -134,11 +129,11 @@ export const submitEvent = (eventData) => {
             size: file.size,
             type: file.type,
           });
-          console.log(
-            `File Name: ${file.name}, Size: ${file.size}, Type: ${file.type}`
-          );
+          // console.log(
+          //   `File Name: ${file.name}, Size: ${file.size}, Type: ${file.type}`
+          // );
         });
-        console.log("Image details stored:", imageArray); // Log the resulting array
+        //  console.log("Image details stored:", imageArray); // Log the resulting array
       } else {
         console.error("eventImages is not an array");
       }
@@ -172,7 +167,6 @@ export const submitEvent = (eventData) => {
       // Construct the full API endpoint URL
       const url = `${baseUrl}${stage}/submit-event`;
 
-      console.log("eventPayload for API call ", JSON.stringify(eventPayload));
       // Make the API call using fetch
       const response = await fetch(url, {
         method: "POST",
@@ -192,7 +186,7 @@ export const submitEvent = (eventData) => {
         if (response.status === 200) {
           if (result.presignedUrls && Array.isArray(result.presignedUrls)) {
             const uploadUrls = result.presignedUrls; // Array of pre-signed URLs
-            console.log("Upload URLs:", uploadUrls);
+            // console.log("Upload URLs:", uploadUrls);
 
             if (uploadUrls.length !== imageArray.length) {
               throw new Error(
@@ -205,7 +199,7 @@ export const submitEvent = (eventData) => {
               const uploadUrl = uploadUrls[i];
               const image = eventData.images[i];
 
-              console.log(`Uploading image ${i + 1} to URL:`, uploadUrl);
+              //    console.log(`Uploading image ${i + 1} to URL:`, uploadUrl);
 
               // Upload the image to S3 using the pre-signed URL
               const uploadResponse = await fetch(uploadUrl, {
@@ -215,12 +209,12 @@ export const submitEvent = (eventData) => {
                 },
                 body: image, // File object
               });
-              console.log("Upload Response", uploadResponse);
+              // console.log("Upload Response", uploadResponse);
 
               if (!uploadResponse.ok) {
                 throw new Error(`Failed to upload image ${i + 1} to S3`);
               }
-              console.log(`Image ${i + 1} uploaded successfully!`);
+              //   console.log(`Image ${i + 1} uploaded successfully!`);
             }
 
             console.log("All images uploaded successfully!");
@@ -245,20 +239,20 @@ export const fetchEventDetailsByOrgID = async () => {
     console.log("Fetch Profiles details started");
 
     const session = await fetchAuthSession(); // Retrieves the session object
-    const jwt = session.tokens.idToken.toString();
+    //  const jwt = session.tokens.idToken.toString();
     const orgID = session.tokens.idToken.payload["cognito:username"];
-    console.log("userName", orgID);
+    // console.log("userName", orgID);
 
     // Prepare the JSON object
     const dataToSend = { orgID }; // Initialize with `username`
 
-    console.log("dataToSend contents:", JSON.stringify(dataToSend));
+    // console.log("dataToSend contents:", JSON.stringify(dataToSend));
 
     const apiUrl =
       process.env.REACT_APP_API_BASE_URL +
       process.env.REACT_APP_STAGE +
       "/get-event-by-orgid";
-    console.log(apiUrl);
+    // console.log(apiUrl);
 
     // Make the API request to save profile data
     const response = await fetch(apiUrl, {
@@ -278,7 +272,7 @@ export const fetchEventDetailsByOrgID = async () => {
     const result = await response.json();
 
     if (response.status === 200) {
-      console.log("API Response:", result);
+      //   console.log("API Response:", result);
 
       console.log("Data fecthed successfully!");
     } else {
@@ -296,22 +290,22 @@ export const fetchEventDetailsByEventID = async (eventID) => {
     // Fetch the current session
     console.log("Fetch Event Details started");
 
-    const session = await fetchAuthSession(); // Retrieves the session object
-    const jwt = session.tokens.idToken.toString();
-    const orgID = session.tokens.idToken.payload["cognito:username"];
-    console.log("userName", orgID);
-    console.log("eventID", eventID);
+    // const session = await fetchAuthSession(); // Retrieves the session object
+    // const jwt = session.tokens.idToken.toString();
+    // const orgID = session.tokens.idToken.payload["cognito:username"];
+    //  console.log("userName", orgID);
+    //  console.log("eventID", eventID);
 
     // Prepare the JSON object
     const dataToSend = { eventID }; // Initialize with `username`
 
-    console.log("dataToSend contents:", JSON.stringify(eventID));
+    //  console.log("dataToSend contents:", JSON.stringify(eventID));
 
     const apiUrl =
       process.env.REACT_APP_API_BASE_URL +
       process.env.REACT_APP_STAGE +
       "/fetch-event-by-id";
-    console.log(apiUrl);
+    // console.log(apiUrl);
 
     // Make the API request to save profile data
     const response = await fetch(apiUrl, {
@@ -331,7 +325,7 @@ export const fetchEventDetailsByEventID = async (eventID) => {
     const result = await response.json();
 
     if (response.status === 200) {
-      console.log("API Response fetchEventDetailsByEventID:", result);
+      //  console.log("API Response fetchEventDetailsByEventID:", result);
 
       console.log("Data fecthed successfully!");
     } else {

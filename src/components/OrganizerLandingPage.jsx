@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect } from "react";
 import Sidebar from "./Sidebar";
 import { useAuth } from "../context/AuthContext";
 
@@ -7,13 +7,13 @@ function OrganizerLandingPage({ user, signOut }) {
 
   useEffect(() => {
     if (session) {
-      const idToken = session.tokens.idToken.payload;
-      console.log("User Details:", {
-        email: idToken.email || "",
-        firstName: idToken.given_name || "",
-        lastName: idToken.family_name || "",
-        picture: idToken.picture || "",
-      });
+      // const idToken = session.tokens.idToken.payload;
+      // console.log("User Details:", {
+      //   email: idToken.email || "",
+      //   firstName: idToken.given_name || "",
+      //   lastName: idToken.family_name || "",
+      //   picture: idToken.picture || "",
+      // });
     }
   }, [session]);
 

@@ -1,28 +1,28 @@
-import React, { useEffect, useState } from 'react';
-import { Link, useParams } from 'react-router-dom';
-import { Card, TextField, SelectField, Flex } from '@aws-amplify/ui-react';
-import '../styles/GlobalStyles.css'; // Your global styles for other elements
+import React, { useEffect, useState } from "react";
+import { Link, useParams } from "react-router-dom";
+import { Card, TextField, SelectField, Flex } from "@aws-amplify/ui-react";
+import "../styles/GlobalStyles.css"; // Your global styles for other elements
 
 const mockEventDetails = {
-  'event-1': { pricePerTicket: 50, title: 'Music Concert' },
-  'event-2': { pricePerTicket: 30, title: 'Comedy Show' },
-  'event-3': { pricePerTicket: 20, title: 'Tech Conference' },
+  "event-1": { pricePerTicket: 50, title: "Music Concert" },
+  "event-2": { pricePerTicket: 30, title: "Comedy Show" },
+  "event-3": { pricePerTicket: 20, title: "Tech Conference" },
 };
 
 function BuyTicketPage() {
   const { eventId } = useParams();
-  console.log(eventId);
+  //  console.log(eventId);
   const [eventData, setEventData] = useState(null);
   const [selectedTickets, setSelectedTickets] = useState(1);
   const [totalPrice, setTotalPrice] = useState(0);
 
   useEffect(() => {
-    const eventDetails = mockEventDetails['event-' + eventId];
+    const eventDetails = mockEventDetails["event-" + eventId];
     if (eventDetails) {
       setEventData(eventDetails);
-      console.log(eventDetails)
+      //   console.log(eventDetails)
     } else {
-      console.error('Invalid eventId or event not found.');
+      console.error("Invalid eventId or event not found.");
     }
   }, [eventId]);
 
@@ -39,29 +39,43 @@ function BuyTicketPage() {
   };
 
   const handlePurchase = () => {
-    console.log(`User purchased ${selectedTickets} tickets for event: ${eventId}`);
-    alert('Purchase successful! Seats have been allocated. Your tickets have been sent to the registered email ID.');
+    console.log(
+      `User purchased ${selectedTickets} tickets for event: ${eventId}`
+    );
+    alert(
+      "Purchase successful! Seats have been allocated. Your tickets have been sent to the registered email ID."
+    );
   };
 
   return (
-    <div className="container" style={{ padding: '20px' }}>
+    <div className="container" style={{ padding: "20px" }}>
       {/* Header */}
       <div className="filter-bar">
-        <Link to="/landing" className="filter-link" style={{ textDecoration: 'none', fontSize: '1rem' }}>
+        <Link
+          to="/landing"
+          className="filter-link"
+          style={{ textDecoration: "none", fontSize: "1rem" }}
+        >
           Back to Events
         </Link>
       </div>
 
       {/* Main Content */}
-      <div className="main-content" style={{ display: 'flex', gap: '20px' }}>
+      <div className="main-content" style={{ display: "flex", gap: "20px" }}>
         {/* Left Column: Contact Form */}
-        <div style={{ flex: 2, borderRight: '2px solid #ccc', paddingRight: '20px' }}>
-          <Card style={{ padding: '20px' }}>
-            <form className="buy-ticket-form" style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
-           
-              <div class="ongoing-event">
-              Contact Information
-</div>
+        <div
+          style={{
+            flex: 2,
+            borderRight: "2px solid #ccc",
+            paddingRight: "20px",
+          }}
+        >
+          <Card style={{ padding: "20px" }}>
+            <form
+              className="buy-ticket-form"
+              style={{ display: "flex", flexDirection: "column", gap: "15px" }}
+            >
+              <div class="ongoing-event">Contact Information</div>
 
               <Flex direction="row" gap="20%">
                 <TextField
@@ -113,36 +127,54 @@ function BuyTicketPage() {
         </div>
 
         {/* Right Column: Banner and Order Summary */}
-        <div style={{ flex: 1, paddingLeft: '20px' }}>
-          <Card style={{ marginBottom: '20px', padding: 0 }}>
+        <div style={{ flex: 1, paddingLeft: "20px" }}>
+          <Card style={{ marginBottom: "20px", padding: 0 }}>
             <img
               src="https://via.placeholder.com/300x150" // Replace with your actual banner image URL
               alt="Event Banner"
-              style={{ width: '100%', height: '150px', objectFit: 'cover' }}
+              style={{ width: "100%", height: "150px", objectFit: "cover" }}
             />
           </Card>
 
-          <Card style={{ padding: '20px' }}>
+          <Card style={{ padding: "20px" }}>
             <h3>Order Summary</h3>
             <hr />
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px' }}>
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                marginBottom: "10px",
+              }}
+            >
               <span>Price for Ticket</span>
               <span>₹{eventData?.pricePerTicket || 0}</span>
             </div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px' }}>
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                marginBottom: "10px",
+              }}
+            >
               <span>No of Tickets ({selectedTickets})</span>
               <span>₹{eventData?.pricePerTicket * selectedTickets || 0}</span>
             </div>
             <hr />
-            <div style={{ display: 'flex', justifyContent: 'space-between', fontWeight: 'bold' }}>
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                fontWeight: "bold",
+              }}
+            >
               <span>Total Amount</span>
               <span>₹{totalPrice}</span>
             </div>
             <hr />
 
             {/* Buy Button under Order Summary */}
-            <div style={{ marginTop: '20px', textAlign: 'center' }}>
-              <button style={{ width: '50%' }} onClick={handlePurchase}>
+            <div style={{ marginTop: "20px", textAlign: "center" }}>
+              <button style={{ width: "50%" }} onClick={handlePurchase}>
                 Buy Now
               </button>
             </div>

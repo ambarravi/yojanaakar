@@ -17,13 +17,13 @@ export const updateRole = async (username, tempRole) => {
     }
     const jwt = session.tokens.idToken.toString();
 
-    console.log(jwt);
+    //  console.log(jwt);
 
     const apiUrl =
       process.env.REACT_APP_API_BASE_URL +
       process.env.REACT_APP_STAGE +
       "/update-role";
-    console.log(apiUrl);
+    // console.log(apiUrl);
     // Make the API request
     const response = await fetch(apiUrl, {
       method: "POST",

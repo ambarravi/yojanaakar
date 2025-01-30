@@ -11,7 +11,7 @@ export const AuthProvider = ({ children }) => {
   const fetchUser = async () => {
     try {
       const session = await fetchAuthSession();
-      console.log("AuthContext session", session);
+      //  console.log("AuthContext session", session);
 
       if (session && session.tokens && session.tokens.idToken.payload) {
         const payload = session.tokens.idToken.payload;

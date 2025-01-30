@@ -3,7 +3,7 @@ import { fetchAuthSession } from "@aws-amplify/auth";
 import { TextField, SelectField, Flex } from "@aws-amplify/ui-react";
 import { Link } from "react-router-dom";
 import "../styles/GlobalStyles.css";
-import blankProfilePicture from '../assets/images/blank-profile-picture.jpg';
+import blankProfilePicture from "../assets/images/blank-profile-picture.jpg";
 
 const ProfilePage = () => {
   const [user, setUser] = useState({
@@ -26,7 +26,7 @@ const ProfilePage = () => {
         const session = await fetchAuthSession();
         const idToken = session.tokens.idToken.payload;
 
-        console.log(idToken.picture);
+        //  console.log(idToken.picture);
 
         setUser((prevUser) => ({
           ...prevUser,
@@ -72,19 +72,20 @@ const ProfilePage = () => {
       <div className="profile-container">
         {/* Left Side */}
         <div className="profile-left">
-      
-          { <img
-             src={user.picture || blankProfilePicture}
-             referrerPolicy="no-referrer"
-            alt="Profile-Pic"
-            className="profile-picture"
-            onError={(e) => {
-              console.log("error" + e.target.src);
-              console.log("error" + e.target);
-              e.target.onerror = null; // Prevent infinite loop
-              e.target.src = blankProfilePicture; // Fallback avatar
-            }}
-          /> }
+          {
+            <img
+              src={user.picture || blankProfilePicture}
+              referrerPolicy="no-referrer"
+              alt="Profile-Pic"
+              className="profile-picture"
+              onError={(e) => {
+                console.log("error" + e.target.src);
+                console.log("error" + e.target);
+                e.target.onerror = null; // Prevent infinite loop
+                e.target.src = blankProfilePicture; // Fallback avatar
+              }}
+            />
+          }
           <p className="profile-email">{user.firstName}</p>
         </div>
 
@@ -93,23 +94,23 @@ const ProfilePage = () => {
 
         {/* Right Side */}
         <div className="profile-right">
-        <Flex direction="column" gap="10px" wrap="wrap">
-  <TextField
-    label="Email Address"
-    value={user.email}
-    isReadOnly
-    style={{ flex: 1 }}
-  />
-  <TextField
-    label="Phone Number"
-    placeholder="Enter your phone number"
-    type="tel"
-    name="mobile"
-    value={user.mobile}
-    onChange={handleInputChange}
-    style={{ flex: 1 }}
-  />
-</Flex>
+          <Flex direction="column" gap="10px" wrap="wrap">
+            <TextField
+              label="Email Address"
+              value={user.email}
+              isReadOnly
+              style={{ flex: 1 }}
+            />
+            <TextField
+              label="Phone Number"
+              placeholder="Enter your phone number"
+              type="tel"
+              name="mobile"
+              value={user.mobile}
+              onChange={handleInputChange}
+              style={{ flex: 1 }}
+            />
+          </Flex>
 
           <Flex direction="row" gap="20px">
             <TextField
@@ -133,26 +134,26 @@ const ProfilePage = () => {
           </Flex>
 
           <Flex direction="row" gap="20px" wrap="wrap">
-  <TextField
-    label="Birthdate"
-    type="date"
-    name="birthdate"
-    value={user.birthdate}
-    onChange={handleInputChange}
-    style={{ flex: 1, minWidth: "150px" }}
-  />
-  <SelectField
-    label="Gender"
-    name="gender"
-    value={user.gender}
-    onChange={handleInputChange}
-    style={{ flex: 1, minWidth: "150px" }}
-  >
-    <option value="">Select Gender</option>
-    <option value="M">Male</option>
-    <option value="F">Female</option>
-  </SelectField>
-</Flex>
+            <TextField
+              label="Birthdate"
+              type="date"
+              name="birthdate"
+              value={user.birthdate}
+              onChange={handleInputChange}
+              style={{ flex: 1, minWidth: "150px" }}
+            />
+            <SelectField
+              label="Gender"
+              name="gender"
+              value={user.gender}
+              onChange={handleInputChange}
+              style={{ flex: 1, minWidth: "150px" }}
+            >
+              <option value="">Select Gender</option>
+              <option value="M">Male</option>
+              <option value="F">Female</option>
+            </SelectField>
+          </Flex>
 
           <Flex direction="row" gap="20px">
             <TextField
@@ -182,15 +183,12 @@ const ProfilePage = () => {
             style={{ width: "100%" }}
           />
 
-  
-
-                    {/* Buy Button under Order Summary */}
-                    <div style={{ marginTop: '20px', textAlign: 'center' }}>
-              <button style={{ width: '50%' }} onClick={handleUpdate}>
+          {/* Buy Button under Order Summary */}
+          <div style={{ marginTop: "20px", textAlign: "center" }}>
+            <button style={{ width: "50%" }} onClick={handleUpdate}>
               Update Profile
-              </button>
-            </div>
-            
+            </button>
+          </div>
         </div>
       </div>
     </div>

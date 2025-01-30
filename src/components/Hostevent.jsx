@@ -39,7 +39,7 @@ function Hostevent({ user, signOut }) {
   const [uploadedFiles, setUploadedFiles] = useState([]); // Track uploaded files
   const [showDropdown, setShowDropdown] = useState(false);
   const [categories, setCategories] = useState([]);
-  const [profile, setProfile] = useState([]);
+  //const [profile, setProfile] = useState([]);
   const [cities, setCities] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -63,16 +63,16 @@ function Hostevent({ user, signOut }) {
         if (orgProfile && orgProfile.record) {
           const record = orgProfile.record;
           mappedValue = record.associatedCollegeUniversity.BOOL;
-          console.log("mappedValue", mappedValue);
+          //  console.log("mappedValue", mappedValue);
         }
 
         setShowDropdown(mappedValue);
-        setProfile(orgProfile);
+        //  setProfile(orgProfile);
 
         if (eventId) {
           const eventReponse = await fetchEventDetailsByEventID(eventId);
           const eventDetails = eventReponse.record;
-          console.log("Record Event Details:", eventDetails);
+          //  console.log("Record Event Details:", eventDetails);
           setFormData({
             eventTitle: eventDetails.EventTitle,
             dateTime: eventDetails.EventDate,
@@ -219,9 +219,9 @@ function Hostevent({ user, signOut }) {
     }
 
     try {
-      console.log("Submitting form data:", formData);
+      //  console.log("Submitting form data:", formData);
 
-      const result = await submitEvent(formData);
+      await submitEvent(formData);
 
       //  await new Promise((resolve) => setTimeout(resolve, 2000));
       alert("Form submitted successfully!");

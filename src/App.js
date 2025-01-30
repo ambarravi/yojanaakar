@@ -15,7 +15,7 @@ import {
 import Home from "./components/Home";
 import Profile from "./components/Profile";
 import EventsPage from "./components/EventsPage";
-import Header from "./components/Header";
+// import Header from "./components/Header";
 import Footer from "./components/Footer";
 import LandingPage from "./components/LandingPage";
 import EventDetailsPage from "./components/EventDetailsPage";
@@ -33,8 +33,8 @@ function AuthenticatedRoutes() {
   const [tempRole, setTempRole] = useState(sessionStorage.getItem("tempRole"));
 
   const handleRoleUpdate = async (user) => {
-    console.log(user);
-    console.log(tempRole);
+    // console.log(user);
+    //   console.log(tempRole);
     if (tempRole && user) {
       try {
         await updateRole(user.username, tempRole);
