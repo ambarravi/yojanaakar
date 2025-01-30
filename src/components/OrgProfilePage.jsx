@@ -201,7 +201,7 @@ function OrgProfilePage({ user, signOut }) {
         console.log(nameofCity.CityName);
         formDataToSubmit.append("venueCityName", nameofCity.CityName);
       }
-      const result = await submitProfile(formDataToSubmit, formData.logo);
+      await submitProfile(formDataToSubmit, formData.logo);
       alert("Profile Updated Successfully!");
       // console.log("API Response:", result);
     } catch (error) {
