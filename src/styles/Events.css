@@ -1,161 +1,179 @@
 /* Main container for consistent padding */
 .container {
-    padding: 0 20px; /* Adds padding on left and right */
-    margin: 0 auto; /* Centers the container */
-    max-width: 1200px; /* Max width to avoid too wide content on larger screens */
-    border: 1px solid #e0e0e0;  /* Light gray border */
+  padding: 0 20px;
+  margin: 0 auto;
+  max-width: 1200px;
+  border: 1px solid #e0e0e0;
+  background-color: #ffffff; /* Subtle background for better visibility */
+}
+
+.custom-link {
+  margin: 0 15px; /* Adjust horizontal spacing */
+  color: var(--amplify-colors-font-primary);
+  text-decoration: none;
+  font-size: 1rem;
+}
+
+.custom-link:last-child {
+  margin-right: 0; /* Remove margin from the last link */
+}
+
+.custom-link:hover {
+  text-decoration: underline;
 }
 
 /* Amplify styled header section */
 .events-header {
-    width: 100%;
-    height: 70px; /* Increased height to match Amplify theme */
-    padding: 0;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    background-color: #fff;
-    font-size: 1rem;
-    margin-top: 0;
-    border-radius: 0;
-    box-sizing: border-box;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Light shadow */
+  width: 100%;
+  height: 70px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  /* background: linear-gradient(90deg, #e0f7fa, #b2ebf2); */
+
+  background: linear-gradient(90deg, #cce5ff, #99ccff);
+  /* background: linear-gradient(90deg, #7da2e4, #d0e1f9); */
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+/* Add hover effect for links in the header */
+.events-header a {
+  color: #007bff;
+  text-decoration: none;
+  padding: 0 10px;
+  transition: color 0.3s ease;
+  font-family: "Montserrat", sans-serif; /* Change font-family here */
+  font-weight: 500; /* Adjust weight for a polished look */
+}
+
+.events-header a:hover {
+  color: #0056b3;
+  text-decoration: underline;
+}
+
+/* Highlight the active link */
+.events-header a.active {
+  color: #0056b3;
+  border-bottom: 2px solid #007bff;
 }
 
 /* Hero Image styles */
 .hero-image {
-    width: 100%;
-    height: 300px;  /* Hero image height */
-    background-image: url('../assets/images/hero-bg.jpg'); /* Replace with your image path */
-    background-size: cover;
-    background-position: center;
-    margin-top: 5px; /* Optional: Adds a little space below the header */
-    border-radius: 15px; /* Apply rounded corners */
+  width: 100%;
+  height: 300px;
+  background-image: url("../assets/images/Tikto_BG_web_5.png");
+  background-size: cover;
+  background-position: center;
+  margin-top: 5px;
+  border-radius: 15px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
 }
 
 /* Main content styles */
 .events-content {
-    padding: 20px 0;  /* Vertical padding for the content */
-    font-family: Arial, sans-serif;
+  padding: 20px 0;
+  font-family: "Arial", sans-serif;
+  color: #333333; /* Improved readability */
+  line-height: 1.6;
 }
 
 /* Footer styles */
 .footer {
-    padding: 20px 0;  /* Vertical padding for footer */
-    background-color: #f8f9fa;
-    text-align: center;
-    margin-top: 20px; /* Space above the footer */
+  padding: 20px 0;
+  background-color: #f8f9fa;
+  text-align: center;
+  color: #555555;
+  border-top: 1px solid #e0e0e0;
 }
 
-/* Sign Out Button - Updated style to align with Amplify's design */
-.sign-out-button {
-    padding: 5px 10px;
-    font-size: 1rem;
-    border-radius: 5px;
-    background-color: #007bff;
-    color: #fff;
-    border: none;
-    cursor: pointer;
-    transition: background-color 0.3s, transform 0.2s;
+/* Add hover effect for footer links */
+.footer a {
+  color: #007bff;
+  text-decoration: none;
+  font-weight: 500;
 }
 
-.sign-out-button:hover {
-    background-color: #0056b3;
-    transform: scale(1.05);
-}
-
-.sign-out-button:focus {
-    outline: 2px solid #0056b3;
-    outline-offset: 2px;
-}
-
-.events-header h1 {
-    flex-grow: 1; /* Ensures the title takes up available space */
-    margin: 0; /* Remove any margin */
-    font-size: 1.5rem;
-    color: #333; /* Slightly darker to match the theme */
+.footer a:hover {
+  text-decoration: underline;
 }
 
 /* Event Boxes Section */
 .event-box-container {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); /* 4 or 5 boxes depending on screen size */
-    gap: 20px; /* Space between boxes */
-    padding: 20px 0; /* Vertical padding */
-    margin-top: 20px; /* Space between hero image and the event boxes */
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 20px;
+  padding: 20px 0;
+  margin-top: 20px;
 }
 
 /* Individual event box */
 .event-box {
-    background-color: #ffffff; /* Box background color */
-    border-radius: 15px; /* Rounded corners */
-    padding: 15px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Subtle shadow */
-    text-align: center; /* Center the text */
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  background-color: #ffffff;
+  border-radius: 15px;
+  padding: 15px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  text-align: center;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
-/* Hover effect for event box */
 .event-box:hover {
-    transform: translateY(-5px); /* Lift the box on hover */
-    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15); /* Increase shadow on hover */
+  transform: translateY(-5px);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+  background-color: #f8f9fa; /* Subtle background change */
 }
 
-/* Event box title */
-.event-box h3 {
-    font-size: 1.2rem; /* Event title font size */
-    color: #333;
-    margin-bottom: 10px;
+/* Custom Button */
+.custom-button {
+  font-size: 1rem;
+  padding: 10px 20px;
+  border-radius: 8px;
+  background-color: #007bff;
+  color: white;
+  font-weight: 500;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transition: background-color 0.3s ease, transform 0.2s ease;
+  border: none;
+  cursor: pointer;
 }
 
-/* Event box description */
-.event-box p {
-    font-size: 1rem;
-    color: #666;
+.custom-button:hover {
+  background-color: #0056b3;
+  transform: scale(1.05);
 }
 
-/* Mobile responsiveness */
+/* Responsive Design */
 @media screen and (max-width: 768px) {
-    .container {
-        padding: 0 10px; /* Less padding on mobile */
-    }
+  .container {
+    padding: 0 10px;
+  }
 
-    .events-header {
-        height: 60px; /* Adjusted header height for mobile */
-        font-size: 0.9rem; /* Adjust font size for mobile */
-    }
+  .events-header {
+    height: 60px;
+    padding: 0 15px;
+  }
 
-    .hero-image {
-        height: 250px; /* Smaller hero image on mobile */
-    }
+  .hero-image {
+    height: 250px;
+  }
 
-    .events-content {
-        padding: 10px 0; /* Reduced vertical padding for mobile */
-    }
+  .events-content {
+    padding: 10px 0;
+  }
 
-    .footer {
-        padding: 15px 0; /* Less padding for footer */
-    }
+  .footer {
+    padding: 15px 0;
+  }
+
+  .custom-button {
+    padding: 8px 16px;
+    font-size: 0.9rem;
+  }
+
+  .event-box-container {
+    gap: 10px;
+    padding: 10px 0;
+  }
 }
-
-.custom-signin-button {
-    font-size: 1rem;
-    padding: 8px 20px;
-    border-radius: 5px;
-    background-color: var(--amplify-colors-button-primary);
-    color: var(--amplify-colors-font-primary);
-    font-weight: 500;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    transition: background-color 0.3s ease, transform 0.2s ease;
-  }
-  
-  .custom-signin-button:hover {
-    background-color: var(--amplify-colors-button-primary-hover);
-    transform: scale(1.05);
-  }
-  
-  .custom-signin-button:focus {
-    outline: none; /* Removes the default outline */
-    transform: scale(1.05);
-  }
-  

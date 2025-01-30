@@ -1,0 +1,199 @@
+Big Prime number , 
+Modify variable name ,
+String occurance ,
+- Sample code questions 
+Max occuance char ,
+Reverse word string,
+Return the string containing factorial ,
+Topics - Array, string , recursion , 
+Binary search using recursion,
+Enqueue , 
+dequeue using two stacks,
+string anagram,
+Character frequesncy in string
+------------------------------------
+Genral code questions pattern  -
+Arrays
+	1D Arrays 
+		Sorting 
+		Finding Subsets
+		Finding Closed element
+		Miscellenous
+	2D Arrays	
+		Rotating sub-array
+		Merging
+		Finding sub matrix
+		
+String	
+	Reverse Strig
+	Reverse Words string
+	Finding sub string
+	Characters in same order
+	Frequancy of word
+	
+Other
+	Stack
+	Other Data structure
+--------------------------------------------	
+Example code questions 
+1.Given array having elements as 0 and 1. Sort the array with time complexity
+2.Find all common elemnts in given sorted array 
+3.You are given sorted array containing both ngative and positive values. Resort the array taking absolute value of negative numbers 
+4. Given 2 sorted arratys of size N and 2N . Merge these sorted arrays and remove duplicates (if any) The resultantn array should be in sorted order . DO this by 3 methods 
+
+5. program to find the pair from two sorted arays such that the sum of pair is closest to a given number x
+6./*
+
+Write a function which takes an array and prints the majority element (if it exists), otherwise prints “No Majority Element”. A majority element in an array A[] of size n is an element that appears more than n/2 times (and hence there is at most one such element).
+Examples :
+
+Input : {3, 3, 4, 2, 4, 4, 2, 4, 4}
+Output : 4
+
+Input : {3, 3, 4, 2, 4, 4, 2, 4}
+Output : No Majority Element
+
+*/
+
+7. /*
+
+Question 1- String are given need to convert it into JavaVaribale and vice-versa
+
+
+
+
+
+Example- if given string are:  this_is_variable
+
+Output- thisIsVariable (need to replace _ with empty and next character to _  need to be Capital letter)
+
+Example – if given string are:  thisIsVariable.
+
+Output:  this_is_variable (if java variable are given before capital character need to add _ (underscore) and capital character will be small).
+
+*/
+
+8.
+Given two array A[] and B[] which were having almost same elements. Only two elements in array b[] are different from array A[]. In minimum space and time complexity you have to print these two elements of array B[] which are not present in array A[].
+
+*/
+
+9. /*
+
+Given 2 matrices. One big matrix(say, A) and one small matrix(say, B). You need to find out whether the smaller one matrix is the sub-matrix(part) of bigger matrix.
+Input:
+
+Matrix A=
+1   2   3   4
+
+5   6   7   8
+
+9  10 11 12
+
+13 14 15 16
+
+
+
+
+Matrix B =
+6   7    8
+
+10 11 12
+
+14 15 16
+
+Output: YES
+
+
+
+*/
+
+
+12.Palindrome stirng
+
+
+
+
+
+
+Write a program that returns the next permutation of the number given in the array.
+For example - the next permutation of arr = [1,2,3] is [1,3,2].
+
+
+	. Given an array of distinct integer candidates and the desired integer target, produce a list of all the possible combinations of candidates where the sum of the chosen numbers is the target. You may return the combinations in any order.
+You may choose the same number from the candidates array an unlimited number of times. Whether two combinations are unique depends on the frequency of at least one of the chosen numbers.
+Example - Input: candidates = [2,3,6,7], target = 7
+Output: [[2,2,3],[7]]
+
+
+Count Possible Decoding of a given Digit Sequence
+
+
+
+--------------------------------------------------
+
+Given a list of words , return length of  longest sub-string
+
+1.) Merge an array of size n into another array of size m+n 
+2.) Given a text string and a sample string. Find if the characters of the sample string is in the same 
+
+1.) A matrix is given, Rotate a sub matrix at 90 degree of given size. 
+2.) A string is given(paragraph type), count the frequency of each word in string and print it. 
+3.) Given 2 sorted array and a number N, find 2 numbers whose sum is closet to given number N. 
+
+ 
+2.) Find sqare sub matrix of size N from the given sqare matrix of size M whose sum of 
+element is maximum. 
+3.) sort the array element based on Dictionary. 
+Input :- 10,20,30,100,200,300. 
+output :- 10,100,20,200,30,300. 
+
+
+
+Count Possible Decoding of a given Digit Sequence
+
+Problem 1: Given an array of size MxN and coordinates of starting of subarray (x, y). You need to rotate that subarray and then print the full array after rotation.
+
+
+
+Problem 3: Given three sorted arrays A, B, and C. Write the most efficient algorithm to find the 5th largest element among the three arrays.
+		
+
+
+
+2)  Don't remember exact problem but it is based on Mathematic and Prime Numbers(Only Question is tricky to understand coding is easy)
+
+3)  Count Possible Decodings of a given Digit Sequence.(DP based question)
+
+
+
+
+
+
+
+or Nagarro, you should have basic knowledge of data structure like recursion, LinkedList, arrays. After this, you can go to Geeksforgeeks and read all Nagarro archives. After that, you can go to CareerCup for Nagarro interview question. After this, you have a 65% chance of getting same question from one of these. If you want 90 - 99% chance you can visit on another website.
+
+
+https://testbook.com/interview/nagarro-interview-questions
+
+https://testbook.com/interview/aws-lambda-interview-questions
+
+What is the Internal Implementation of HashMap
+
+
+How to encode the word using ceaser cipher technique
+Question from previous project. Why? How? What?
+
+Asked 2-3 quiz/puzzles and finally a discussion with HR
+
+program for finding duplicate array elements and put it in array in increasing order
+
+https://prepinsta.com/nagarro-coding-questions/
+https://www.geeksforgeeks.org/check-for-balanced-parentheses-in-an-expression/
+https://www.geeksforgeeks.org/program-to-find-the-nth-prime-number/
+https://www.geeksforgeeks.org/count-derangements-permutation-such-that-no-element-appears-in-its-original-position/
+https://prepinsta.com/nagarro-coding-questions/
+https://www.keka.com/javascript-coding-interview-questions-and-answers
+
+
+

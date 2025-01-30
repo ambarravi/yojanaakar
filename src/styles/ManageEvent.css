@@ -1,0 +1,125 @@
+/* General Styling */
+.organizer-profile-page {
+  display: flex;
+}
+
+.sidebar-toggle {
+  display: none;
+}
+
+/* Sidebar Styling */
+.organizer-profile-container {
+  flex-grow: 1;
+  padding: 20px;
+  transition: margin-left 0.3s ease-in-out;
+}
+
+.organizer-profile-container.collapsed {
+  margin-left: 250px;
+}
+
+/* Table Styling */
+.events-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 20px 0;
+  font-size: 14px;
+  background-color: #fff;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.events-table th,
+.events-table td {
+  padding: 12px 15px;
+  border: 1px solid #ddd;
+  text-align: left;
+}
+
+.events-table th {
+  background-color: #4b0082;
+  color: #fff;
+  cursor: pointer;
+}
+
+.events-table th:hover {
+  background-color: #5e2e91;
+}
+
+.events-table tr:nth-child(even) {
+  background-color: #f9f9f9;
+}
+
+.events-table tr:hover {
+  background-color: #e6e6fa;
+}
+
+.btn {
+  padding: 10px 16px; /* Adjusts button size (height/width) */
+  border: none;
+  border-radius: 4px; /* Rounded corners */
+  cursor: pointer;
+  transition: transform 0.2s ease-in-out;
+  background: none;
+  margin-right: 8px; /* Adds space between buttons */
+  font-size: 14px; /* Defines font size */
+  font-family: Arial, sans-serif; /* Defines font family */
+  font-weight: 500; /* Optional: Makes the text slightly bold */
+}
+
+.btn:last-child {
+  margin-right: 0; /* Removes extra margin from the last button */
+}
+
+.btn:hover {
+  transform: scale(1.1);
+}
+
+.cancel-btn {
+  background-color: #f39c12;
+  color: #fff;
+}
+
+.edit-btn {
+  background-color: #3498db;
+  color: #fff;
+}
+
+.delete-btn {
+  background-color: #e74c3c;
+  color: #fff;
+}
+.publish-btn {
+  background-color: #197a37;
+  color: #fff;
+}
+
+/* Action Buttons Hover */
+.cancel-btn:hover,
+.edit-btn:hover,
+.delete-btn:hover {
+  opacity: 0.9;
+}
+
+/* Pagination Styling */
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+/* Buttons for Pagination */
+.pagination .btn {
+  background: none;
+  border: none;
+  padding: 10px;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+.pagination .btn:disabled {
+  opacity: 0.5;
+}

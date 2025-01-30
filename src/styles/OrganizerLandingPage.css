@@ -1,36 +1,47 @@
 .organizer-landing {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: 20px;
-    background-color: #f9f9f9;
-    height: 100vh;
-  }
-  
-  .organizer-header h1 {
-    font-size: 2rem;
-    margin-bottom: 20px;
-    color: #333;
-  }
-  
-  .organizer-nav {
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
-  }
-  
-  .organizer-nav button {
-    font-size: 1rem;
-    padding: 10px 20px;
-    border: none;
-    border-radius: 5px;
-    background-color: #007bff;
-    color: white;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
-  }
-  
-  .organizer-nav button:hover {
-    background-color: #0056b3;
-  }
-  
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px;
+  background-color: #f9f9f9;
+  height: 100vh;
+}
+
+.organizer-header h1 {
+  font-size: 2rem;
+  margin-bottom: 20px;
+  color: #333;
+}
+
+.organizer-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.organizer-nav button {
+  font-size: 1rem;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  background-color: #007bff;
+  color: white;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.organizer-nav button:hover {
+  background-color: #0056b3;
+}
+
+.form-section {
+  margin-bottom: 20px;
+}
+
+/* Form Group */
+.form-group {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 15px;
+  width: 100%;
+}

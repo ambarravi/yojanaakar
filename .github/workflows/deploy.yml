@@ -12,23 +12,22 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3  # Use the latest v3 version
+        uses: actions/checkout@v3 # Use the latest v3 version
 
       - name: Set up Node.js
-        uses: actions/setup-node@v3  # Use v3 for latest support
+        uses: actions/setup-node@v3 # Use v3 for latest support
         with:
-          node-version: '20'  # Explicitly set Node.js version 20
-      
+          node-version: "20" # Explicitly set Node.js version 20
+
       - name: Check AWS credentials
         run: |
-        
 
       - name: Set up AWS CLI
-        uses: aws-actions/configure-aws-credentials@v2  # Use v2 for latest support
+        uses: aws-actions/configure-aws-credentials@v2 # Use v2 for latest support
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ github.ref == 'refs/heads/main' && 'us-west-2' || 'eu-west-1' }}         
+          aws-region: ${{ github.ref == 'refs/heads/main' && 'us-west-2' || 'eu-west-1' }}
 
       - name: Install dependencies
         run: npm install
@@ -39,9 +38,9 @@ jobs:
           REACT_APP_COGNITO_USER_POOL_CLIENT_ID: ${{ secrets.APP_COGNITO_USER_POOL_CLIENT_ID }}
           REACT_APP_COGNITO_OAUTH_DOMAIN: ${{ secrets.COGNITO_DOMAIN }}
           REACT_APP_COGNITO_REDIRECT_SIGN_IN: ${{ secrets.COGNITO_REDIRECTSIGNIN }}
-          REACT_APP_COGNITO_REDIRECT_SIGN_OUT: ${{ secrets.COGNITO_REDIRECTSIGNOUT }}  
-          REACT_APP_API_BASE_URL: ${{ secrets.BASE_API_URL }}  
-          REACT_APP_STAGE: ${{ secrets.APP_STAGE }}  
+          REACT_APP_COGNITO_REDIRECT_SIGN_OUT: ${{ secrets.COGNITO_REDIRECTSIGNOUT }}
+          REACT_APP_API_BASE_URL: ${{ secrets.BASE_API_URL }}
+          REACT_APP_STAGE: ${{ secrets.APP_STAGE }}
         run: |
           npm run build
 
@@ -52,13 +51,10 @@ jobs:
           echo "User Pool ID: $REACT_APP_COGNITO_USER_POOL_ID"
           echo "Client ID: $REACT_APP_COGNITO_USER_POOL_CLIENT_ID"
           echo "COGNITO_REDIRECTSIGNOUT: ${{ secrets.COGNITO_REDIRECTSIGNOUT }}"
-        
-
 
       - name: Deploy to S3
         run: |
-            aws s3 sync build/ s3://${{ secrets.S3_BUCKET_NAME }} --delete 
-
+          aws s3 sync build/ s3://${{ secrets.S3_BUCKET_NAME }} --delete
 
       - name: Deploy to AWS
         run: |
