@@ -43,6 +43,29 @@ function AuthenticatedRoutes() {
   const hasRedirected = useRef(false); // Track if redirection has already happened
 
   useEffect(() => {
+    const url = window.location.href;
+    console.log("Current URL:", url);
+
+    try {
+      // Ensure the URL exists before using startsWith
+      if (url && typeof url === "string" && url.startsWith("https")) {
+        console.log("Valid redirect URL:", url);
+      } else {
+        console.error("Invalid or undefined redirect URL:", url);
+      }
+
+      Auth.currentAuthenticatedUser()
+        .then((user) => console.log("User:", user))
+        .catch(() => {
+          console.log("Not signed in, redirecting to Cognito Hosted UI...");
+          Auth.federatedSignIn(); // Redirects to Cognito
+        });
+    } catch (error) {
+      console.error("Error in processing redirect:", error);
+    }
+  }, []);
+
+  useEffect(() => {
     async function fetchAndUpdateRole() {
       try {
         //  let userRole =  sessionStorage.getItem("userRole");
