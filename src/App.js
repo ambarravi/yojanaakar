@@ -43,43 +43,28 @@ function AuthenticatedRoutes() {
   const hasRedirected = useRef(false); // Track if redirection has already happened
 
   useEffect(() => {
-    const url = window.location.href;
-    console.log("Current URL:", url);
-
-    try {
-      // Ensure the URL exists before using startsWith
-      if (url && typeof url === "string" && url.startsWith("https")) {
-        console.log("Valid redirect URL:", url);
-      } else {
-        console.error("Invalid or undefined redirect URL:", url);
-      }
-
-      Auth.currentAuthenticatedUser()
-        .then((user) => console.log("User:", user))
-        .catch(() => {
-          console.log("Not signed in, redirecting to Cognito Hosted UI...");
-          Auth.federatedSignIn(); // Redirects to Cognito
-        });
-    } catch (error) {
-      console.error("Error in processing redirect:", error);
-    }
-  }, []);
-
-  useEffect(() => {
     async function fetchAndUpdateRole() {
       try {
-        //  let userRole =  sessionStorage.getItem("userRole");
+        // Ensure window.location is valid before using startsWith
+        if (!window.location || typeof window.location.href !== "string") {
+          console.error("Invalid redirect URL:", window.location);
+          return;
+        }
+
+        console.log("Current URL:", window.location.href);
+
         const session = await fetchAuthSession();
         const idToken = session.tokens?.idToken;
 
         if (!idToken) {
-          console.error("ID token not found");
+          console.error("ID token not found. Redirecting to login.");
           return;
         }
 
         let userRole = idToken.payload["custom:role"];
         sessionStorage.setItem("userRole", userRole);
         const userId = idToken.payload["sub"];
+
         console.log("Fetched role from Cognito:", userRole);
 
         const tempRole = sessionStorage.getItem("tempRole");
@@ -88,18 +73,18 @@ function AuthenticatedRoutes() {
           await updateRole(userId, tempRole);
           sessionStorage.removeItem("tempRole");
 
+          // Fetch updated role after update
           const updatedSession = await fetchAuthSession();
           userRole = updatedSession.tokens?.idToken?.payload["custom:role"];
           console.log("Updated role from Cognito:", userRole);
         }
 
-        // Redirect only once
         if (!hasRedirected.current) {
           hasRedirected.current = true; // Mark as redirected
 
-          if (userRole.includes("admin")) {
+          if (userRole?.includes("admin")) {
             navigate("/admin-dashboard");
-          } else if (userRole.includes("organizer")) {
+          } else if (userRole?.includes("organizer")) {
             navigate("/organizer-landing");
           } else {
             navigate("/landing");
@@ -112,7 +97,8 @@ function AuthenticatedRoutes() {
       }
     }
 
-    fetchAndUpdateRole();
+    // Delay execution slightly to ensure window is fully loaded
+    setTimeout(fetchAndUpdateRole, 500);
   }, [navigate]);
 
   if (loading) return <div>Loading...</div>;
