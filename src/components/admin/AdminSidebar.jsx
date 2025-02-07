@@ -1,26 +1,18 @@
 import React, { useContext } from "react";
-import { Link } from "react-router-dom";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "bootstrap-icons/font/bootstrap-icons.css";
 import { useNavigate } from "react-router-dom";
-import { AuthContext } from "../context/AuthContext";
+import { AuthContext } from "../../context/AuthContext";
 
-import "../styles/Sidebar.css";
+import "./styles/AdminSidebar.css";
 
-const Sidebar = ({ signOut, className }) => {
-  const { user, loading } = useContext(AuthContext); // Access user from AuthContext
+const Sidebar = ({ className }) => {
+  const { user, loading, signOut } = useContext(AuthContext); // Access user from AuthContext
   const navigate = useNavigate();
-
-  const handleHostEventClick = (e) => {
-    e.preventDefault(); // Prevent the default Link behavior
-    // Navigate with the state
-    sessionStorage.setItem("fromSidebar", true);
-    navigate("/host-event", { state: { fromSidebar: true } });
-  };
 
   const handleLogout = () => {
     signOut();
-    navigate("/");
+    navigate("/"); // Redirect to the home page after sign out
   };
 
   return (
@@ -57,44 +49,52 @@ const Sidebar = ({ signOut, className }) => {
       </div>
       <ul className="nav flex-column">
         <li className="nav-item">
-          <Link to="/manage-events" className="nav-link text-dark">
-            <i className="bi bi-house-door"></i> Home
-          </Link>
-        </li>
-        <li className="nav-item">
-          <Link
+          <button
             className="nav-link text-dark"
-            to="/host-event" // Just add the destination here for default fallback
-            onClick={handleHostEventClick}
+            onClick={() => navigate("/admin-events")}
+            style={{ border: "none", background: "none", cursor: "pointer" }}
           >
-            <i className="bi bi-plus-square"></i> Host Event
-          </Link>
-        </li>
-
-        <li className="nav-item">
-          <Link to="/manage-events" className="nav-link text-dark">
             <i className="bi bi-table"></i> Manage Events
-          </Link>
+          </button>
         </li>
         <li className="nav-item">
-          <Link to="/dashboard" className="nav-link text-dark">
-            <i className="bi bi-speedometer2"></i> Dashboard
-          </Link>
-        </li>
-        <li className="nav-item">
-          <Link to="/host-profile" className="nav-link text-dark">
-            <i className="bi bi-person-circle"></i> Profile
-          </Link>
+          <button
+            className="nav-link text-dark"
+            onClick={() => navigate("/admin-manage-users")}
+            style={{ border: "none", background: "none", cursor: "pointer" }}
+          >
+            <i className="bi bi-plus-square"></i> Manage Users
+          </button>
         </li>
 
         <li className="nav-item">
-          <Link
-            to="/signout"
+          <button
+            className="nav-link text-dark"
+            onClick={() => navigate("/admin-dashboard")}
+            style={{ border: "none", background: "none", cursor: "pointer" }}
+          >
+            <i className="bi bi-speedometer2"></i> Dashboard
+          </button>
+        </li>
+        <li className="nav-item">
+          <button
+            className="nav-link text-dark"
+            onClick={() => navigate("/admin-master")}
+            style={{ border: "none", background: "none", cursor: "pointer" }}
+          >
+            <i className="bi bi-person-circle"></i> Add Master
+          </button>
+        </li>
+
+        {/* Sign out button */}
+        <li className="nav-item">
+          <button
             className="nav-link text-dark"
             onClick={handleLogout}
+            style={{ border: "none", background: "none", cursor: "pointer" }}
           >
             <i className="bi bi-box-arrow-right"></i> Sign Out
-          </Link>
+          </button>
         </li>
         <hr style={{ borderColor: "#0056b3", borderWidth: "1px" }} />
       </ul>

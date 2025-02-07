@@ -1,19 +1,22 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import Sidebar from "./Sidebar";
-import "../styles/ManageEvent.css";
+import Sidebar from "./AdminSidebar";
+import "./styles/AdminManageEvent.css";
+import { fetchAuthSession } from "@aws-amplify/auth";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
-  faEdit,
   faTrash,
   faArrowLeft,
   faArrowRight,
-  faPaperPlane,
   faStopCircle,
+  faInfoCircle,
+  faThumbsUp,
+  faThumbsDown,
 } from "@fortawesome/free-solid-svg-icons"; // Import icons
-import { fetchEventDetailsByOrgID, updateEventStatus } from "../api/eventApi";
+import { fetchAllEventDetails } from "../../api/adminApi";
+import { updateEventStatus } from "../../api/eventApi";
 
-function ManageEvents({ user, signOut }) {
+function AdminEvents({ user, signOut }) {
   const navigate = useNavigate(); // Initialize navigate for routing
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [sortConfig, setSortConfig] = useState({ key: null, direction: "asc" });
@@ -23,88 +26,51 @@ function ManageEvents({ user, signOut }) {
 
   const eventsPerPage = 5;
 
-  // // Fetch event details on page load
-  // useEffect(() => {
-  //   const fetchEvents = async () => {
-  //     try {
-  //       const result = await fetchEventDetailsByOrgID();
-  //       console.log(result.items);
-  //       setEvents(result.items); // Assuming `result` aligns with the `events` object structure
-  //       setIsLoading(false); // Set loading to false once data is fetched
-  //     } catch (error) {
-  //       console.error("Error fetching events:", error);
-  //       setIsLoading(false); // Set loading to false once data is fetched
-  //     }
-  //   };
+  // Fetch event details on page load
+  useEffect(() => {
+    let role = sessionStorage.getItem("userRole");
+    if (role) {
+      console.log(`User role is: ${role}`);
+    } else {
+      role = fetchUser();
+      sessionStorage.setItem("userRole", role);
+    }
 
-  //   fetchEvents();
-  // }, []);
+    fetchEvents();
+  }, []);
+
+  const fetchUser = async () => {
+    const session = await fetchAuthSession();
+    const idToken = session.tokens?.idToken;
+
+    if (!idToken) {
+      console.error("ID token not found");
+      return;
+    }
+
+    let userRole = idToken.payload["custom:role"];
+    return userRole;
+  };
 
   const fetchEvents = async () => {
     try {
-      const result = await fetchEventDetailsByOrgID();
+      const result = await fetchAllEventDetails();
+      //  let result = { items: [] };
+
       console.log(result.items);
-      setEvents(result.items); // Assuming `result.items` holds the event list
-      setIsLoading(false);
+      setEvents(result.items); // Assuming `result` aligns with the `events` object structure
+      setIsLoading(false); // Set loading to false once data is fetched
     } catch (error) {
       console.error("Error fetching events:", error);
-      setIsLoading(false);
+      setIsLoading(false); // Set loading to false once data is fetched
     }
   };
-
-  useEffect(() => {
-    fetchEvents();
-  }, []);
 
   const toggleSidebar = () => setIsSidebarCollapsed(!isSidebarCollapsed);
 
   // const handleEditEvent = (eventId) => {
-  //   navigate(`/host-event`, { state: { eventId } }); // Pass eventId via state
+  //   navigate(`/admin-event-details`, { state: { eventId } }); // Pass eventId via state
   // };
-
-  const handleSort = (key) => {
-    let direction = "asc";
-    if (sortConfig.key === key && sortConfig.direction === "asc") {
-      direction = "desc";
-    }
-    setSortConfig({ key, direction });
-  };
-
-  const validateEventAction = (status, action) => {
-    const allowedActions = {
-      AwaitingApproval: ["Edit", "Delete", "UnderReview"],
-      UnderReview: ["Edit", "Delete", "Approve"],
-      Approved: ["Publish", "Delete", "Edit"],
-      Published: ["Edit"],
-      Cancelled: ["Edit"],
-    };
-
-    // Check if the action is allowed for the current status
-    if (!allowedActions[status]?.includes(action)) {
-      alert(
-        `Action ${action} is not allowed in the current event status: ${status}`
-      );
-      return false; // If action is not allowed
-    }
-
-    // Specific checks for Edit action based on status
-    if (action === "Edit") {
-      if (status === "Approved") {
-        alert(
-          "Event is Approved. Further edits will require re-approval from Admin."
-        );
-        return true;
-      } else if (status === "Published") {
-        alert("Event is Published. You can only view event details.");
-        return true;
-      } else if (status === "Cancelled") {
-        alert("Event is Cancelled. You can only view event details.");
-        return true;
-      }
-    }
-
-    return true; // Action is allowed
-  };
 
   const formatDateTime = (dateTimeString) => {
     const date = new Date(dateTimeString);
@@ -118,6 +84,14 @@ function ManageEvents({ user, signOut }) {
       minute: "2-digit", // 04
       hour12: true, // AM/PM format
     }).format(date);
+  };
+
+  const handleSort = (key) => {
+    let direction = "asc";
+    if (sortConfig.key === key && sortConfig.direction === "asc") {
+      direction = "desc";
+    }
+    setSortConfig({ key, direction });
   };
 
   const handleActionButtonClick = async (event, action) => {
@@ -137,8 +111,7 @@ function ManageEvents({ user, signOut }) {
     switch (action) {
       case "Edit":
         // Edit doesn't change status, so just navigate to the event edit page
-        sessionStorage.setItem("fromSidebar", false);
-        navigate(`/host-event`, { state: { eventId: event.EventID } });
+        navigate(`/admin-event-details`, { state: { eventId: event.EventID } });
         return;
       case "Delete":
         newStatus = "Deleted";
@@ -148,6 +121,12 @@ function ManageEvents({ user, signOut }) {
         break;
       case "Cancel":
         newStatus = "Cancelled";
+        break;
+      case "Approve":
+        newStatus = "Approved";
+        break;
+      case "Reject":
+        newStatus = "UnderReview";
         break;
       default:
         console.log("Unknown action");
@@ -173,6 +152,48 @@ function ManageEvents({ user, signOut }) {
     }
   };
 
+  const validateEventAction = (status, action) => {
+    const role = sessionStorage.getItem("userRole"); // Get role here
+    const allowedActions = {
+      AwaitingApproval: ["Edit", "Delete", "UnderReview", "Approve"],
+      UnderReview: ["Edit", "Delete", "Approve"],
+      Approved: ["Publish", "Delete", "Edit"],
+      Published: ["Edit"], // Default case for non-admin users
+      Cancelled: ["Edit"],
+    };
+
+    // If the user is an Admin, allow event cancellation after Publish
+    if (role === "Admin") {
+      allowedActions.Published.push("Cancel");
+    }
+
+    // Check if the action is allowed for the current status
+    if (!allowedActions[status]?.includes(action)) {
+      alert(
+        `Action ${action} is not allowed in the current event status: ${status}`
+      );
+      return false; // If action is not allowed
+    }
+
+    // Specific checks for Edit action based on status
+    if (action === "Edit") {
+      if (status === "Approved") {
+        alert(
+          "Event is Approved. Further edits will require re-approval from Admin."
+        );
+        return false;
+      } else if (status === "Published") {
+        alert("Event is Published. You can only view event details.");
+        return false;
+      } else if (status === "Cancelled") {
+        alert("Event is Cancelled. You can only view event details.");
+        return false;
+      }
+    }
+
+    return true; // Action is allowed
+  };
+
   const sortedEvents = [...events].sort((a, b) => {
     if (!sortConfig.key) return 0;
     if (sortConfig.direction === "asc") {
@@ -190,6 +211,7 @@ function ManageEvents({ user, signOut }) {
 
   return (
     <div className="organizer-profile-page">
+      {isLoading && <div className="loading-overlay">Loading...</div>}
       <button className="sidebar-toggle" onClick={toggleSidebar}>
         ☰
       </button>
@@ -203,7 +225,7 @@ function ManageEvents({ user, signOut }) {
           isSidebarCollapsed ? "collapsed" : ""
         }`}
       >
-        <h1 className="org-page-title">Manage Events</h1>
+        <h1 className="admin-page-title">Admin Manage Events</h1>
 
         {/* Loading Indicator */}
         {isLoading ? (
@@ -219,8 +241,8 @@ function ManageEvents({ user, signOut }) {
                 <th onClick={() => handleSort("eventId")}>Event ID</th>
                 <th onClick={() => handleSort("name")}>Event Name</th>
                 <th onClick={() => handleSort("dateTime")}>DateTime</th>
-                <th onClick={() => handleSort("eventStatus")}>EventStatus</th>
-                <th onClick={() => handleSort("seat")}>Seats</th>
+                <th onClick={() => handleSort("status")}>Status</th>
+                <th onClick={() => handleSort("seats")}>Seats</th>
                 <th
                   style={{
                     width: "5%",
@@ -233,7 +255,7 @@ function ManageEvents({ user, signOut }) {
                 </th>
                 <th
                   style={{
-                    width: "25%",
+                    width: "30%",
                     textAlign: "center",
                     cursor: "pointer",
                   }}
@@ -249,33 +271,41 @@ function ManageEvents({ user, signOut }) {
                   <td>{event.ReadableEventID}</td>
                   <td>{event.EventTitle}</td>
                   <td>{formatDateTime(event.EventDate)}</td>
-                  <td>{event.EventStatus}</td>
+                  <td>{event.Status}</td>
                   <td>{event.Seats}</td>
                   <td>{event.TicketsBooked}</td>
                   <td>
                     <button
-                      className="btn publish-btn"
-                      title="Publish Event"
-                      onClick={() => handleActionButtonClick(event, "Publish")}
+                      className="manage-btn publish-btn"
+                      title="Approve  Event"
+                      onClick={() => handleActionButtonClick(event, "Approve")}
                     >
-                      <FontAwesomeIcon icon={faPaperPlane} />
+                      <FontAwesomeIcon icon={faThumbsUp} />
                     </button>
                     <button
-                      className="btn edit-btn"
+                      className="manage-btn reject-btn"
+                      title="Reject  Event"
+                      onClick={() => handleActionButtonClick(event, "Reject")}
+                    >
+                      <FontAwesomeIcon icon={faThumbsDown} />
+                    </button>
+
+                    <button
+                      className="manage-btn edit-btn"
                       title="Edit Event Details"
                       onClick={() => handleActionButtonClick(event, "Edit")}
                     >
-                      <FontAwesomeIcon icon={faEdit} />
+                      <FontAwesomeIcon icon={faInfoCircle} />
                     </button>
                     <button
-                      className="btn cancel-btn"
+                      className="manage-btn cancel-btn"
                       title="Cancel Event"
                       onClick={() => handleActionButtonClick(event, "Cancel")}
                     >
                       <FontAwesomeIcon icon={faStopCircle} />
                     </button>
                     <button
-                      className="btn delete-btn"
+                      className="manage-btn delete-btn"
                       title="Delete Event"
                       onClick={() => handleActionButtonClick(event, "Delete")}
                     >
@@ -327,4 +357,4 @@ function ManageEvents({ user, signOut }) {
   );
 }
 
-export default ManageEvents;
+export default AdminEvents;

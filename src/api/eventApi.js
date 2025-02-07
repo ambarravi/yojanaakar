@@ -121,26 +121,45 @@ export const submitEvent = (eventData) => {
       // const jwt = session.tokens.idToken.toString();
       const username = session.tokens.idToken.payload["cognito:username"];
 
-      const imageArray = []; // Change to an array to store multiple image details
+      const oldImageArray = [];
+      const newImageArray = [];
+      // Change to an array to store multiple image details
       if (Array.isArray(eventData.images)) {
         eventData.images.forEach((file) => {
-          imageArray.push({
-            name: file.name,
-            size: file.size,
-            type: file.type,
-          });
-          // console.log(
-          //   `File Name: ${file.name}, Size: ${file.size}, Type: ${file.type}`
-          // );
+          if (!file.preview) {
+            newImageArray.push({
+              name: file.name,
+              size: file.size,
+              type: file.type,
+              status: "new",
+              url: "",
+            });
+            // console.log(
+            //   `File Name: ${file.name}, Size: ${file.size}, Type: ${file.type}`
+            // );
+          } else {
+            oldImageArray.push({
+              name: file.name,
+              size: "",
+              type: "",
+              status: "old",
+              url: file.preview,
+            });
+          }
         });
-        //  console.log("Image details stored:", imageArray); // Log the resulting array
+        console.log("Image details stored New Images:", newImageArray); // Log the resulting array
+        console.log("Image details stored Old Images:", oldImageArray); // Log the resulting array
       } else {
         console.error("eventImages is not an array");
       }
 
+      const originalImagesFiles = eventData.images.filter(
+        (image) => !image.preview
+      );
+
       // Prepare the eventData for submission by mapping to API payload format
       const eventPayload = {
-        EventID: eventData.eventID || "",
+        EventID: eventData.eventId || "",
         OrgID: username,
         eventTitle: eventData.eventTitle,
         dateTime: eventData.dateTime,
@@ -149,7 +168,7 @@ export const submitEvent = (eventData) => {
         categoryID: eventData.categoryID,
         cityID: eventData.cityID,
         eventLocation: eventData.location,
-        mode: eventData.mode,
+        eventMode: eventData.eventMode,
         eventDetails: eventData.eventDetails,
         ticketPrice: eventData.ticketPrice,
         noOfSeats: eventData.noOfSeats,
@@ -157,7 +176,10 @@ export const submitEvent = (eventData) => {
         additionalInfo: eventData.additionalInfo,
         tags: eventData.tags,
         audienceBenefits: eventData.audienceBenefits,
-        eventImages: imageArray,
+        eventImages: eventData.images,
+        readableEventID: eventData.readableEventID,
+        oldImages: oldImageArray,
+        newImages: newImageArray,
       };
 
       // API base URL and stage environment variable
@@ -183,41 +205,41 @@ export const submitEvent = (eventData) => {
         reject(errorData); // Reject with error details
       } else {
         const result = await response.json(); // Assume the API returns the pre-signed URL
+        console.log("Event details saved successfully!");
         if (response.status === 200) {
+          console.log(
+            "Check for  presignedUrls length",
+            result.presignedUrls.length
+          );
           if (result.presignedUrls && Array.isArray(result.presignedUrls)) {
             const uploadUrls = result.presignedUrls; // Array of pre-signed URLs
-            // console.log("Upload URLs:", uploadUrls);
 
-            if (uploadUrls.length !== imageArray.length) {
+            if (uploadUrls.length !== originalImagesFiles.length) {
               throw new Error(
                 "Number of pre-signed URLs does not match the number of images."
               );
             }
 
             // Loop through each pre-signed URL and upload the corresponding image
-            for (let i = 0; i < uploadUrls.length; i++) {
-              const uploadUrl = uploadUrls[i];
-              const image = eventData.images[i];
 
-              //    console.log(`Uploading image ${i + 1} to URL:`, uploadUrl);
-
-              // Upload the image to S3 using the pre-signed URL
-              const uploadResponse = await fetch(uploadUrl, {
-                method: "PUT",
-                headers: {
-                  "Content-Type": image.type, // Ensure the correct file type
-                },
-                body: image, // File object
+            try {
+              const uploadPromises = uploadUrls.map((uploadUrl, index) => {
+                return fetch(uploadUrl, {
+                  method: "PUT",
+                  headers: {
+                    "Content-Type":
+                      originalImagesFiles[index].type ||
+                      "application/octet-stream",
+                  },
+                  body: originalImagesFiles[index],
+                });
               });
-              // console.log("Upload Response", uploadResponse);
 
-              if (!uploadResponse.ok) {
-                throw new Error(`Failed to upload image ${i + 1} to S3`);
-              }
-              //   console.log(`Image ${i + 1} uploaded successfully!`);
+              await Promise.all(uploadPromises);
+              console.log("All images uploaded successfully!");
+            } catch (error) {
+              console.error("Error uploading images:", error);
             }
-
-            console.log("All images uploaded successfully!");
           } else {
             console.log("Error in API Response:", result);
           }
@@ -336,4 +358,36 @@ export const fetchEventDetailsByEventID = async (eventID) => {
     console.error("Error fetching EventDetails:", error.message);
     throw error;
   }
+};
+
+export const updateEventStatus = async (eventID, status) => {
+  // return "Event updated";
+
+  const session = await fetchAuthSession(); // Retrieves the session object
+  const idTokenPayload = session.tokens.idToken.payload;
+  // Option 1: If role is stored as a custom attribute in Cognito User Pool
+  const userRole = idTokenPayload["custom:role"];
+
+  const apiUrl =
+    process.env.REACT_APP_API_BASE_URL +
+    process.env.REACT_APP_STAGE +
+    "/update-event-status";
+
+  const response = await fetch(apiUrl, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      eventID: eventID,
+      eventStatus: status,
+      role: userRole,
+    }),
+  });
+
+  if (!response.ok) {
+    throw new Error("Failed to update event status");
+  }
+
+  return await response.json();
 };

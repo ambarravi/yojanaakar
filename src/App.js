@@ -1,4 +1,5 @@
 import "@aws-amplify/ui-react/styles.css";
+import { useRef } from "react"; // Import useRef
 import React, { useEffect, useState } from "react";
 import {
   BrowserRouter as Router,
@@ -12,10 +13,11 @@ import {
   ThemeProvider,
   defaultTheme,
 } from "@aws-amplify/ui-react";
+import { fetchAuthSession } from "@aws-amplify/auth";
+
 import Home from "./components/Home";
 import Profile from "./components/Profile";
 import EventsPage from "./components/EventsPage";
-// import Header from "./components/Header";
 import Footer from "./components/Footer";
 import LandingPage from "./components/LandingPage";
 import EventDetailsPage from "./components/EventDetailsPage";
@@ -25,38 +27,72 @@ import OrganizerLandingPage from "./components/OrganizerLandingPage.jsx";
 import HostEvent from "./components/Hostevent.jsx";
 import ManageEvent from "./components/ManageEvents.jsx";
 import OrgProfile from "./components/OrgProfilePage.jsx";
+
+import AdminDashBoard from "./components/admin/AdminDashboard.jsx";
+import AdminEventDetails from "./components/admin/AdminEventDetails.jsx";
+import AdminEvents from "./components/admin/AdminEvents.jsx";
+import AdminMaster from "./components/admin/AdminMaster.jsx";
+import AdminManageUsers from "./components/admin/AdminmanageUsers.jsx";
+
 import { AuthProvider } from "./context/AuthContext.js";
 import { updateRole } from "./api/userApi";
 
 function AuthenticatedRoutes() {
   const navigate = useNavigate();
-  const [tempRole, setTempRole] = useState(sessionStorage.getItem("tempRole"));
-
-  const handleRoleUpdate = async (user) => {
-    // console.log(user);
-    //   console.log(tempRole);
-    if (tempRole && user) {
-      try {
-        await updateRole(user.username, tempRole);
-        console.log("Role updated successfully");
-        sessionStorage.removeItem("tempRole"); // Clear tempRole from session
-      } catch (error) {
-        console.error("Failed to update role:", error);
-      }
-    }
-  };
+  const [loading, setLoading] = useState(true);
+  const hasRedirected = useRef(false); // Track if redirection has already happened
 
   useEffect(() => {
-    if (tempRole) {
-      if (tempRole === "organizer") {
-        setTempRole(""); // Clear state variable
-        navigate("/organizer-landing");
-      } else if (tempRole === "user") {
-        setTempRole(""); // Clear state variable
-        navigate("/landing");
+    async function fetchAndUpdateRole() {
+      try {
+        //  let userRole =  sessionStorage.getItem("userRole");
+        const session = await fetchAuthSession();
+        const idToken = session.tokens?.idToken;
+
+        if (!idToken) {
+          console.error("ID token not found");
+          return;
+        }
+
+        let userRole = idToken.payload["custom:role"];
+        sessionStorage.setItem("userRole", userRole);
+        const userId = idToken.payload["sub"];
+        console.log("Fetched role from Cognito:", userRole);
+
+        const tempRole = sessionStorage.getItem("tempRole");
+        if (tempRole && tempRole !== userRole) {
+          console.log("Updating role for first-time login...");
+          await updateRole(userId, tempRole);
+          sessionStorage.removeItem("tempRole");
+
+          const updatedSession = await fetchAuthSession();
+          userRole = updatedSession.tokens?.idToken?.payload["custom:role"];
+          console.log("Updated role from Cognito:", userRole);
+        }
+
+        // Redirect only once
+        if (!hasRedirected.current) {
+          hasRedirected.current = true; // Mark as redirected
+
+          if (userRole.includes("admin")) {
+            navigate("/admin-dashboard");
+          } else if (userRole.includes("organizer")) {
+            navigate("/organizer-landing");
+          } else {
+            navigate("/landing");
+          }
+        }
+      } catch (error) {
+        console.error("Error fetching/updating role:", error);
+      } finally {
+        setLoading(false);
       }
     }
-  }, [tempRole, navigate]);
+
+    fetchAndUpdateRole();
+  }, [navigate]);
+
+  if (loading) return <div>Loading...</div>;
 
   return (
     <Authenticator
@@ -68,17 +104,14 @@ function AuthenticatedRoutes() {
           return <Navigate to="/" />;
         }
 
-        handleRoleUpdate(user);
-
         const handleSignOut = async () => {
           console.log("Signing out...");
           await signOut();
-          navigate("/"); // Redirect to home after sign-out
+          navigate("/");
         };
 
         return (
           <ThemeProvider theme={defaultTheme}>
-            {/* <Header user={user} signOut={handleSignOut} /> */}
             <Routes>
               <Route
                 path="/organizer-landing"
@@ -86,7 +119,6 @@ function AuthenticatedRoutes() {
                   <OrganizerLandingPage user={user} signOut={handleSignOut} />
                 }
               />
-              HostEvent
               <Route path="/host-event" element={<HostEvent />} />
               <Route path="/manage-events" element={<ManageEvent />} />
               <Route
@@ -98,6 +130,19 @@ function AuthenticatedRoutes() {
               <Route path="/profile" element={<Profile user={user} />} />
               <Route path="/event/:eventId" element={<EventDetailsPage />} />
               <Route path="/buyticket/:eventId" element={<BuyTicketPage />} />
+
+              {/* Admin Routes */}
+              <Route path="/admin-dashboard" element={<AdminDashBoard />} />
+              <Route path="/admin-events" element={<AdminEvents />} />
+              <Route
+                path="/admin-event-details"
+                element={<AdminEventDetails />}
+              />
+              <Route path="/admin-master" element={<AdminMaster />} />
+              <Route
+                path="/admin-manage-users"
+                element={<AdminManageUsers />}
+              />
             </Routes>
             <Footer />
           </ThemeProvider>

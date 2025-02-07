@@ -55,7 +55,7 @@
   background-color: #e6e6fa;
 }
 
-.btn {
+.manage-btn {
   padding: 10px 16px; /* Adjusts button size (height/width) */
   border: none;
   border-radius: 4px; /* Rounded corners */
@@ -92,6 +92,11 @@
 }
 .publish-btn {
   background-color: #197a37;
+  color: #fff;
+}
+
+.reject-btn {
+  background-color: #643107;
   color: #fff;
 }
 

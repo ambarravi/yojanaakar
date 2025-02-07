@@ -1,26 +1,23 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import Sidebar from "./Sidebar";
+import Sidebar from "./AdminSidebar";
 import {
   GetCityList,
   GetCategory,
   submitEvent,
   fetchEventDetailsByEventID,
-} from "../api/eventApi";
-import { fetchProfileDetails } from "../api/organizerApi";
+} from "../../api/eventApi";
+import { fetchProfileDetails } from "../../api/organizerApi";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faTimes } from "@fortawesome/free-solid-svg-icons";
-import "../styles/hostEvent.css";
+import "./styles/AdminViewEvent.css";
 
-function Hostevent({ user, signOut }) {
-  const fromSidebar = sessionStorage.getItem("fromSidebar");
-  console.log("fromSidebar", fromSidebar);
+function AdminEventDetails({ user, signOut }) {
   const location = useLocation();
   let eventId;
-  if (fromSidebar === "false") {
-    console.log("location.state", location.state);
-    eventId = location.state?.eventId ?? null;
-  }
+  console.log("location.state", location.state);
+  eventId = location.state?.eventId ?? null;
+
   console.log(eventId);
   //const eventId = location.state?.eventId;
 
@@ -291,8 +288,8 @@ function Hostevent({ user, signOut }) {
 
       //  await new Promise((resolve) => setTimeout(resolve, 2000));
       alert("Form submitted successfully!");
-      sessionStorage.setItem("fromSidebar", false);
-      navigate("/manage-events", { replace: true });
+
+      navigate("/admin-events", { replace: true });
     } catch (error) {
       console.error("Error submitting form:", error);
       alert("Failed to submit the form. Please try again.");
@@ -302,13 +299,11 @@ function Hostevent({ user, signOut }) {
   };
 
   const handleCancel = () => {
-    sessionStorage.setItem("fromSidebar", false);
-    navigate("/manage-events", { replace: true });
+    navigate("/admin-events", { replace: true });
   };
 
   const handleReset = () => {
-    sessionStorage.setItem("fromSidebar", false);
-    navigate("/manage-events", { replace: true });
+    navigate("/admin-events", { replace: true });
   };
 
   const toggleSidebar = () => {
@@ -760,4 +755,4 @@ function Hostevent({ user, signOut }) {
   );
 }
 
-export default Hostevent;
+export default AdminEventDetails;

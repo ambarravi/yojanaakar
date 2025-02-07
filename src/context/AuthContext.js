@@ -1,5 +1,5 @@
 import React, { createContext, useState, useEffect, useContext } from "react";
-import { fetchAuthSession } from "@aws-amplify/auth";
+import { fetchAuthSession, signOut as awsSignOut } from "@aws-amplify/auth";
 
 export const AuthContext = createContext();
 
@@ -11,8 +11,6 @@ export const AuthProvider = ({ children }) => {
   const fetchUser = async () => {
     try {
       const session = await fetchAuthSession();
-      //  console.log("AuthContext session", session);
-
       if (session && session.tokens && session.tokens.idToken.payload) {
         const payload = session.tokens.idToken.payload;
 
@@ -27,7 +25,6 @@ export const AuthProvider = ({ children }) => {
 
         setSession(session); // Store session globally
       } else {
-        console.log("No session object found");
         setUser(null); // Handle unauthenticated state
         setSession(null);
       }
@@ -44,8 +41,21 @@ export const AuthProvider = ({ children }) => {
     fetchUser();
   }, []);
 
+  // The signOut function to clear the session and reset the user state
+  const signOut = async () => {
+    try {
+      await awsSignOut(); // This is AWS Amplify's signOut function
+      setUser(null); // Clear user state
+      setSession(null); // Clear session data
+    } catch (error) {
+      console.error("Error signing out:", error);
+    }
+  };
+
   return (
-    <AuthContext.Provider value={{ user, session, loading, setSession }}>
+    <AuthContext.Provider
+      value={{ user, session, loading, setSession, signOut }}
+    >
       {children}
     </AuthContext.Provider>
   );

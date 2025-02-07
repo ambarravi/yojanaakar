@@ -7,6 +7,7 @@ export const updateRole = async (username, tempRole) => {
     const session = await fetchAuthSession(); // Retrieves the session object
     // const token = session.tokens.idToken; // Access the ID token
     const customRole = session.tokens.idToken.payload["custom:role"];
+    console.log(customRole);
 
     if (customRole) {
       console.log(
@@ -23,7 +24,7 @@ export const updateRole = async (username, tempRole) => {
       process.env.REACT_APP_API_BASE_URL +
       process.env.REACT_APP_STAGE +
       "/update-role";
-    // console.log(apiUrl);
+
     // Make the API request
     const response = await fetch(apiUrl, {
       method: "POST",
