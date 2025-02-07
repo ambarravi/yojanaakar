@@ -11,17 +11,15 @@ Amplify.configure({
       userPoolClientId: process.env.REACT_APP_COGNITO_USER_POOL_CLIENT_ID,
       userPoolId: process.env.REACT_APP_COGNITO_USER_POOL_ID,
       mandatorySignIn: true, // Forces sign-in
-      hostedUI: true,
       loginWith: {
         // Optional
         oauth: {
           domain: process.env.REACT_APP_COGNITO_OAUTH_DOMAIN,
           scopes: ["email", "openid", "profile"],
-          redirectSignIn: process.env.REACT_APP_COGNITO_O_REDIRECT_SIGN_IN,
+          redirectSignIn: process.env.REACT_APP_COGNITO_REDIRECT_SIGN_IN,
           redirectSignOut: process.env.REACT_APP_COGNITO_REDIRECT_SIGN_OUT,
           responseType: "code",
         },
-        username: "true",
       },
     },
   },
