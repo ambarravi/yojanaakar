@@ -51,6 +51,8 @@ jobs:
           echo "User Pool ID: $REACT_APP_COGNITO_USER_POOL_ID"
           echo "Client ID: $REACT_APP_COGNITO_USER_POOL_CLIENT_ID"
           echo "COGNITO_REDIRECTSIGNOUT: ${{ secrets.COGNITO_REDIRECTSIGNOUT }}"
+          echo "COGNITO_REDIRECTSIGNIN: ${{ secrets.COGNITO_REDIRECTSIGNIN }}"
+          echo "COGNITO_DOMAIN: ${{ secrets.COGNITO_DOMAIN }}"
 
       - name: Deploy to S3
         run: |
