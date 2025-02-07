@@ -119,7 +119,7 @@ function EventsPage() {
               Download APP
             </Link>
             <Link
-              to="/organizer-signin"
+              to="/organizer-landing"
               onClick={handleOrganizerSignIn}
               className="custom-link"
             >
