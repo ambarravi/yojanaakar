@@ -3,7 +3,15 @@ import ReactDOM from "react-dom/client";
 import "./styles/index.css";
 import App from "./App";
 import reportWebVitals from "./reportWebVitals";
-import { Amplify } from "aws-amplify"; // Correct way to import Amplify in recent versions
+import { Amplify } from "aws-amplify";
+
+console.log("Cognito Config ff:", {
+  userPoolId: process.env.REACT_APP_COGNITO_USER_POOL_ID,
+  userPoolClientId: process.env.REACT_APP_POOL_CLIENT_ID,
+  domain: process.env.REACT_APP_COGNITO_OAUTH_DOMAIN,
+  redirectSignIn: process.env.REACT_APP_COGNITO_REDIRECT_SIGN_IN,
+  redirectSignOut: process.env.REACT_APP_COGNITO_REDIRECT_SIGN_OUT,
+});
 
 Amplify.configure({
   Auth: {
@@ -11,19 +19,41 @@ Amplify.configure({
       userPoolClientId: process.env.REACT_APP_POOL_CLIENT_ID,
       userPoolId: process.env.REACT_APP_COGNITO_USER_POOL_ID,
       mandatorySignIn: true, // Forces sign-in
+      hostedUI: true,
       loginWith: {
         // Optional
         oauth: {
           domain: process.env.REACT_APP_COGNITO_OAUTH_DOMAIN,
           scopes: ["email", "openid", "profile"],
-          redirectSignIn: process.env.REACT_APP_COGNITO_REDIRECT_SIGN_IN,
-          redirectSignOut: process.env.REACT_APP_COGNITO_REDIRECT_SIGN_OUT,
+          redirectSignIn: [process.env.REACT_APP_COGNITO_REDIRECT_SIGN_IN],
+          redirectSignOut: [process.env.REACT_APP_COGNITO_REDIRECT_SIGN_OUT],
           responseType: "code",
         },
+        username: "true",
       },
     },
   },
 });
+
+// Amplify.configure({
+//   Auth: {
+//     Cognito: {
+//       userPoolClientId: process.env.REACT_APP_POOL_CLIENT_ID,
+//       userPoolId: process.env.REACT_APP_COGNITO_USER_POOL_ID,
+//       mandatorySignIn: true, // Forces sign-in
+//       loginWith: {
+//         // Optional
+//         oauth: {
+//           domain: process.env.REACT_APP_COGNITO_OAUTH_DOMAIN,
+//           scopes: ["email", "openid", "profile"],
+//           redirectSignIn: process.env.REACT_APP_COGNITO_REDIRECT_SIGN_IN,
+//           redirectSignOut: process.env.REACT_APP_COGNITO_REDIRECT_SIGN_OUT,
+//           responseType: "code",
+//         },
+//       },
+//     },
+//   },
+// });
 
 //console.log("Amplify Config:", Amplify.configure());
 
