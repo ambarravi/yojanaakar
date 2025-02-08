@@ -35,7 +35,7 @@ jobs:
       - name: Build React app
         env:
           REACT_APP_COGNITO_USER_POOL_ID: ${{ secrets.COGNITO_USER_POOL_ID }}
-          REACT_APP_COGNITO_USER_POOL_CLIENT_ID: ${{ secrets.COGNITO_USER_POOL_CLIENT_ID }}
+          REACT_APP_POOL_CLIENT_ID: ${{ secrets.POOL_CLIENT_ID }}
           REACT_APP_COGNITO_OAUTH_DOMAIN: ${{ secrets.COGNITO_DOMAIN }}
           REACT_APP_COGNITO_REDIRECT_SIGN_IN: ${{ secrets.COGNITO_REDIRECTSIGNIN }}
           REACT_APP_COGNITO_REDIRECT_SIGN_OUT: ${{ secrets.COGNITO_REDIRECTSIGNOUT }}
@@ -47,7 +47,7 @@ jobs:
       - name: Debug Environment Variables
         run: |
           echo "COGNITO_USER_POOL_ID: ${{ secrets.COGNITO_USER_POOL_ID }}"
-          echo "COGNITO_USER_POOL_CLIENT_ID: ${{ secrets.COGNITO_USER_POOL_CLIENT_ID }}"
+          echo "REACT_APP_POOL_CLIENT_ID: ${{ secrets.POOL_CLIENT_ID }}"
           echo "COGNITO_DOMAIN: ${{ secrets.COGNITO_DOMAIN }}"
           echo "COGNITO_REDIRECTSIGNOUT: ${{ secrets.COGNITO_REDIRECTSIGNOUT }}"
           echo "COGNITO_REDIRECTSIGNIN: ${{ secrets.COGNITO_REDIRECTSIGNIN }}"
