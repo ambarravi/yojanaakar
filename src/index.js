@@ -16,8 +16,8 @@ Amplify.configure({
         oauth: {
           domain: process.env.REACT_APP_COGNITO_OAUTH_DOMAIN,
           scopes: ["email", "openid", "profile"],
-          redirectSignIn: [process.env.REACT_APP_COGNITO_REDIRECT_SIGN_IN],
-          redirectSignOut: [process.env.REACT_APP_COGNITO_REDIRECT_SIGN_OUT],
+          redirectSignIn: process.env.REACT_APP_COGNITO_REDIRECT_SIGN_IN,
+          redirectSignOut: process.env.REACT_APP_COGNITO_REDIRECT_SIGN_OUT,
           responseType: "code",
         },
       },
