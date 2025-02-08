@@ -32,15 +32,17 @@ jobs:
       - name: Install dependencies
         run: npm install
 
+      - name: Set up Environment Variables
+        run: |
+          echo "REACT_APP_COGNITO_USER_POOL_ID=${{ secrets.COGNITO_USER_POOL_ID }}" >> $GITHUB_ENV
+          echo "REACT_APP_POOL_CLIENT_ID=${{ secrets.POOL_CLIENT_ID }}" >> $GITHUB_ENV
+          echo "REACT_APP_COGNITO_OAUTH_DOMAIN=${{ secrets.COGNITO_DOMAIN }}" >> $GITHUB_ENV
+          echo "REACT_APP_COGNITO_REDIRECT_SIGN_IN=${{ secrets.COGNITO_REDIRECTSIGNIN }}" >> $GITHUB_ENV
+          echo "REACT_APP_COGNITO_REDIRECT_SIGN_OUT=${{ secrets.COGNITO_REDIRECTSIGNOUT }}" >> $GITHUB_ENV
+          echo "REACT_APP_API_BASE_URL=${{ secrets.BASE_API_URL }}" >> $GITHUB_ENV
+          echo "REACT_APP_STAGE=${{ secrets.APP_STAGE }}" >> $GITHUB_ENV
+
       - name: Build React app
-        env:
-          REACT_APP_COGNITO_USER_POOL_ID: ${{ secrets.COGNITO_USER_POOL_ID }}
-          REACT_APP_POOL_CLIENT_ID: ${{ secrets.POOL_CLIENT_ID }}
-          REACT_APP_COGNITO_OAUTH_DOMAIN: ${{ secrets.COGNITO_DOMAIN }}
-          REACT_APP_COGNITO_REDIRECT_SIGN_IN: ${{ secrets.COGNITO_REDIRECTSIGNIN }}
-          REACT_APP_COGNITO_REDIRECT_SIGN_OUT: ${{ secrets.COGNITO_REDIRECTSIGNOUT }}
-          REACT_APP_API_BASE_URL: ${{ secrets.BASE_API_URL }}
-          REACT_APP_STAGE: ${{ secrets.APP_STAGE }}
         run: npm run build
 
       - name: Debug Environment Variables
@@ -50,7 +52,6 @@ jobs:
           echo "COGNITO_DOMAIN: ${{ secrets.COGNITO_DOMAIN }}"
           echo "COGNITO_REDIRECTSIGNOUT: ${{ secrets.COGNITO_REDIRECTSIGNOUT }}"
           echo "COGNITO_REDIRECTSIGNIN: ${{ secrets.COGNITO_REDIRECTSIGNIN }}"
-          echo "COGNITO_DOMAIN: ${{ secrets.COGNITO_DOMAIN }}"
 
       - name: Deploy to S3
         run: |
