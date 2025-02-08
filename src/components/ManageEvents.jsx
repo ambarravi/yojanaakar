@@ -254,28 +254,28 @@ function ManageEvents({ user, signOut }) {
                   <td>{event.TicketsBooked}</td>
                   <td>
                     <button
-                      className="btn publish-btn"
+                      className="mbtn publish-btn"
                       title="Publish Event"
                       onClick={() => handleActionButtonClick(event, "Publish")}
                     >
                       <FontAwesomeIcon icon={faPaperPlane} />
                     </button>
                     <button
-                      className="btn edit-btn"
+                      className="mbtn edit-btn"
                       title="Edit Event Details"
                       onClick={() => handleActionButtonClick(event, "Edit")}
                     >
                       <FontAwesomeIcon icon={faEdit} />
                     </button>
                     <button
-                      className="btn cancel-btn"
+                      className="mbtn cancel-btn"
                       title="Cancel Event"
                       onClick={() => handleActionButtonClick(event, "Cancel")}
                     >
                       <FontAwesomeIcon icon={faStopCircle} />
                     </button>
                     <button
-                      className="btn delete-btn"
+                      className="mbtn delete-btn"
                       title="Delete Event"
                       onClick={() => handleActionButtonClick(event, "Delete")}
                     >
