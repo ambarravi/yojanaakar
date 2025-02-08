@@ -8,7 +8,7 @@ import { Amplify } from "aws-amplify"; // Correct way to import Amplify in recen
 Amplify.configure({
   Auth: {
     Cognito: {
-      userPoolClientId: process.env.REACT_APP_COGNITO_USER_POOL_CLIENT_ID,
+      userPoolClientId: "3apts80kiph7bafapf28ltu3vl", //process.env.REACT_APP_COGNITO_USER_POOL_CLIENT_ID,
       userPoolId: process.env.REACT_APP_COGNITO_USER_POOL_ID,
       mandatorySignIn: true, // Forces sign-in
       loginWith: {
