@@ -32,6 +32,12 @@ jobs:
       - name: Install dependencies
         run: npm install
 
+      - name: Debug Secret Existence
+        run: |
+          if [ -z "${{ secrets.COGNITO_USER_POOL_ID }}" ]; then echo "COGNITO_USER_POOL_ID is missing"; else echo "COGNITO_USER_POOL_ID is set"; fi
+          if [ -z "${{ secrets.POOL_CLIENT_ID }}" ]; then echo "POOL_CLIENT_ID is missing"; else echo "POOL_CLIENT_ID is set"; fi
+          if [ -z "${{ secrets.COGNITO_DOMAIN }}" ]; then echo "COGNITO_DOMAIN is missing"; else echo "COGNITO_DOMAIN is set"; fi
+
       - name: Set up Environment Variables
         run: |
           echo "REACT_APP_COGNITO_USER_POOL_ID=${{ secrets.COGNITO_USER_POOL_ID }}" >> $GITHUB_ENV
