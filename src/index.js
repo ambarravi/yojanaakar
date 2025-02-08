@@ -5,7 +5,7 @@ import App from "./App";
 import reportWebVitals from "./reportWebVitals";
 import { Amplify } from "aws-amplify";
 
-console.log("Cognito Config ff:", {
+console.log("Cognito Config :", {
   userPoolId: process.env.REACT_APP_COGNITO_USER_POOL_ID,
   userPoolClientId: process.env.REACT_APP_POOL_CLIENT_ID,
   domain: process.env.REACT_APP_COGNITO_OAUTH_DOMAIN,
