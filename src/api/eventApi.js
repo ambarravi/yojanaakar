@@ -114,7 +114,7 @@ export const GetCollegeList = (city, searchText) => {
   });
 };
 
-export const submitEvent = (eventData) => {
+export const submitEvent = (eventData, organizerName) => {
   return new Promise(async (resolve, reject) => {
     try {
       const session = await fetchAuthSession(); // Retrieves the session object
@@ -166,6 +166,7 @@ export const submitEvent = (eventData) => {
         highlight: eventData.highlight,
         eventType: eventData.eventType,
         categoryID: eventData.categoryID,
+        categoryName: eventData.categoryName,
         cityID: eventData.cityID,
         eventLocation: eventData.location,
         eventMode: eventData.eventMode,
@@ -174,6 +175,7 @@ export const submitEvent = (eventData) => {
         noOfSeats: eventData.noOfSeats,
         reserveSeats: eventData.reserveSeats,
         additionalInfo: eventData.additionalInfo,
+        OrganizerName: organizerName,
         tags: eventData.tags,
         audienceBenefits: eventData.audienceBenefits,
         eventImages: eventData.images,
@@ -181,6 +183,8 @@ export const submitEvent = (eventData) => {
         oldImages: oldImageArray,
         newImages: newImageArray,
       };
+
+      console.log(eventPayload);
 
       // API base URL and stage environment variable
       const baseUrl = process.env.REACT_APP_API_BASE_URL;

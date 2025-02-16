@@ -1,26 +1,36 @@
-import React, { useEffect } from "react";
+import React, { useState } from "react";
 import Sidebar from "./Sidebar";
-import { useAuth } from "../context/AuthContext";
+
+import "../styles/OrganizerLandingPage.css";
 
 function OrganizerLandingPage({ user, signOut }) {
-  const { session } = useAuth();
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
 
-  useEffect(() => {
-    if (session) {
-      // const idToken = session.tokens.idToken.payload;
-      // console.log("User Details:", {
-      //   email: idToken.email || "",
-      //   firstName: idToken.given_name || "",
-      //   lastName: idToken.family_name || "",
-      //   picture: idToken.picture || "",
-      // });
-    }
-  }, [session]);
+  const toggleSidebar = () => {
+    setIsSidebarCollapsed(!isSidebarCollapsed);
+  };
 
   return (
-    <div className="organizer-landing-container">
-      {/* Sidebar */}
-      <Sidebar user={user} signOut={signOut} />
+    <div className="org-dashboard-page">
+      <button className="sidebar-toggle" onClick={toggleSidebar}>
+        ☰
+      </button>
+      <Sidebar
+        user={user}
+        signOut={signOut}
+        className={isSidebarCollapsed ? "collapsed" : ""}
+      />
+      <div
+        className={`org-landing-container ${
+          isSidebarCollapsed ? "collapsed" : ""
+        }`}
+      >
+        <h1 className="org-landing-page-title">Welcome</h1>
+        {/* Main Content */}
+
+        <h2>Welcome to Tikto Organizer Dashboard</h2>
+        <p>Select an option from the sidebar.</p>
+      </div>
     </div>
   );
 }
