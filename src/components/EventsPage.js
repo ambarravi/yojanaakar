@@ -12,15 +12,14 @@ import {
   faCrown,
 } from "@fortawesome/free-solid-svg-icons";
 
+// Import images explicitly from src/assets/images/
+import heroImage from "../assets/images/Tikto_BG_web_5.png";
 import event1Image from "../assets/images/event1.jpg";
 import event2Image from "../assets/images/event2.jpg";
 import event3Image from "../assets/images/event3.jpg";
 import event4Image from "../assets/images/event4.jpg";
 import event5Image from "../assets/images/event5.jpg";
-<link
-  href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500&display=swap"
-  rel="stylesheet"
-></link>;
+
 const events = [
   {
     id: 1,
@@ -77,163 +76,82 @@ const events = [
 function EventsPage() {
   const navigate = useNavigate();
 
-  // const handleSignIn = () => {
-  //   localStorage.setItem("local_tempRole", "user");
-  //   sessionStorage.setItem("tempRole", "user");
-  //   navigate("/landing"); // Redirect for user sign-in
-  // };
-
   const handleOrganizerSignIn = () => {
     sessionStorage.setItem("tempRole", "organizer");
     localStorage.setItem("local_tempRole", "organizer");
-    navigate("/organizer-landing"); // Redirect for organizer sign-in
+    navigate("/organizer-landing");
   };
 
   return (
     <div className="events-page">
       <header className="events-header">
-        <View
-          padding="0 20px"
-          display="flex"
-          justifyContent="space-between"
-          alignItems="center"
-          width="100%"
-        >
-          <Heading
-            level={1}
-            fontSize="3rem"
-            color="var(--amplify-colors-font-primary)"
-            style={{
-              fontFamily: "Playfair Display, serif",
-              fontWeight: "500",
-            }}
-          >
-            tikto
-          </Heading>
-          <div style={{ display: "flex", alignItems: "center", gap: "20px" }}>
-            <Link to="/#" className="custom-link">
-              <FontAwesomeIcon
-                icon={faDownload}
-                style={{ marginRight: "8px" }}
-              />
-              Download APP
-            </Link>
-            <Link
-              to="/organizer-landing"
-              onClick={handleOrganizerSignIn}
-              className="custom-link"
-            >
-              <FontAwesomeIcon
-                icon={faUserTie}
-                style={{ marginRight: "8px" }}
-              />
-              Organizer Sign In
-            </Link>
-            <Link to="/#" className="custom-link">
-              <FontAwesomeIcon
-                icon={faEnvelope}
-                style={{ marginRight: "8px" }}
-              />
-              Contact Us
-            </Link>
-            <Link to="/#" className="custom-link">
-              <FontAwesomeIcon
-                icon={faInfoCircle}
-                style={{ marginRight: "8px" }}
-              />
-              About Us
-            </Link>
-            <Link to="/#" className="custom-link">
-              <FontAwesomeIcon icon={faCrown} style={{ marginRight: "8px" }} />
-              Subscription
-            </Link>
-          </div>
-        </View>
+        <div className="container">
+          <View className="header-content">
+            <Heading level={1} className="logo">
+              tikto
+            </Heading>
+            <nav className="nav-links">
+              <Link to="/#" className="custom-link">
+                <FontAwesomeIcon icon={faDownload} /> Download App
+              </Link>
+              <Link
+                to="/organizer-landing"
+                onClick={handleOrganizerSignIn}
+                className="custom-link"
+              >
+                <FontAwesomeIcon icon={faUserTie} /> Organizer Sign In
+              </Link>
+              <Link to="/#" className="custom-link">
+                <FontAwesomeIcon icon={faEnvelope} /> Contact Us
+              </Link>
+              <Link to="/#" className="custom-link">
+                <FontAwesomeIcon icon={faInfoCircle} /> About Us
+              </Link>
+              <Link to="/#" className="custom-link">
+                <FontAwesomeIcon icon={faCrown} /> Subscription
+              </Link>
+            </nav>
+          </View>
+        </div>
       </header>
 
-      <div className="container">
-        <div className="hero-image"></div>
-        <div className="events-content">
-          <div className="ongoing-event">Ongoing Events</div>
-          <div
-            className="event-box-container"
-            style={{ display: "grid", gap: "20px" }}
-          >
+      <main className="container">
+        <section className="hero-section">
+          <img src={heroImage} alt="Event Hero" className="hero-image" />
+        </section>
+
+        <section className="events-content">
+          <h2 className="section-title">Ongoing Events</h2>
+          <div className="event-box-container">
             {events.map((event) => (
               <Link
                 to={`/event/${event.id}`}
                 key={event.id}
-                className="event-box-link"
-                style={{ textDecoration: "none" }}
+                className="event-box"
               >
-                <div
-                  className="event-box"
-                  style={{
-                    border: "1px solid #ddd",
-                    borderRadius: "8px",
-                    padding: "15px",
-                    width: "100%",
-                    boxSizing: "border-box",
-                    backgroundColor: "#fff",
-                  }}
-                >
-                  <p
-                    style={{
-                      fontSize: "0.8rem",
-                      marginBottom: "5px",
-                      color: "#777",
-                    }}
-                  >
-                    {event.date}
-                  </p>
-                  <p
-                    style={{
-                      fontWeight: "Bold",
-                      fontSize: "1.2rem",
-                      color: "#4fc3f7",
-                      marginTop: "10px",
-                    }}
-                  >
-                    {event.title}
-                  </p>
-                  <p
-                    style={{
-                      fontSize: "0.9rem",
-                      color: "#333",
-                      marginTop: "10px",
-                    }}
-                  >
+                <img
+                  src={event.image}
+                  alt={event.title}
+                  className="event-image"
+                />
+                <div className="event-details">
+                  <p className="event-date">{event.date}</p>
+                  <h3 className="event-title">{event.title}</h3>
+                  <p className="event-location">
                     {event.address}, {event.city}
                   </p>
-                  <hr style={{ margin: "10px 0", borderColor: "#ddd" }} />
-                  <img
-                    src={event.image}
-                    alt={event.title}
-                    style={{
-                      width: "100%",
-                      height: "120px",
-                      objectFit: "cover",
-                      borderRadius: "5px",
-                    }}
-                  />
                 </div>
               </Link>
             ))}
           </div>
+        </section>
+      </main>
+
+      <footer className="footer">
+        <div className="container">
+          <p className="footer-text">© 2025 tikto. All rights reserved.</p>
         </div>
-        <footer className="footer">
-          <p
-            style={{
-              fontFamily: "Playfair Display, serif",
-              fontWeight: "400",
-              fontSize: "1rem",
-              color: "#333",
-            }}
-          >
-            &copy; 2024 tikto. All rights reserved.
-          </p>
-        </footer>
-      </div>
+      </footer>
     </div>
   );
 }

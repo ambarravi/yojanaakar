@@ -3,7 +3,7 @@ import Sidebar from "./AdminSidebar";
 import "./styles/AdminManageEvent.css";
 import "./styles/AdminSidebar.css";
 
-function AdminEventDetails({ user, signOut }) {
+function AdminDashboard({ user, signOut }) {
   //const navigate = useNavigate(); // Initialize navigate for routing
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
 
@@ -25,4 +25,4 @@ function AdminEventDetails({ user, signOut }) {
   );
 }
 
-export default AdminEventDetails;
+export default AdminDashboard;
