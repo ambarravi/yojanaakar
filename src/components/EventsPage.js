@@ -8,7 +8,6 @@ import {
   faDownload,
   faUserTie,
   faEnvelope,
-  faInfoCircle,
   faCrown,
 } from "@fortawesome/free-solid-svg-icons";
 
