@@ -1,36 +1,37 @@
 import React, { useState } from "react";
 import Sidebar from "./Sidebar";
-
-import "../styles/OrganizerLandingPage.css";
+import "../styles/OrganizerLandingPage.css"; // Unified CSS file
+<link
+  href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Poppins:wght@700&display=swap"
+  rel="stylesheet"
+></link>;
 
 function OrganizerLandingPage({ user, signOut }) {
-  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false); // Changed to isSidebarOpen for clarity
 
   const toggleSidebar = () => {
-    setIsSidebarCollapsed(!isSidebarCollapsed);
+    setIsSidebarOpen(!isSidebarOpen);
   };
 
   return (
-    <div className="org-dashboard-page">
+    <div className="dashboard-page">
       <button className="sidebar-toggle" onClick={toggleSidebar}>
         ☰
       </button>
-      <Sidebar
-        user={user}
-        signOut={signOut}
-        className={isSidebarCollapsed ? "collapsed" : ""}
-      />
-      <div
-        className={`org-landing-container ${
-          isSidebarCollapsed ? "collapsed" : ""
-        }`}
+      <Sidebar user={user} signOut={signOut} isOpen={isSidebarOpen} />
+      <main
+        className={`dashboard-content ${isSidebarOpen ? "sidebar-open" : ""}`}
       >
-        <h1 className="org-landing-page-title">Welcome</h1>
-        {/* Main Content */}
-
-        <h2>Welcome to Tikto Organizer Dashboard</h2>
-        <p>Select an option from the sidebar.</p>
-      </div>
+        <header className="dashboard-header">
+          <h1 className="dashboard-title">
+            Welcome to Tikto Organizer Dashboard
+          </h1>
+        </header>
+        <section className="dashboard-main">
+          <p>Select an option from the sidebar to get started.</p>
+          {/* Placeholder for future content */}
+        </section>
+      </main>
     </div>
   );
 }

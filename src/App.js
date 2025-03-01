@@ -9,6 +9,7 @@ import {
   useNavigate,
 } from "react-router-dom";
 import {
+  Alert,
   Authenticator,
   ThemeProvider,
   defaultTheme,
@@ -19,7 +20,7 @@ import Home from "./components/Home";
 import Profile from "./components/Profile";
 import EventsPage from "./components/EventsPage";
 import Footer from "./components/Footer";
-// import LandingPage from "./components/LandingPage";
+import LandingPage from "./components/LandingPage";
 import EventDetailsPage from "./components/EventDetailsPage";
 import BuyTicketPage from "./components/BuyTicketPage";
 import OrganizerLoginPage from "./components/OrganizerLoginPage.jsx";
@@ -87,7 +88,9 @@ function AuthenticatedRoutes() {
           } else if (userRole?.includes("organizer")) {
             navigate("/organizer-landing");
           } else {
-            navigate("/EventsPage");
+            Alert.alert(
+              "You are not authorized to access. Contact Tikto admin"
+            );
           }
         }
       } catch (error) {
@@ -134,7 +137,7 @@ function AuthenticatedRoutes() {
                 path="/host-profile"
                 element={<OrgProfile user={user} />}
               />
-              {/* <Route path="/landing" element={<LandingPage />} /> */}
+              <Route path="/landing" element={<LandingPage />} />
               <Route path="/home" element={<Home />} />
               <Route path="/profile" element={<Profile user={user} />} />
               <Route path="/event/:eventId" element={<EventDetailsPage />} />

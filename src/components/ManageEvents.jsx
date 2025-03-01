@@ -10,12 +10,12 @@ import {
   faArrowRight,
   faPaperPlane,
   faStopCircle,
-} from "@fortawesome/free-solid-svg-icons"; // Import icons
+} from "@fortawesome/free-solid-svg-icons";
 import { fetchEventDetailsByOrgID, updateEventStatus } from "../api/eventApi";
 
 function ManageEvents({ user, signOut }) {
-  const navigate = useNavigate(); // Initialize navigate for routing
-  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+  const navigate = useNavigate();
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false); // Changed to isSidebarOpen
   const [sortConfig, setSortConfig] = useState({ key: null, direction: "asc" });
   const [currentPage, setCurrentPage] = useState(1);
   const [events, setEvents] = useState([]);
@@ -23,28 +23,11 @@ function ManageEvents({ user, signOut }) {
 
   const eventsPerPage = 5;
 
-  // // Fetch event details on page load
-  // useEffect(() => {
-  //   const fetchEvents = async () => {
-  //     try {
-  //       const result = await fetchEventDetailsByOrgID();
-  //       console.log(result.items);
-  //       setEvents(result.items); // Assuming `result` aligns with the `events` object structure
-  //       setIsLoading(false); // Set loading to false once data is fetched
-  //     } catch (error) {
-  //       console.error("Error fetching events:", error);
-  //       setIsLoading(false); // Set loading to false once data is fetched
-  //     }
-  //   };
-
-  //   fetchEvents();
-  // }, []);
-
   const fetchEvents = async () => {
+    setIsLoading(true);
     try {
       const result = await fetchEventDetailsByOrgID();
-      console.log(result.items);
-      setEvents(result.items); // Assuming `result.items` holds the event list
+      setEvents(result.items);
       setIsLoading(false);
     } catch (error) {
       console.error("Error fetching events:", error);
@@ -56,11 +39,7 @@ function ManageEvents({ user, signOut }) {
     fetchEvents();
   }, []);
 
-  const toggleSidebar = () => setIsSidebarCollapsed(!isSidebarCollapsed);
-
-  // const handleEditEvent = (eventId) => {
-  //   navigate(`/host-event`, { state: { eventId } }); // Pass eventId via state
-  // };
+  const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
 
   const handleSort = (key) => {
     let direction = "asc";
@@ -78,65 +57,45 @@ function ManageEvents({ user, signOut }) {
       Published: ["Edit"],
       Cancelled: ["Edit"],
     };
-
-    // Check if the action is allowed for the current status
     if (!allowedActions[status]?.includes(action)) {
-      alert(
-        `Action ${action} is not allowed in the current event status: ${status}`
-      );
-      return false; // If action is not allowed
+      alert(`Action ${action} is not allowed in status: ${status}`);
+      return false;
     }
-
-    // Specific checks for Edit action based on status
     if (action === "Edit") {
       if (status === "Approved") {
-        alert(
-          "Event is Approved. Further edits will require re-approval from Admin."
-        );
+        alert("Event is Approved. Edits will require re-approval.");
         return true;
-      } else if (status === "Published") {
-        alert("Event is Published. You can only view event details.");
-        return true;
-      } else if (status === "Cancelled") {
-        alert("Event is Cancelled. You can only view event details.");
+      } else if (status === "Published" || status === "Cancelled") {
+        alert(`Event is ${status}. You can only view details.`);
         return true;
       }
     }
-
-    return true; // Action is allowed
+    return true;
   };
 
   const formatDateTime = (dateTimeString) => {
     const date = new Date(dateTimeString);
-
     return new Intl.DateTimeFormat("en-US", {
-      weekday: "long", // Thursday
-      year: "numeric", // 2025
-      month: "short", // Feb
-      day: "numeric", // 6
-      hour: "2-digit", // 10
-      minute: "2-digit", // 04
-      hour12: true, // AM/PM format
+      weekday: "long",
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: true,
     }).format(date);
   };
 
   const handleActionButtonClick = async (event, action) => {
-    const isValidAction = validateEventAction(event.EventStatus, action);
-
-    if (!isValidAction) return; // If validation fails, do not proceed
-
-    // Ask for user confirmation
+    if (!validateEventAction(event.EventStatus, action)) return;
     const userConfirmed = window.confirm(
       `Are you sure you want to ${action} this event?`
     );
-    if (!userConfirmed) return; // If user cancels, do nothing
+    if (!userConfirmed) return;
 
     let newStatus;
-
-    // Determine the new status based on the action
     switch (action) {
       case "Edit":
-        // Edit doesn't change status, so just navigate to the event edit page
         sessionStorage.setItem("fromSidebar", false);
         navigate(`/host-event`, { state: { eventId: event.EventID } });
         return;
@@ -153,93 +112,61 @@ function ManageEvents({ user, signOut }) {
         console.log("Unknown action");
         return;
     }
-    setIsLoading(true); // Show loading overlay
-    // Now, send EventID and newStatus to the backend API
+    setIsLoading(true);
     try {
       const response = await updateEventStatus(event.EventID, newStatus);
-      console.log(response);
       if (response.statusCode === 200) {
         alert(`Event status updated to: ${newStatus}`);
-        // You can optionally refresh the event list or navigate elsewhere
         fetchEvents();
       } else {
         alert("Failed to update event status.");
       }
     } catch (error) {
       console.error("Error updating event status:", error);
-      alert("There was an error updating the event status.");
+      alert("Error updating event status.");
     } finally {
-      setIsLoading(false); // Hide loading overlay after API call
+      setIsLoading(false);
     }
   };
 
   const sortedEvents = [...events].sort((a, b) => {
     if (!sortConfig.key) return 0;
-    if (sortConfig.direction === "asc") {
-      return a[sortConfig.key] > b[sortConfig.key] ? 1 : -1;
-    } else {
-      return a[sortConfig.key] < b[sortConfig.key] ? 1 : -1;
-    }
+    const direction = sortConfig.direction === "asc" ? 1 : -1;
+    return a[sortConfig.key] > b[sortConfig.key] ? direction : -direction;
   });
 
   const indexOfLastEvent = currentPage * eventsPerPage;
   const indexOfFirstEvent = indexOfLastEvent - eventsPerPage;
   const currentEvents = sortedEvents.slice(indexOfFirstEvent, indexOfLastEvent);
-
   const totalPages = Math.ceil(events.length / eventsPerPage);
 
   return (
-    <div className="organizer-profile-page">
+    <div className="manage-events-page">
+      {isLoading && (
+        <div className="loading-overlay">
+          <div className="spinner"></div>
+        </div>
+      )}
       <button className="sidebar-toggle" onClick={toggleSidebar}>
         ☰
       </button>
-      <Sidebar
-        user={user}
-        signOut={signOut}
-        className={isSidebarCollapsed ? "collapsed" : ""}
-      />
-      <div
-        className={`organizer-profile-container ${
-          isSidebarCollapsed ? "collapsed" : ""
-        }`}
-      >
-        <h1 className="org-page-title">Manage Events</h1>
-
-        {/* Loading Indicator */}
-        {isLoading ? (
-          <div className="loading-indicator">
-            <p>Loading events...</p>
-            {/* You can replace this with a spinner or any other visual indicator */}
-          </div>
-        ) : (
+      <Sidebar user={user} signOut={signOut} isOpen={isSidebarOpen} />
+      <main className={`events-content ${isSidebarOpen ? "sidebar-open" : ""}`}>
+        <h1 className="events-title">Manage Events</h1>
+        <div className="table-wrapper">
           <table className="events-table">
             <thead>
               <tr>
                 <th onClick={() => handleSort("id")}>SrNo</th>
-                <th onClick={() => handleSort("eventId")}>Event ID</th>
-                <th onClick={() => handleSort("name")}>Event Name</th>
-                <th onClick={() => handleSort("dateTime")}>DateTime</th>
-                <th onClick={() => handleSort("eventStatus")}>EventStatus</th>
-                <th onClick={() => handleSort("seat")}>Seats</th>
-                <th
-                  style={{
-                    width: "5%",
-                    textAlign: "center",
-                    cursor: "pointer",
-                  }}
-                  onClick={() => handleSort("ticketsBooked")}
-                >
+                <th onClick={() => handleSort("ReadableEventID")}>Event ID</th>
+                <th onClick={() => handleSort("EventTitle")}>Event Name</th>
+                <th onClick={() => handleSort("EventDate")}>Date & Time</th>
+                <th onClick={() => handleSort("EventStatus")}>Status</th>
+                <th onClick={() => handleSort("Seats")}>Seats</th>
+                <th onClick={() => handleSort("TicketsBooked")}>
                   Tickets Booked
                 </th>
-                <th
-                  style={{
-                    width: "25%",
-                    textAlign: "center",
-                    cursor: "pointer",
-                  }}
-                >
-                  Actions
-                </th>
+                <th>Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -252,30 +179,30 @@ function ManageEvents({ user, signOut }) {
                   <td>{event.EventStatus}</td>
                   <td>{event.Seats}</td>
                   <td>{event.TicketsBooked}</td>
-                  <td>
+                  <td className="action-buttons">
                     <button
-                      className="mbtn publish-btn"
+                      className="action-btn publish-btn"
                       title="Publish Event"
                       onClick={() => handleActionButtonClick(event, "Publish")}
                     >
                       <FontAwesomeIcon icon={faPaperPlane} />
                     </button>
                     <button
-                      className="mbtn edit-btn"
+                      className="action-btn edit-btn"
                       title="Edit Event Details"
                       onClick={() => handleActionButtonClick(event, "Edit")}
                     >
                       <FontAwesomeIcon icon={faEdit} />
                     </button>
                     <button
-                      className="mbtn cancel-btn"
+                      className="action-btn cancel-btn"
                       title="Cancel Event"
                       onClick={() => handleActionButtonClick(event, "Cancel")}
                     >
                       <FontAwesomeIcon icon={faStopCircle} />
                     </button>
                     <button
-                      className="mbtn delete-btn"
+                      className="action-btn delete-btn"
                       title="Delete Event"
                       onClick={() => handleActionButtonClick(event, "Delete")}
                     >
@@ -286,43 +213,29 @@ function ManageEvents({ user, signOut }) {
               ))}
             </tbody>
           </table>
-        )}
+        </div>
         <div className="pagination">
           <button
-            className="btn"
+            className="pagination-btn"
             onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
             disabled={currentPage === 1}
-            style={{
-              backgroundColor: "transparent",
-              border: "none",
-              cursor: currentPage === 1 ? "not-allowed" : "pointer",
-              color: currentPage === 1 ? "gray" : "#1565C0",
-              fontSize: "18px",
-            }}
           >
-            <FontAwesomeIcon icon={faArrowLeft} /> {/* Previous icon */}
+            <FontAwesomeIcon icon={faArrowLeft} />
           </button>
-          <span style={{ margin: "0 10px" }}>
+          <span className="pagination-info">
             Page {currentPage} of {totalPages}
           </span>
           <button
-            className="btn"
+            className="pagination-btn"
             onClick={() =>
               setCurrentPage((prev) => Math.min(prev + 1, totalPages))
             }
             disabled={currentPage === totalPages}
-            style={{
-              backgroundColor: "transparent",
-              border: "none",
-              cursor: currentPage === totalPages ? "not-allowed" : "pointer",
-              color: currentPage === totalPages ? "gray" : "#1565C0",
-              fontSize: "18px",
-            }}
           >
-            <FontAwesomeIcon icon={faArrowRight} /> {/* Next icon */}
+            <FontAwesomeIcon icon={faArrowRight} />
           </button>
         </div>
-      </div>
+      </main>
     </div>
   );
 }

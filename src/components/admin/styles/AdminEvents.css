@@ -1,14 +1,8 @@
-/* Base Styles */
-body {
-  font-family: "Inter", sans-serif;
-  background-color: #f9fafb;
-  color: #1f2937;
-}
-
 /* Page Layout */
-.manage-events-page {
+.admin-events-page {
   display: flex;
   min-height: 100vh;
+  background: #f9fafb;
 }
 
 /* Main Content */
@@ -32,7 +26,7 @@ body {
   margin-bottom: 2rem;
 }
 
-/* Table Wrapper (for horizontal scrolling on small screens) */
+/* Table Wrapper */
 .table-wrapper {
   overflow-x: auto;
   margin-bottom: 2rem;
@@ -55,7 +49,7 @@ body {
 }
 
 .events-table th {
-  background: #1e3a8a; /* Deep blue */
+  background: #1e3a8a;
   color: #ffffff;
   font-weight: 600;
   cursor: pointer;
@@ -63,7 +57,7 @@ body {
 }
 
 .events-table th:hover {
-  background: #3b82f6; /* Lighter blue */
+  background: #3b82f6;
 }
 
 .events-table tr:nth-child(even) {
@@ -96,8 +90,12 @@ body {
   transform: scale(1.1);
 }
 
-.publish-btn {
+.approve-btn {
   background: #197a37; /* Green */
+}
+
+.reject-btn {
+  background: #643107; /* Brown */
 }
 
 .edit-btn {

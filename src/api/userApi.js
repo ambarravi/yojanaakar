@@ -7,9 +7,10 @@ export const updateRole = async (username, tempRole) => {
     const session = await fetchAuthSession(); // Retrieves the session object
     // const token = session.tokens.idToken; // Access the ID token
     const customRole = session.tokens.idToken.payload["custom:role"];
-    console.log(customRole);
+    if (customRole === "user") console.log("customRole", customRole);
+    console.log("tempRole", tempRole);
 
-    if (customRole) {
+    if (!customRole === "user") {
       console.log(
         "Custom Role found , No need to update Role again:",
         customRole

@@ -1,104 +1,66 @@
 import React, { useContext } from "react";
-import "bootstrap/dist/css/bootstrap.min.css";
-import "bootstrap-icons/font/bootstrap-icons.css";
+import "bootstrap-icons/font/bootstrap-icons.css"; // Keep Bootstrap icons
 import { useNavigate } from "react-router-dom";
 import { AuthContext } from "../../context/AuthContext";
-
 import "./styles/AdminSidebar.css";
 
-const Sidebar = ({ className }) => {
-  const { user, loading, signOut } = useContext(AuthContext); // Access user from AuthContext
+const Sidebar = ({ isOpen, toggleSidebar }) => {
+  // Changed to accept isOpen and toggleSidebar props
+  const { user, loading, signOut } = useContext(AuthContext);
   const navigate = useNavigate();
 
-  const handleLogout = () => {
-    signOut();
-    navigate("/"); // Redirect to the home page after sign out
+  const handleLogout = async () => {
+    sessionStorage.clear();
+    localStorage.clear();
+    await signOut({ global: true });
   };
 
   return (
-    <div className={`sidebar bg-light d-flex flex-column vh-100 ${className}`}>
-      <div style={{ padding: "2% 0", textAlign: "center" }}>
-        <h1
-          style={{
-            fontFamily: "'Playfair Display', serif",
-            fontSize: "60px",
-            fontWeight: "bold",
-            marginBottom: "20px",
-            color: "#0056b3",
-          }}
-        >
-          tikto
-        </h1>
-        <hr style={{ borderColor: "#0056b3", borderWidth: "1px" }} />
+    <aside className={`sidebar ${isOpen ? "open" : ""}`}>
+      <div className="sidebar-header">
+        <h1 className="sidebar-logo">tikto</h1>
+        <hr />
         {!loading ? (
           user ? (
-            <h6 className="text-primary" style={{ margin: 0 }}>
-              Welcome, {user.firstName}!
-            </h6>
+            <p className="sidebar-user">Welcome, {user.firstName}!</p>
           ) : (
-            <h6 className="text-secondary" style={{ margin: 0 }}>
-              Welcome, Guest!
-            </h6>
+            <p className="sidebar-user">Welcome, Guest!</p>
           )
         ) : (
-          <h6 className="text-secondary" style={{ margin: 0 }}>
-            Loading...
-          </h6>
+          <p className="sidebar-user">Loading...</p>
         )}
-        <hr style={{ borderColor: "#0056b3", borderWidth: "1px" }} />
+        <hr />
       </div>
-      <ul className="nav flex-column">
-        <li className="nav-item">
-          <button
-            className="nav-link text-dark"
-            onClick={() => navigate("/admin-events")}
-            style={{ border: "none", background: "none", cursor: "pointer" }}
-          >
-            <i className="bi bi-table"></i> Manage Events
-          </button>
-        </li>
-        <li className="nav-item">
-          <button
-            className="nav-link text-dark"
-            onClick={() => navigate("/admin-manage-users")}
-            style={{ border: "none", background: "none", cursor: "pointer" }}
-          >
-            <i className="bi bi-plus-square"></i> Manage Users
-          </button>
-        </li>
-
-        <li className="nav-item">
-          <button
-            className="nav-link text-dark"
-            onClick={() => navigate("/admin-dashboard")}
-            style={{ border: "none", background: "none", cursor: "pointer" }}
-          >
-            <i className="bi bi-speedometer2"></i> Dashboard
-          </button>
-        </li>
-        <li className="nav-item">
-          <button
-            className="nav-link text-dark"
-            onClick={() => navigate("/admin-master")}
-            style={{ border: "none", background: "none", cursor: "pointer" }}
-          >
-            <i className="bi bi-person-circle"></i> Add Master
-          </button>
-        </li>
-
-        {/* Sign out button */}
-        <li className="nav-item">
-          <button
-            className="nav-link text-dark"
-            onClick={handleLogout}
-            style={{ border: "none", background: "none", cursor: "pointer" }}
-          >
-            <i className="bi bi-box-arrow-right"></i> Sign Out
-          </button>
-        </li>
-        <hr style={{ borderColor: "#0056b3", borderWidth: "1px" }} />
-      </ul>
-    </div>
+      <nav className="sidebar-nav">
+        <ul>
+          <li>
+            <button onClick={() => navigate("/admin-events")}>
+              <i className="bi bi-table"></i> Manage Events
+            </button>
+          </li>
+          <li>
+            <button onClick={() => navigate("/admin-manage-users")}>
+              <i className="bi bi-plus-square"></i> Manage Users
+            </button>
+          </li>
+          <li>
+            <button onClick={() => navigate("/admin-dashboard")}>
+              <i className="bi bi-speedometer2"></i> Dashboard
+            </button>
+          </li>
+          <li>
+            <button onClick={() => navigate("/admin-master")}>
+              <i className="bi bi-person-circle"></i> Add Master
+            </button>
+          </li>
+          <li>
+            <button onClick={handleLogout}>
+              <i className="bi bi-box-arrow-right"></i> Sign Out
+            </button>
+          </li>
+        </ul>
+      </nav>
+    </aside>
   );
 };
 

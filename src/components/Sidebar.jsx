@@ -1,115 +1,135 @@
-import React, { useContext } from "react";
-import { Link } from "react-router-dom";
-import "bootstrap/dist/css/bootstrap.min.css";
-import "bootstrap-icons/font/bootstrap-icons.css";
-import { useNavigate } from "react-router-dom";
+import React, { useContext, useEffect, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { AuthContext } from "../context/AuthContext";
 import { fetchAuthSession, signOut } from "@aws-amplify/auth";
-
 import "../styles/Sidebar.css";
+import "bootstrap-icons/font/bootstrap-icons.css";
 
-const Sidebar = ({ className }) => {
-  const { user, loading } = useContext(AuthContext); // Access user from AuthContext
+const Sidebar = ({ user: propUser, signOut: propSignOut, isOpen }) => {
+  const { loading: contextLoading } = useContext(AuthContext); // Rename to avoid conflict
   const navigate = useNavigate();
+  const [userDetails, setUserDetails] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  // Fetch user details from sessionStorage or AuthSession
+  useEffect(() => {
+    const fetchUserDetails = async () => {
+      try {
+        // Check sessionStorage first
+        const cachedUser = sessionStorage.getItem("userDetails");
+        if (cachedUser) {
+          const parsedUser = JSON.parse(cachedUser);
+          setUserDetails(parsedUser);
+          setLoading(false);
+          return;
+        }
+
+        // If no firstName in propUser or cached data, fetch from AuthSession
+        if (!propUser?.firstName && !propUser?.given_name) {
+          const session = await fetchAuthSession();
+          const idToken = session.tokens?.idToken;
+          if (idToken) {
+            const userData = {
+              username: idToken.payload["sub"],
+              given_name: idToken.payload["given_name"],
+              firstName: idToken.payload["custom:firstName"], // If using custom attribute
+              email: idToken.payload["email"],
+              role: idToken.payload["custom:role"],
+            };
+            setUserDetails(userData);
+            sessionStorage.setItem("userDetails", JSON.stringify(userData)); // Cache it
+          }
+        } else {
+          setUserDetails(propUser); // Use propUser if it has firstName
+        }
+      } catch (error) {
+        console.error("Error fetching user details:", error);
+        setUserDetails(propUser || { username: "Guest" }); // Fallback
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchUserDetails();
+  }, [propUser]);
 
   const handleHostEventClick = (e) => {
-    e.preventDefault(); // Prevent the default Link behavior
-    // Navigate with the state
+    e.preventDefault();
     sessionStorage.setItem("fromSidebar", true);
     navigate("/host-event", { state: { fromSidebar: true } });
   };
 
   const handleLogout = async () => {
-    // const signOutUrl = `https://eventmgmt.auth.eu-west-1.amazoncognito.com/logout?client_id=eventmgmt&logout_uri=${encodeURIComponent(
-    //   window.location.origin
-    // )}`;
-    await signOut({ global: true });
-
-    // await signOut();
-
-    sessionStorage.clear(); // Clear session data
-    localStorage.clear(); // Clear local storage tokens
-    console.log(await fetchAuthSession()); // Should return an empty session
-    // window.location.href = signOutUrl; // Redirect to Cognito's logout URL
-    window.location.href = "/";
+    try {
+      if (propSignOut) {
+        await propSignOut();
+      } else {
+        await signOut({ global: true });
+      }
+      sessionStorage.clear();
+      localStorage.clear();
+      console.log(await fetchAuthSession());
+      navigate("/");
+    } catch (error) {
+      console.error("Error signing out:", error);
+    }
   };
 
+  console.log("Sidebar - Loading:", loading, "User Details:", userDetails);
+
+  const displayName =
+    userDetails?.given_name ||
+    userDetails?.firstName ||
+    userDetails?.username ||
+    "Guest";
+
   return (
-    <div className={`sidebar bg-light d-flex flex-column vh-100 ${className}`}>
-      <div style={{ padding: "2% 0", textAlign: "center" }}>
-        <h1
-          style={{
-            fontFamily: "'Playfair Display', serif",
-            fontSize: "60px",
-            fontWeight: "bold",
-            marginBottom: "20px",
-            color: "#0056b3",
-          }}
-        >
-          tikto
-        </h1>
-        <hr style={{ borderColor: "#0056b3", borderWidth: "1px" }} />
-        {!loading ? (
-          user ? (
-            <h6 className="text-primary" style={{ margin: 0 }}>
-              Welcome, {user.firstName}!
-            </h6>
-          ) : (
-            <h6 className="text-secondary" style={{ margin: 0 }}>
-              Welcome, Guest!
-            </h6>
-          )
+    <aside className={`sidebar ${isOpen ? "open" : ""}`}>
+      <div className="sidebar-header">
+        <h1 className="sidebar-logo">tikto</h1>
+        <hr />
+        {loading || contextLoading ? (
+          <p className="sidebar-user">Loading...</p>
         ) : (
-          <h6 className="text-secondary" style={{ margin: 0 }}>
-            Loading...
-          </h6>
+          <p className="sidebar-user">Welcome, {displayName}!</p>
         )}
-        <hr style={{ borderColor: "#0056b3", borderWidth: "1px" }} />
+        <hr />
       </div>
-      <ul className="nav flex-column">
-        <li className="nav-item">
-          <Link to="/organizer-landing" className="nav-link text-dark">
-            <i className="bi bi-house-door"></i> Home
-          </Link>
-        </li>
-        <li className="nav-item">
-          <Link
-            className="nav-link text-dark"
-            to="/host-event" // Just add the destination here for default fallback
-            onClick={handleHostEventClick}
-          >
-            <i className="bi bi-plus-square"></i> Host Event
-          </Link>
-        </li>
-
-        <li className="nav-item">
-          <Link to="/manage-events" className="nav-link text-dark">
-            <i className="bi bi-table"></i> Manage Events
-          </Link>
-        </li>
-        <li className="nav-item">
-          <Link to="/dashboard" className="nav-link text-dark">
-            <i className="bi bi-speedometer2"></i> Dashboard
-          </Link>
-        </li>
-        <li className="nav-item">
-          <Link to="/host-profile" className="nav-link text-dark">
-            <i className="bi bi-person-circle"></i> Profile
-          </Link>
-        </li>
-
-        <li className="nav-item">
-          <Link
-            to="/signout"
-            className="nav-link text-dark"
-            onClick={handleLogout}
-          >
-            <i className="bi bi-box-arrow-right"></i> Sign Out
-          </Link>
-        </li>
-        <hr style={{ borderColor: "#0056b3", borderWidth: "1px" }} />
-      </ul>
-    </div>
+      <nav className="sidebar-nav">
+        <ul>
+          <li>
+            <Link to="/organizer-landing">
+              <i className="bi bi-house-door"></i> Home
+            </Link>
+          </li>
+          <li>
+            <Link to="/host-event" onClick={handleHostEventClick}>
+              <i className="bi bi-plus-square"></i> Host Event
+            </Link>
+          </li>
+          <li>
+            <Link to="/manage-events">
+              <i className="bi bi-table"></i> Manage Events
+            </Link>
+          </li>
+          <li>
+            <Link to="/dashboard">
+              <i className="bi bi-speedometer2"></i> Dashboard
+            </Link>
+          </li>
+          <li>
+            <Link to="/host-profile">
+              <i className="bi bi-person-circle"></i> Profile
+            </Link>
+          </li>
+          <li>
+            <Link to="/signout" onClick={handleLogout}>
+              <i className="bi bi-box-arrow-right"></i> Sign Out
+            </Link>
+          </li>
+        </ul>
+      </nav>
+    </aside>
   );
 };
 

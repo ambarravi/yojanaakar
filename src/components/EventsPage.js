@@ -105,9 +105,6 @@ function EventsPage() {
                 <FontAwesomeIcon icon={faEnvelope} /> Contact Us
               </Link>
               <Link to="/#" className="custom-link">
-                <FontAwesomeIcon icon={faInfoCircle} /> About Us
-              </Link>
-              <Link to="/#" className="custom-link">
                 <FontAwesomeIcon icon={faCrown} /> Subscription
               </Link>
             </nav>
@@ -120,7 +117,7 @@ function EventsPage() {
           <img src={heroImage} alt="Event Hero" className="hero-image" />
         </section>
 
-        <section className="events-content">
+        <section className="events-page-content">
           <h2 className="section-title">Ongoing Events</h2>
           <div className="event-box-container">
             {events.map((event) => (

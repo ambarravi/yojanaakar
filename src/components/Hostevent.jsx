@@ -14,16 +14,9 @@ import "../styles/hostEvent.css";
 
 function Hostevent({ user, signOut }) {
   const fromSidebar = sessionStorage.getItem("fromSidebar");
-  console.log("fromSidebar", fromSidebar);
   const location = useLocation();
-  let eventId;
-  if (fromSidebar === "false") {
-    console.log("location.state", location.state);
-    eventId = location.state?.eventId ?? null;
-  }
-  console.log(eventId);
-  //const eventId = location.state?.eventId;
-
+  const eventId =
+    fromSidebar === "false" ? location.state?.eventId ?? null : null;
   const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
@@ -45,52 +38,41 @@ function Hostevent({ user, signOut }) {
     images: [],
   });
 
-  const [uploadedFiles, setUploadedFiles] = useState([]); // Track uploaded files
+  const [uploadedFiles, setUploadedFiles] = useState([]);
   const [showDropdown, setShowDropdown] = useState(false);
   const [categories, setCategories] = useState([]);
-  //const [profile, setProfile] = useState([]);
   const [cities, setCities] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isSubmitDisabled, setIsSubmitDisabled] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         setIsLoading(true);
-
-        // Fetch category and city data concurrently
         const [categoryData, cityData] = await Promise.all([
           GetCategory(),
           GetCityList(),
         ]);
-
         setCategories(categoryData);
         setCities(cityData);
 
-        // Fetch organizer profile details
         const orgProfile = await fetchProfileDetails();
         const mappedValue =
           orgProfile?.record?.associatedCollegeUniversity?.BOOL || false;
-
         setShowDropdown(mappedValue);
-        console.log("set Form data", eventId);
+
         if (eventId) {
-          // Fetch event details by event ID
           const eventResponse = await fetchEventDetailsByEventID(eventId);
           const eventDetails = eventResponse?.record;
-          console.log("eventDetails:", eventDetails);
-
-          // Map event images to an array of objects with a `name` key
           const imagesArray = (eventDetails?.EventImages || []).map(
             (image) => ({
-              name: extractImageName(image), // Assuming extractImageName works for getting unique names
-              preview: image, // Assuming image is a valid preview URL or data
+              name: extractImageName(image),
+              preview: image,
             })
           );
 
-          // Update form data with fetched event details
           setFormData({
             eventId: eventDetails.EventID,
             readableEventID: eventDetails.ReadableEventID,
@@ -108,40 +90,11 @@ function Hostevent({ user, signOut }) {
             reserveSeats: eventDetails?.ReservedSeats || "",
             additionalInfo: eventDetails?.AdditionalInfo || "",
             tags: eventDetails?.Tags || "",
-            audienceBenefits: eventDetails?.AudienceBenefits || "",
+            audienceBenefits: eventDetails?.AudienceBenefits || ["", "", ""],
             images: [],
-            imagesArray: imagesArray, // You can keep this as-is if it's needed elsewhere
           });
 
-          // Handle uploaded files and avoid duplicates
-          console.log("imagesArray:", imagesArray);
-          if (imagesArray.length > 0) {
-            // Deduplicate new files based on the 'name' property before updating the state
-            const uniqueFiles = imagesArray.filter(
-              (file, index, self) =>
-                index === self.findIndex((f) => f.name === file.name)
-            );
-
-            // Update uploaded files state
-            setUploadedFiles((prevFiles) => {
-              // Combine previous files with unique new files, ensuring no duplicates
-              const updatedFiles = [
-                ...prevFiles,
-                ...uniqueFiles.filter(
-                  (file) => !prevFiles.some((f) => f.name === file.name)
-                ),
-              ];
-
-              return updatedFiles;
-            });
-
-            // Update form data state
-            setFormData((prevFormData) => ({
-              ...prevFormData,
-              images: [...prevFormData.images, ...uniqueFiles],
-            }));
-          }
-
+          setUploadedFiles(imagesArray);
           setIsSubmitDisabled(
             ["Published", "Cancelled", "Deleted"].includes(
               eventDetails?.EventStatus
@@ -150,28 +103,21 @@ function Hostevent({ user, signOut }) {
         }
       } catch (error) {
         console.error("Error fetching data:", error);
-        alert("An error occurred, Please try again.");
-        navigate("/manage-event");
+        alert("An error occurred. Please try again.");
+        navigate("/manage-events");
       } finally {
         setIsLoading(false);
       }
     };
-
     fetchData();
   }, [eventId, navigate]);
 
-  // Function to extract the image name from the URL
-  const extractImageName = (url) => {
-    return url.substring(url.lastIndexOf("/") + 1);
-  };
+  const extractImageName = (url) => url.substring(url.lastIndexOf("/") + 1);
 
-  // Replace handleImageUpload function
   const handleImageUpload = (e) => {
     const files = Array.from(e.target.files);
-    const maxSizeInMB = 5; // Maximum file size in MB
-    const maxSizeInBytes = maxSizeInMB * 1024 * 1024; // Convert MB to bytes
-
-    const newFiles = files.slice(0, 3 - uploadedFiles.length); // Limit new uploads to stay within 3 files total
+    const maxSizeInBytes = 5 * 1024 * 1024; // 5MB
+    const newFiles = files.slice(0, 3 - uploadedFiles.length);
 
     if (uploadedFiles.length + newFiles.length > 3) {
       alert("You can upload a maximum of 3 files.");
@@ -183,51 +129,39 @@ function Hostevent({ user, signOut }) {
         file.type
       );
       const isValidSize = file.size <= maxSizeInBytes;
-      if (!isValidType) {
-        alert(
-          `${file.name} is not a valid image file (only JPEG, PNG, or GIF allowed).`
-        );
-      } else if (!isValidSize) {
-        alert(
-          `${file.name} exceeds the maximum file size limit of ${maxSizeInMB} MB.`
-        );
-      }
+      if (!isValidType) alert(`${file.name} is not a valid image type.`);
+      if (!isValidSize) alert(`${file.name} exceeds 5MB limit.`);
       return isValidType && isValidSize;
     });
 
-    if (validFiles.length > 0) {
-      const filePreviews = validFiles.map((file) => ({
-        name: file.name,
-        preview: URL.createObjectURL(file),
-      }));
+    const filePreviews = validFiles.map((file) => ({
+      name: file.name,
+      preview: URL.createObjectURL(file),
+    }));
 
-      console.log("filePreviews:", filePreviews);
-      setUploadedFiles((prevFiles) => [...prevFiles, ...filePreviews]);
-
-      setFormData((prevFormData) => ({
-        ...prevFormData,
-        images: [...prevFormData.images, ...validFiles],
-      }));
-    } else {
-      alert(
-        "Please select valid image files (JPEG, PNG, or GIF) that are within the size limit."
-      );
-    }
+    setUploadedFiles((prev) => [...prev, ...filePreviews]);
+    setFormData((prev) => ({
+      ...prev,
+      images: [...prev.images, ...validFiles],
+    }));
   };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData({
-      ...formData,
-      [name]: value,
-    });
+    if (name.startsWith("audienceBenefit")) {
+      const index = parseInt(name.replace("audienceBenefit", ""), 10);
+      const newBenefits = [...formData.audienceBenefits];
+      newBenefits[index] = value;
+      setFormData({ ...formData, audienceBenefits: newBenefits });
+    } else {
+      setFormData({ ...formData, [name]: value });
+    }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
-    console.log("formData:", formData);
-    // Validation checks
+
     if (formData.eventTitle.length > 100) {
       alert("Event Title should not exceed 100 characters.");
       setIsSubmitting(false);
@@ -238,8 +172,8 @@ function Hostevent({ user, signOut }) {
       setIsSubmitting(false);
       return;
     }
-    if (!formData.eventType) {
-      alert("Please select the target audience for this event.");
+    if (!formData.eventType && showDropdown) {
+      alert("Please select the target audience.");
       setIsSubmitting(false);
       return;
     }
@@ -269,27 +203,23 @@ function Hostevent({ user, signOut }) {
       return;
     }
     if (parseFloat(formData.ticketPrice) < 0) {
-      alert("Ticket Price should be a non-negative number.");
+      alert("Ticket Price should be non-negative.");
       setIsSubmitting(false);
       return;
     }
     if (parseInt(formData.noOfSeats) < 25) {
-      alert("No of Seats should be greater than or equal to 25.");
+      alert("No of Seats should be at least 25.");
       setIsSubmitting(false);
       return;
     }
     if (parseFloat(formData.reserveSeats) < 0) {
-      alert("Reserve Seats should be a non-negative number.");
+      alert("Reserve Seats should be non-negative.");
       setIsSubmitting(false);
       return;
     }
 
     try {
-      console.log("Submitting form data:", formData);
-
       await submitEvent(formData);
-
-      //  await new Promise((resolve) => setTimeout(resolve, 2000));
       alert("Form submitted successfully!");
       sessionStorage.setItem("fromSidebar", false);
       navigate("/manage-events", { replace: true });
@@ -307,13 +237,28 @@ function Hostevent({ user, signOut }) {
   };
 
   const handleReset = () => {
-    sessionStorage.setItem("fromSidebar", false);
-    navigate("/manage-events", { replace: true });
+    setFormData({
+      eventTitle: "",
+      dateTime: "",
+      highlight: "",
+      eventType: "",
+      categoryID: "",
+      cityID: "",
+      location: "",
+      eventMode: "",
+      eventDetails: "",
+      ticketPrice: "",
+      noOfSeats: "",
+      reserveSeats: "",
+      additionalInfo: "",
+      tags: "",
+      audienceBenefits: ["", "", ""],
+      images: [],
+    });
+    setUploadedFiles([]);
   };
 
-  const toggleSidebar = () => {
-    setIsSidebarCollapsed(!isSidebarCollapsed);
-  };
+  const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
 
   if (isLoading) {
     return (
@@ -327,30 +272,23 @@ function Hostevent({ user, signOut }) {
   return (
     <div className="host-event-page">
       {isSubmitting && (
-        <div className="overlay">
+        <div className="loading-overlay">
           <div className="spinner"></div>
         </div>
       )}
-
       <button className="sidebar-toggle" onClick={toggleSidebar}>
         ☰
       </button>
-      <Sidebar
-        user={user}
-        signOut={signOut}
-        className={isSidebarCollapsed ? "collapsed" : ""}
-      />
-      <div
-        className={`host-event-container ${
-          isSidebarCollapsed ? "collapsed" : ""
-        }`}
+      <Sidebar user={user} signOut={signOut} isOpen={isSidebarOpen} />
+      <main
+        className={`host-event-content ${isSidebarOpen ? "sidebar-open" : ""}`}
       >
-        <h1 className="host-event-page-title">
+        <h1 className="host-event-title">
           {eventId ? "Update Event" : "Host Event"}
         </h1>
         <form onSubmit={handleSubmit} className="host-event-form">
           <div className="form-group">
-            <label>Event Title:</label>
+            <label>Event Title</label>
             <input
               type="text"
               name="eventTitle"
@@ -361,7 +299,7 @@ function Hostevent({ user, signOut }) {
             />
           </div>
           <div className="form-group">
-            <label>Event Details:</label>
+            <label>Event Details</label>
             <input
               type="text"
               name="eventDetails"
@@ -371,37 +309,25 @@ function Hostevent({ user, signOut }) {
               maxLength="300"
             />
           </div>
-
-          <div className="form-group">
-            {showDropdown && ( // Conditionally render dropdown based on state
-              <>
-                <label>Target Audience for this event :</label>
-                <select
-                  name="eventType"
-                  value={formData.eventType}
-                  onChange={handleChange}
-                  required
-                >
-                  <option value="">Select</option>
-                  <option value="open">
-                    Open to all - Public event accessible to everyone.
-                  </option>
-                  <option value="inter">
-                    Inter-Colleges/Institutions: Open to attendees from any
-                    college or university.
-                  </option>
-                  <option value="private">
-                    Private to College/Institution: Restricted to attendees from
-                    the same institution as the organizer.
-                  </option>
-                </select>
-              </>
-            )}
-          </div>
-
+          {showDropdown && (
+            <div className="form-group">
+              <label>Target Audience</label>
+              <select
+                name="eventType"
+                value={formData.eventType}
+                onChange={handleChange}
+                required
+              >
+                <option value="">Select</option>
+                <option value="open">Open to All (Public)</option>
+                <option value="inter">Inter-Colleges/Institutions</option>
+                <option value="private">Private to College/Institution</option>
+              </select>
+            </div>
+          )}
           <div className="form-row">
             <div className="form-group">
-              <label>Date and Time:</label>
+              <label>Date and Time</label>
               <input
                 type="datetime-local"
                 name="dateTime"
@@ -411,7 +337,7 @@ function Hostevent({ user, signOut }) {
               />
             </div>
             <div className="form-group">
-              <label>Category:</label>
+              <label>Category</label>
               <select
                 name="categoryID"
                 value={formData.categoryID}
@@ -429,31 +355,31 @@ function Hostevent({ user, signOut }) {
           </div>
           <div className="form-row">
             <div className="form-group">
-              <label>Highlight:</label>
+              <label>Highlight</label>
               <input
                 type="text"
                 name="highlight"
                 value={formData.highlight}
                 onChange={handleChange}
                 required
-                placeholder="e.g., - 10% discount, Free Entry"
+                placeholder="e.g., 10% discount, Free Entry"
                 maxLength="20"
               />
             </div>
             <div className="form-group">
-              <label>Additional Info:</label>
+              <label>Additional Info</label>
               <input
                 type="text"
                 name="additionalInfo"
                 value={formData.additionalInfo}
                 onChange={handleChange}
-                placeholder="e.g., Please present 10 minutes before the event starts."
+                placeholder="e.g., Arrive 10 minutes early"
               />
             </div>
           </div>
           <div className="form-row">
             <div className="form-group">
-              <label>City:</label>
+              <label>City</label>
               <select
                 name="cityID"
                 value={formData.cityID}
@@ -469,7 +395,7 @@ function Hostevent({ user, signOut }) {
               </select>
             </div>
             <div className="form-group">
-              <label>Location:</label>
+              <label>Location</label>
               <input
                 type="text"
                 name="location"
@@ -480,11 +406,9 @@ function Hostevent({ user, signOut }) {
               />
             </div>
           </div>
-
-          {/* Mode Dropdown */}
           <div className="form-row">
             <div className="form-group">
-              <label>Mode:</label>
+              <label>Mode</label>
               <select
                 name="eventMode"
                 value={formData.eventMode}
@@ -496,10 +420,8 @@ function Hostevent({ user, signOut }) {
                 <option value="Offline">Offline</option>
               </select>
             </div>
-
-            {/* Tags Input */}
             <div className="form-group">
-              <label>Tags:</label>{" "}
+              <label>Tags</label>
               <input
                 type="text"
                 name="tags"
@@ -507,31 +429,28 @@ function Hostevent({ user, signOut }) {
                 onChange={handleChange}
                 required
                 maxLength="20"
-                placeholder="Help user to search with keywords"
+                placeholder="Keywords for search"
               />
             </div>
           </div>
           <div className="form-group">
-            <label>What Audience Will Get:</label>
+            <label>What Audience Will Get</label>
             {formData.audienceBenefits.map((benefit, index) => (
               <input
                 key={index}
                 type="text"
                 name={`audienceBenefit${index}`}
                 value={benefit}
-                onChange={(e) => {
-                  const newBenefits = [...formData.audienceBenefits];
-                  newBenefits[index] = e.target.value;
-                  setFormData({ ...formData, audienceBenefits: newBenefits });
-                }}
+                onChange={handleChange}
                 maxLength="50"
-                placeholder="ex: Certificate , Interact with Host , Hands on experience "
+                placeholder="e.g., Certificate, Interaction"
+                className="audience-benefit-input"
               />
             ))}
           </div>
           <div className="form-row">
             <div className="form-group">
-              <label>Ticket Price:</label>
+              <label>Ticket Price</label>
               <input
                 type="number"
                 name="ticketPrice"
@@ -542,7 +461,7 @@ function Hostevent({ user, signOut }) {
               />
             </div>
             <div className="form-group">
-              <label>No of Seats:</label>
+              <label>No of Seats</label>
               <input
                 type="number"
                 name="noOfSeats"
@@ -553,7 +472,7 @@ function Hostevent({ user, signOut }) {
               />
             </div>
             <div className="form-group">
-              <label>Reserve Seats:</label>
+              <label>Reserve Seats</label>
               <input
                 type="number"
                 name="reserveSeats"
@@ -564,106 +483,45 @@ function Hostevent({ user, signOut }) {
               />
             </div>
           </div>
-          <div className="form-row">
-            <div className="form-group">
-              <label>Upload Images:</label>
-              <input
-                style={{
-                  width: "50%",
-                  display: "inline-block",
-                  marginRight: "10px",
-                  border: "1px solid black",
-                }}
-                type="file"
-                accept="image/jpeg, image/png, image/gif"
-                multiple
-                onChange={handleImageUpload}
-              />{" "}
-              <span className="upload-message">
-                Images will be used for Banner and thumbnails
-              </span>
-              {uploadedFiles.length >= 3 && (
-                <p className="error-message" style={{ color: "red" }}>
-                  You have reached the upload limit of 3 files.
-                </p>
-              )}
-              <div className="uploaded-files-table">
-                <table
-                  style={{
-                    border: "1px solid black",
-                    fontSize: "12px",
-                    borderCollapse: "collapse", // Ensures a clean table layout
-                    width: "80%", // Optional: Make the table responsive
-                  }}
-                >
+          <div className="form-group image-upload-group">
+            <label>Upload Images</label>
+            <input
+              type="file"
+              accept="image/jpeg, image/png, image/gif"
+              multiple
+              onChange={handleImageUpload}
+              className="image-input"
+            />
+            <span className="upload-message">
+              Max 3 images for banner/thumbnails
+            </span>
+            {uploadedFiles.length >= 3 && (
+              <p className="error-message">Upload limit of 3 files reached.</p>
+            )}
+            {uploadedFiles.length > 0 && (
+              <div className="image-preview-table">
+                <table>
                   <thead>
                     <tr>
-                      <th
-                        style={{
-                          border: "1px solid black",
-                          padding: "8px",
-                          width: "3%",
-                        }}
-                      >
-                        #
-                      </th>
-                      <th
-                        style={{
-                          border: "1px solid black",
-                          padding: "8px",
-                          width: "25%",
-                        }}
-                      >
-                        File Name
-                      </th>
-                      <th style={{ border: "1px solid black", padding: "8px" }}>
-                        Image
-                      </th>
-                      <th
-                        style={{
-                          border: "1px solid black",
-                          padding: "8px",
-                          width: "5%",
-                        }}
-                      >
-                        Action
-                      </th>
+                      <th>#</th>
+                      <th>File Name</th>
+                      <th>Preview</th>
+                      <th>Action</th>
                     </tr>
                   </thead>
                   <tbody>
                     {uploadedFiles.map((file, index) => (
                       <tr key={index}>
-                        <td style={{ border: "1px solid black" }}>
-                          {index + 1}
+                        <td>{index + 1}</td>
+                        <td>{file.name}</td>
+                        <td>
+                          <img
+                            src={file.preview}
+                            alt={file.name}
+                            className="image-preview"
+                          />
                         </td>
-                        <td style={{ border: "1px solid black" }}>
-                          {file.name}
-                        </td>
-
-                        <td style={{ border: "1px solid black" }}>
-                          {formData.images[index] instanceof File ? (
-                            <img
-                              src={file.preview}
-                              alt={file.name}
-                              style={{
-                                width: "200PX",
-                                height: "200px",
-                                alignContent: "center",
-                              }}
-                            />
-                          ) : (
-                            <img
-                              src={formData.images[index].preview}
-                              alt={formData.images[index].preview}
-                              style={{
-                                width: "200PX",
-                                height: "200px",
-                                alignContent: "center",
-                              }}
-                            />
-                          )}
-                        </td>
-                        <td style={{ border: "1px solid black" }}>
+                        <td>
                           <button
                             type="button"
                             onClick={() => {
@@ -671,24 +529,16 @@ function Hostevent({ user, signOut }) {
                                 (_, i) => i !== index
                               );
                               setUploadedFiles(newFiles);
-                              setFormData((prevFormData) => ({
-                                ...prevFormData,
-                                images: prevFormData.images.filter(
+                              setFormData((prev) => ({
+                                ...prev,
+                                images: prev.images.filter(
                                   (_, i) => i !== index
                                 ),
                               }));
                             }}
-                            style={{
-                              backgroundColor: "transparent",
-                              border: "none",
-                              cursor: "pointer",
-                            }}
+                            className="remove-btn"
                           >
-                            <FontAwesomeIcon
-                              icon={faTimes}
-                              color="red"
-                              size="lg"
-                            />
+                            <FontAwesomeIcon icon={faTimes} />
                           </button>
                         </td>
                       </tr>
@@ -696,66 +546,25 @@ function Hostevent({ user, signOut }) {
                   </tbody>
                 </table>
               </div>
-            </div>
+            )}
           </div>
-          <div style={{ display: "flex", gap: "10px" }}>
+          <div className="form-actions">
             <button
-              style={{
-                backgroundColor:
-                  isSubmitting || isSubmitDisabled ? "#B0BEC5" : "#1565C0",
-                color: "white",
-                padding: "10px 20px",
-                fontSize: "16px",
-                border: "none",
-                borderRadius: "5px",
-                cursor:
-                  isSubmitting || isSubmitDisabled ? "not-allowed" : "pointer",
-                transition: "background-color 0.3s ease",
-                opacity: isSubmitting || isSubmitDisabled ? 0.7 : 1,
-              }}
               type="submit"
+              className="submit-btn"
               disabled={isSubmitDisabled || isSubmitting}
-              aria-busy={isSubmitting}
             >
               {isSubmitting ? "Submitting..." : "Submit"}
             </button>
-
-            <button
-              style={{
-                backgroundColor: "#D32F2F",
-                color: "white",
-                padding: "10px 20px",
-                fontSize: "16px",
-                border: "none",
-                borderRadius: "5px",
-                cursor: "pointer",
-                transition: "background-color 0.3s ease",
-              }}
-              type="button"
-              onClick={handleCancel}
-            >
+            <button type="button" className="cancel-btn" onClick={handleCancel}>
               Cancel
             </button>
-
-            <button
-              style={{
-                backgroundColor: "#388E3C",
-                color: "white",
-                padding: "10px 20px",
-                fontSize: "16px",
-                border: "none",
-                borderRadius: "5px",
-                cursor: "pointer",
-                transition: "background-color 0.3s ease",
-              }}
-              type="button"
-              onClick={handleReset}
-            >
+            <button type="button" className="reset-btn" onClick={handleReset}>
               Reset
             </button>
           </div>
         </form>
-      </div>
+      </main>
     </div>
   );
 }

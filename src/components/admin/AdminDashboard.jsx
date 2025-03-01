@@ -1,26 +1,32 @@
 import React, { useState } from "react";
 import Sidebar from "./AdminSidebar";
-import "./styles/AdminManageEvent.css";
-import "./styles/AdminSidebar.css";
+import "./styles/AdminManageEvent.css"; // Renamed for clarity
 
 function AdminDashboard({ user, signOut }) {
-  //const navigate = useNavigate(); // Initialize navigate for routing
-  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
-  const toggleSidebar = () => setIsSidebarCollapsed(!isSidebarCollapsed);
-
-  // If still loading, show a loading spinner or message
+  const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
 
   return (
-    <div className="organizer-profile-page">
+    <div className="admin-dashboard-page">
       <button className="sidebar-toggle" onClick={toggleSidebar}>
         ☰
       </button>
       <Sidebar
         user={user}
         signOut={signOut}
-        className={isSidebarCollapsed ? "collapsed" : ""}
+        isOpen={isSidebarOpen}
+        toggleSidebar={toggleSidebar}
       />
+      <main
+        className={`dashboard-content ${isSidebarOpen ? "sidebar-open" : ""}`}
+      >
+        <h1 className="dashboard-title">Admin Dashboard</h1>
+        <p>
+          Welcome to the Admin Dashboard. Select an option from the sidebar to
+          proceed.
+        </p>
+      </main>
     </div>
   );
 }
