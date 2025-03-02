@@ -64,10 +64,11 @@ const Sidebar = ({ user: propUser, signOut: propSignOut, isOpen }) => {
       if (propSignOut) {
         await propSignOut();
       } else {
+        sessionStorage.clear();
+        localStorage.clear();
         await signOut({ global: true });
       }
-      sessionStorage.clear();
-      localStorage.clear();
+    
       console.log(await fetchAuthSession());
       navigate("/");
     } catch (error) {

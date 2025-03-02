@@ -16,13 +16,13 @@ import {
 } from "@aws-amplify/ui-react";
 import { fetchAuthSession } from "@aws-amplify/auth";
 
-import Home from "./components/Home";
-import Profile from "./components/Profile";
+// import Home from "./components/Home";
+// import Profile from "./components/Profile";
 import EventsPage from "./components/EventsPage";
 import Footer from "./components/Footer";
-import LandingPage from "./components/LandingPage";
-import EventDetailsPage from "./components/EventDetailsPage";
-import BuyTicketPage from "./components/BuyTicketPage";
+// import LandingPage from "./components/LandingPage";
+// import EventDetailsPage from "./components/EventDetailsPage";
+// import BuyTicketPage from "./components/BuyTicketPage";
 import OrganizerLoginPage from "./components/OrganizerLoginPage.jsx";
 import OrganizerLandingPage from "./components/OrganizerLandingPage.jsx";
 import HostEvent from "./components/Hostevent.jsx";
@@ -137,11 +137,11 @@ function AuthenticatedRoutes() {
                 path="/host-profile"
                 element={<OrgProfile user={user} />}
               />
-              <Route path="/landing" element={<LandingPage />} />
+              {/* <Route path="/landing" element={<LandingPage />} />
               <Route path="/home" element={<Home />} />
               <Route path="/profile" element={<Profile user={user} />} />
               <Route path="/event/:eventId" element={<EventDetailsPage />} />
-              <Route path="/buyticket/:eventId" element={<BuyTicketPage />} />
+              <Route path="/buyticket/:eventId" element={<BuyTicketPage />} /> */}
 
               {/* Admin Routes */}
               <Route path="/admin-dashboard" element={<AdminDashBoard />} />

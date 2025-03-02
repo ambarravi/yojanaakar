@@ -18,7 +18,7 @@ body {
   margin: 0 auto;
   padding: 0 1.5rem;
   width: 100%; /* Ensure container takes full available width */
-  border: 1px solid red;
+  /* border: 1px solid red; */
 }
 
 /* Header */
@@ -102,7 +102,7 @@ body {
   margin: 0; /* Remove any unintended margins */
   padding: 0; /* Remove padding to avoid extra space */
   justify-content: center;
-  border: 1px solid blue;
+  /* border: 1px solid blue; */
 }
 
 /* Event Cards */
