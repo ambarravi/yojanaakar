@@ -88,6 +88,7 @@ function AuthenticatedRoutes() {
           } else if (userRole?.includes("organizer")) {
             navigate("/organizer-landing");
           } else {
+            console.log("No Role defined");
             Alert.alert(
               "You are not authorized to access. Contact Tikto admin"
             );

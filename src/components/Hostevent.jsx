@@ -25,6 +25,7 @@ function Hostevent({ user, signOut }) {
     highlight: "",
     eventType: "",
     categoryID: "",
+    categoryName: "", // Added categoryName
     cityID: "",
     location: "",
     eventMode: "",
@@ -81,6 +82,7 @@ function Hostevent({ user, signOut }) {
             highlight: eventDetails?.EventHighLight || "",
             eventType: eventDetails?.EventType || "",
             categoryID: eventDetails?.CategoryID || "",
+            categoryName: selectedCategory?.CategoryName || "", // Set categoryName
             cityID: eventDetails?.CityID || "",
             location: eventDetails?.EventLocation || "",
             eventMode: eventDetails?.EventMode || "",
@@ -153,6 +155,16 @@ function Hostevent({ user, signOut }) {
       const newBenefits = [...formData.audienceBenefits];
       newBenefits[index] = value;
       setFormData({ ...formData, audienceBenefits: newBenefits });
+    } else if (name === "categoryID") {
+      // When category changes, update both ID and name
+      const selectedCategory = categories.find(
+        (cat) => cat.CategoryID === value
+      );
+      setFormData({
+        ...formData,
+        categoryID: value,
+        categoryName: selectedCategory?.CategoryName || "",
+      });
     } else {
       setFormData({ ...formData, [name]: value });
     }
