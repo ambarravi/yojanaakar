@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import Sidebar from "./Sidebar";
 import { submitProfile, fetchProfileDetails } from "../api/organizerApi";
 import "../styles/OrgProfilePage.css";
-import { GetCityList, GetCollegeList } from "../api/eventApi";
+import { GetCollegeList } from "../api/eventApi";
 
 function OrgProfilePage({ user, signOut }) {
   const [formData, setFormData] = useState({
@@ -13,43 +13,48 @@ function OrgProfilePage({ user, signOut }) {
     alternateNumber: "",
     logo: null,
     cityID: "",
+    cityName: "",
+    state: "",
     collegeID: "",
     address: "",
     aboutOrganization: "",
-    associatedCollegeUniversity: false,
+    associatedCollegeUniversity: "",
     termsAccepted: false,
+    collegeSearchText: "",
   });
-  const [cities, setCities] = useState([]);
-  const [colleges, setColleges] = useState([]);
+  const [citySuggestions, setCitySuggestions] = useState([]);
+  const [isOtherCity, setIsOtherCity] = useState(false);
+  const [collegeSuggestions, setCollegeSuggestions] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false); // Changed to isSidebarOpen
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
-  useEffect(() => {
-    const fetchData = async () => {
-      setIsLoading(true);
-      try {
-        const [cityData] = await Promise.all([GetCityList()]);
-        setCities(cityData);
-        sessionStorage.setItem("cityDataSession", JSON.stringify(cityData));
-      } catch (error) {
-        console.error("Error fetching data:", error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    fetchData();
-  }, []);
+  const majorCities = useMemo(
+    () => [
+      { cityName: "Pune", cityId: "1259229", state: "Maharashtra" },
+      { cityName: "Mumbai", cityId: "1275339", state: "Maharashtra" },
+      { cityName: "Delhi", cityId: "1273294", state: "Delhi" },
+    ],
+    []
+  );
 
   useEffect(() => {
     const loadProfile = async () => {
       setIsLoading(true);
       try {
         const profile = await fetchProfileDetails();
+        console.log("Profile", profile);
         if (profile && profile.record) {
           const record = profile.record;
           const mappedValue = record.associatedCollegeUniversity?.BOOL
             ? "Yes"
             : "No";
+          const cityID = record.cityID?.S || "";
+          const matchedCity = majorCities.find(
+            (city) => city.cityId === cityID
+          );
+          const collegeID = record.collegeID?.S || "";
+          const isCustomCollege = collegeID && !collegeID.match(/^\d+$/);
+
           setFormData({
             name: record.OrganizerName?.S || "",
             contactPerson: record.contactPerson?.S || "",
@@ -57,13 +62,21 @@ function OrgProfilePage({ user, signOut }) {
             contactNumber: record.contactNumber?.S || "",
             alternateNumber: record.alternateNumber?.S || "",
             aboutOrganization: record.aboutOrganization?.S || "",
-            cityID: record.cityID?.S || "",
-            collegeID: record.collegeID?.S || "",
+            cityID: cityID,
+            cityName: matchedCity
+              ? matchedCity.cityName
+              : record.cityName?.S || "",
+            state: matchedCity ? matchedCity.state : record.state?.S || "",
+            collegeID: isCustomCollege ? "" : collegeID,
             address: record.address?.S || "",
             associatedCollegeUniversity: mappedValue,
             termsAccepted: record.termsAccepted?.BOOL || false,
             logo: record.logoPath?.S || "",
+            collegeSearchText: record.collegeName?.S || "", // Use collegeName directly
           });
+          if (!matchedCity && cityID) {
+            setIsOtherCity(true);
+          }
         }
       } catch (error) {
         alert("Error fetching profile details: " + error.message);
@@ -72,31 +85,135 @@ function OrgProfilePage({ user, signOut }) {
       }
     };
     loadProfile();
-  }, [user]);
+  }, [user, majorCities]);
 
-  const handleCollegeSearch = async () => {
-    if (!formData.collegeSearchText || !formData.venueCityName) {
-      alert("Please enter a search text and select a city.");
+  const fetchCitySuggestions = async (query) => {
+    const username = "tikto_city";
+    const url = `http://api.geonames.org/searchJSON?q=${query}&maxRows=10&username=${username}&country=IN`;
+    try {
+      const response = await fetch(url);
+      if (!response.ok)
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      const data = await response.json();
+      const cities = data.geonames
+        .filter((c) => c.countryCode === "IN")
+        .map((c) => ({
+          cityName: c.name,
+          cityId: c.geonameId.toString(),
+          state: c.adminName1 || "Unknown",
+        }));
+      setCitySuggestions(cities);
+    } catch (error) {
+      console.error("Error fetching GeoNames suggestions:", error.message);
+      setCitySuggestions([]);
+    }
+  };
+
+  const fetchCollegeSuggestions = async (query) => {
+    if (!formData.cityName || !query) {
+      setCollegeSuggestions([]);
       return;
     }
     setIsLoading(true);
     try {
       const collegeData = await GetCollegeList(
-        formData.venueCityName.toLowerCase(),
-        formData.collegeSearchText.toLowerCase()
+        formData.cityName.toLowerCase(),
+        query.toLowerCase()
       );
-      if (collegeData.length === 0) {
-        alert(
-          "Can't find your college? Contact us at: tikto@gmail.com or 9860719197"
-        );
-        return;
-      }
-      setColleges(collegeData);
+      setCollegeSuggestions(collegeData);
     } catch (error) {
-      console.error("Error fetching college data:", error);
+      console.error("Error fetching college suggestions:", error);
+      setCollegeSuggestions([]);
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handleCityChange = (e) => {
+    const value = e.target.value;
+    if (value === "Other") {
+      setIsOtherCity(true);
+      setFormData({
+        ...formData,
+        cityID: "",
+        cityName: "",
+        state: "",
+        associatedCollegeUniversity: "",
+        collegeID: "",
+        collegeSearchText: "",
+      });
+      setCollegeSuggestions([]);
+    } else {
+      const selectedCity = majorCities.find((city) => city.cityId === value);
+      setIsOtherCity(false);
+      setFormData({
+        ...formData,
+        cityID: selectedCity.cityId,
+        cityName: selectedCity.cityName,
+        state: selectedCity.state,
+        associatedCollegeUniversity: "",
+        collegeID: "",
+        collegeSearchText: "",
+      });
+      setCitySuggestions([]);
+      setCollegeSuggestions([]);
+    }
+  };
+
+  const handleOtherCityChange = (e) => {
+    const text = e.target.value;
+    setFormData({
+      ...formData,
+      cityName: text,
+      cityID: "",
+      state: "",
+      associatedCollegeUniversity: "",
+      collegeID: "",
+      collegeSearchText: "",
+    });
+    setCollegeSuggestions([]);
+    if (text.length > 2) {
+      fetchCitySuggestions(text);
+    } else {
+      setCitySuggestions([]);
+    }
+  };
+
+  const handleSuggestionSelect = (suggestion) => {
+    setFormData({
+      ...formData,
+      cityName: suggestion.cityName,
+      cityID: suggestion.cityId,
+      state: suggestion.state,
+      associatedCollegeUniversity: "",
+      collegeID: "",
+      collegeSearchText: "",
+    });
+    setCitySuggestions([]);
+    setCollegeSuggestions([]);
+  };
+
+  const handleCollegeSearchChange = (e) => {
+    const text = e.target.value;
+    setFormData({
+      ...formData,
+      collegeSearchText: text,
+      collegeID: "",
+    });
+    if (text.length > 2) {
+      fetchCollegeSuggestions(text);
+    } else {
+      setCollegeSuggestions([]);
+    }
+  };
+
+  const handleCollegeSuggestionSelect = (college) => {
+    setFormData({
+      ...formData,
+      collegeID: college.CollegeID,
+      collegeSearchText: `${college.Name} (${college.Shortform})`,
+    });
+    setCollegeSuggestions([]);
   };
 
   const handleChange = (e) => {
@@ -147,6 +264,17 @@ function OrgProfilePage({ user, signOut }) {
       alert("Logo upload is required.");
       return false;
     }
+    if (!formData.cityID) {
+      alert("Please select a valid city.");
+      return false;
+    }
+    if (
+      formData.associatedCollegeUniversity === "Yes" &&
+      !formData.collegeSearchText.trim()
+    ) {
+      alert("Please enter or select a college name.");
+      return false;
+    }
     if (!formData.termsAccepted) {
       alert("You must agree to the Terms and Conditions.");
       return false;
@@ -159,26 +287,34 @@ function OrgProfilePage({ user, signOut }) {
     if (!validateForm()) return;
     setIsLoading(true);
     const formDataToSubmit = new FormData();
-    Object.keys(formData).forEach((key) => {
-      if (key === "logo" && formData.logo) {
-        formDataToSubmit.append(key, formData.logo);
-      } else {
-        formDataToSubmit.append(key, formData[key]);
-      }
+    const fieldsToSubmit = {
+      username: user.username,
+      name: formData.name,
+      contactPerson: formData.contactPerson,
+      contactEmail: formData.contactEmail,
+      contactNumber: formData.contactNumber,
+      alternateNumber: formData.alternateNumber,
+      cityID: formData.cityID,
+      cityName: formData.cityName,
+      state: formData.state,
+      collegeID: formData.collegeID || formData.collegeSearchText,
+      address: formData.address,
+      aboutOrganization: formData.aboutOrganization,
+      associatedCollegeUniversity: formData.associatedCollegeUniversity,
+      termsAccepted: formData.termsAccepted,
+    };
+
+    Object.keys(fieldsToSubmit).forEach((key) => {
+      formDataToSubmit.append(key, fieldsToSubmit[key]);
     });
+
+    if (formData.logo && typeof formData.logo !== "string") {
+      formDataToSubmit.append("logo", formData.logo);
+      formDataToSubmit.append("logoFileName", formData.logo.name);
+      formDataToSubmit.append("logoFileType", formData.logo.type);
+    }
+
     try {
-      const sessionCityData = sessionStorage.getItem("cityDataSession");
-      const parsedData = JSON.parse(sessionCityData);
-      const dataTOCheck = {};
-      for (const [key, value] of formDataToSubmit.entries()) {
-        dataTOCheck[key] = value;
-      }
-      if (!dataTOCheck.cityName && dataTOCheck.cityID) {
-        const nameofCity = parsedData.find(
-          (item) => item.CityID === dataTOCheck.cityID
-        );
-        formDataToSubmit.append("venueCityName", nameofCity.CityName);
-      }
       await submitProfile(formDataToSubmit, formData.logo);
       alert("Profile Updated Successfully!");
     } catch (error) {
@@ -287,29 +423,46 @@ function OrgProfilePage({ user, signOut }) {
             <div className="form-group">
               <label>City</label>
               <select
-                name="venueCity"
-                value={formData.cityID}
-                onChange={(e) => {
-                  const selectedCityID = e.target.value;
-                  const selectedCity = cities.find(
-                    (city) => city.CityID === selectedCityID
-                  );
-                  setFormData({
-                    ...formData,
-                    cityID: selectedCityID,
-                    venueCityName: selectedCity?.CityName || "",
-                  });
-                }}
+                name="cityID"
+                value={formData.cityID || "Select"}
+                onChange={handleCityChange}
                 required
               >
-                <option value="">Select City</option>
-                {cities.map((city) => (
-                  <option key={city.CityID} value={city.CityID}>
-                    {city.CityName}
+                <option value="Select">Select City</option>
+                {majorCities.map((city) => (
+                  <option key={city.cityId} value={city.cityId}>
+                    {city.cityName}
                   </option>
                 ))}
+                <option value="Other">Other</option>
               </select>
             </div>
+            {isOtherCity && (
+              <div className="form-group">
+                <label>Other City</label>
+                <input
+                  type="text"
+                  name="otherCity"
+                  value={formData.cityName}
+                  onChange={handleOtherCityChange}
+                  placeholder="Type city name..."
+                  className="city-input"
+                />
+                {citySuggestions.length > 0 && (
+                  <ul className="suggestions-list">
+                    {citySuggestions.map((suggestion) => (
+                      <li
+                        key={suggestion.cityId}
+                        onClick={() => handleSuggestionSelect(suggestion)}
+                        className="suggestion-item"
+                      >
+                        {`${suggestion.cityName}, ${suggestion.state}`}
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
+            )}
             <div className="form-group">
               <label>Address</label>
               <textarea
@@ -335,48 +488,31 @@ function OrgProfilePage({ user, signOut }) {
               </select>
             </div>
             {formData.associatedCollegeUniversity === "Yes" && (
-              <>
-                <div className="form-group search-group">
-                  <label>College Search</label>
-                  <div className="search-container">
-                    <input
-                      type="text"
-                      name="collegeSearchText"
-                      value={formData.collegeSearchText || ""} // Ensure controlled input
-                      onChange={handleChange}
-                      placeholder="Enter college name or short form"
-                      className="search-input"
-                    />
-                    <button
-                      type="button"
-                      onClick={handleCollegeSearch}
-                      className="search-btn"
-                    >
-                      <i className="bi bi-search"></i> {/* Bootstrap icon */}
-                    </button>
-                  </div>
-                </div>
-                {colleges.length > 0 && (
-                  <div className="form-group">
-                    <label>Select College</label>
-                    <select
-                      name="collegeID"
-                      value={formData.collegeID || ""}
-                      onChange={handleChange}
-                    >
-                      <option value="">Select College/University</option>
-                      {colleges.map((college) => (
-                        <option
-                          key={college.CollegeID}
-                          value={college.CollegeID}
-                        >
-                          {college.Name} ({college.Shortform})
-                        </option>
-                      ))}
-                    </select>
-                  </div>
+              <div className="form-group">
+                <label>College Name</label>
+                <input
+                  type="text"
+                  name="collegeSearchText"
+                  value={formData.collegeSearchText}
+                  onChange={handleCollegeSearchChange}
+                  placeholder="Type college name..."
+                  className="college-input"
+                  maxLength="100"
+                />
+                {collegeSuggestions.length > 0 && (
+                  <ul className="suggestions-list">
+                    {collegeSuggestions.map((college) => (
+                      <li
+                        key={college.CollegeID}
+                        onClick={() => handleCollegeSuggestionSelect(college)}
+                        className="suggestion-item"
+                      >
+                        {`${college.Name} (${college.Shortform})`}
+                      </li>
+                    ))}
+                  </ul>
                 )}
-              </>
+              </div>
             )}
             <div className="form-group full-width">
               <label>About Organization</label>

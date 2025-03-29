@@ -57,8 +57,8 @@ export const fetchProfileDetails = async () => {
 export const submitProfile = async (profileData, logo) => {
   try {
     // Fetch the current session
-    //  console.log("Update Role started");
-    //  console.log("UpdateAPI Logo image", logo);
+
+    console.log("UpdateAPI Logo image", logo);
 
     const session = await fetchAuthSession(); // Retrieves the session object
     //  const jwt = session.tokens.idToken.toString();
@@ -72,6 +72,7 @@ export const submitProfile = async (profileData, logo) => {
     }
 
     if (logo) {
+      console.log("Logo Found");
       dataToSend.logoFileName = logo.name;
       dataToSend.logoFileType = logo.type;
     }
@@ -100,29 +101,28 @@ export const submitProfile = async (profileData, logo) => {
     }
 
     const result = await response.json(); // Assume the API returns the pre-signed URL
-    if (result.statusCode === 200) {
-      //  console.log("API Response:", result);
-      const responseBody = JSON.parse(result.body); // Parse the JSON string in the body
 
-      if (responseBody.presignedUrl) {
-        const uploadUrl = responseBody.presignedUrl; // Pre-signed URL for file upload
-        //  console.log("Upload URL:", uploadUrl);
+    console.log("API Response:", result);
+    //  const responseBody = JSON.parse(result.body); // Parse the JSON string in the body
 
-        // Upload the logo file to S3 using the pre-signed URL
-        const uploadResponse = await fetch(uploadUrl, {
-          method: "PUT",
-          headers: {
-            "Content-Type": logo.type, // Ensure the correct file type
-          },
-          body: logo, // File object
-        });
-        if (!uploadResponse.ok) {
-          throw new Error("Failed to upload logo to S3");
-        }
-        console.log("Logo uploaded successfully!");
-      } else {
-        console.log("Error in API Response:", result);
+    if (result.presignedUrl) {
+      const uploadUrl = result.presignedUrl; // Pre-signed URL for file upload
+      console.log("Upload URL:", uploadUrl);
+
+      // Upload the logo file to S3 using the pre-signed URL
+      const uploadResponse = await fetch(uploadUrl, {
+        method: "PUT",
+        headers: {
+          "Content-Type": logo.type, // Ensure the correct file type
+        },
+        body: logo, // File object
+      });
+      if (!uploadResponse.ok) {
+        throw new Error("Failed to upload logo to S3");
       }
+      console.log("Logo uploaded successfully!");
+    } else {
+      console.log("Error in API Response:", result);
     }
 
     return result; // Return the response object if needed

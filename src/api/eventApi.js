@@ -99,7 +99,7 @@ export const GetCollegeList = (city, searchText) => {
 
       if (response.status === 200) {
         const data = await response.json();
-
+        console.log("CollegeData ", data);
         resolve(data);
       } else {
         console.error(`Error: Received status code ${response.status}`);

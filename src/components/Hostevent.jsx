@@ -25,7 +25,7 @@ function Hostevent({ user, signOut }) {
     highlight: "",
     eventType: "",
     categoryID: "",
-    categoryName: "", // Added categoryName
+    categoryName: "",
     cityID: "",
     location: "",
     eventMode: "",
@@ -47,6 +47,9 @@ function Hostevent({ user, signOut }) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isSubmitDisabled, setIsSubmitDisabled] = useState(false);
+  const [showModal, setShowModal] = useState(false);
+  const [modalMessage, setModalMessage] = useState({ title: "", body: "" });
+  const [profileCompleted, setProfileCompleted] = useState("");
 
   useEffect(() => {
     const fetchData = async () => {
@@ -60,6 +63,37 @@ function Hostevent({ user, signOut }) {
         setCities(cityData);
 
         const orgProfile = await fetchProfileDetails();
+        console.log("OrgProfile details ", orgProfile);
+        const profileCompletedStatus =
+          orgProfile?.record?.OrganizerName?.S || "";
+        const eventLimit = parseInt(
+          orgProfile?.record?.publishedEvent?.N || "0"
+        );
+        const eventsAllowed = parseInt(
+          orgProfile?.record?.eventsAllowed?.N || "0"
+        );
+
+        setProfileCompleted(profileCompletedStatus);
+
+        // Check profile completion first
+        if (!profileCompletedStatus) {
+          setModalMessage({
+            title: "Profile Incomplete",
+            body: "You must complete your profile before you can host an event. Please complete all details mentioned in the profile section.",
+          });
+          setShowModal(true);
+        }
+        // Check event limit if profile is complete
+        else if (eventLimit >= eventsAllowed) {
+          setModalMessage({
+            title: "Event Limit Reached",
+            body: "We regret to inform you that the monthly event hosting limit has been reached. Please try again next month or contact support for assistance.",
+          });
+          setShowModal(true);
+        } else {
+          setShowModal(false);
+        }
+
         const mappedValue =
           orgProfile?.record?.associatedCollegeUniversity?.BOOL || false;
         setShowDropdown(mappedValue);
@@ -82,7 +116,7 @@ function Hostevent({ user, signOut }) {
             highlight: eventDetails?.EventHighLight || "",
             eventType: eventDetails?.EventType || "",
             categoryID: eventDetails?.CategoryID || "",
-            categoryName: selectedCategory?.CategoryName || "", // Set categoryName
+            categoryName: eventDetails?.CategoryName || "",
             cityID: eventDetails?.CityID || "",
             location: eventDetails?.EventLocation || "",
             eventMode: eventDetails?.EventMode || "",
@@ -105,7 +139,7 @@ function Hostevent({ user, signOut }) {
         }
       } catch (error) {
         console.error("Error fetching data:", error);
-        alert("An error occurred. Please try again.");
+        alert("An error occurred while loading data. Please try again.");
         navigate("/manage-events");
       } finally {
         setIsLoading(false);
@@ -156,7 +190,6 @@ function Hostevent({ user, signOut }) {
       newBenefits[index] = value;
       setFormData({ ...formData, audienceBenefits: newBenefits });
     } else if (name === "categoryID") {
-      // When category changes, update both ID and name
       const selectedCategory = categories.find(
         (cat) => cat.CategoryID === value
       );
@@ -172,6 +205,31 @@ function Hostevent({ user, signOut }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    // Check profile completion
+    if (!profileCompleted) {
+      setModalMessage({
+        title: "Profile Incomplete",
+        body: "You must complete your profile before you can host an event. Please complete all details mentioned in the profile section.",
+      });
+      setShowModal(true);
+      return;
+    }
+
+    // Check event limit
+    const orgProfile = await fetchProfileDetails();
+    const eventLimit = parseInt(orgProfile?.record?.publishedEvent?.N || "0");
+    const eventsAllowed = parseInt(orgProfile?.record?.eventsAllowed?.N || "0");
+
+    if (eventLimit >= eventsAllowed) {
+      setModalMessage({
+        title: "Event Limit Reached",
+        body: "We regret to inform you that the monthly event hosting limit has been reached. Please try again next month or contact support for assistance.",
+      });
+      setShowModal(true);
+      return;
+    }
+
     setIsSubmitting(true);
 
     if (formData.eventTitle.length > 100) {
@@ -272,6 +330,15 @@ function Hostevent({ user, signOut }) {
 
   const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
 
+  const handleModalClose = () => {
+    setShowModal(false);
+    if (modalMessage.title === "Profile Incomplete") {
+      navigate("/host-profile"); // Navigate to profile when profile is incomplete
+    } else {
+      navigate("/organizer-landing"); // Navigate to landing for event limit case
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="loading-container">
@@ -298,284 +365,333 @@ function Hostevent({ user, signOut }) {
         <h1 className="host-event-title">
           {eventId ? "Update Event" : "Host Event"}
         </h1>
-        <form onSubmit={handleSubmit} className="host-event-form">
-          <div className="form-group">
-            <label>Event Title</label>
-            <input
-              type="text"
-              name="eventTitle"
-              value={formData.eventTitle}
-              onChange={handleChange}
-              required
-              maxLength="100"
-            />
-          </div>
-          <div className="form-group">
-            <label>Event Details</label>
-            <input
-              type="text"
-              name="eventDetails"
-              value={formData.eventDetails}
-              onChange={handleChange}
-              required
-              maxLength="300"
-            />
-          </div>
-          {showDropdown && (
-            <div className="form-group">
-              <label>Target Audience</label>
-              <select
-                name="eventType"
-                value={formData.eventType}
-                onChange={handleChange}
-                required
+        {showModal ? (
+          <div className="modal-overlay">
+            <div
+              style={{
+                backgroundColor: "#ffebee",
+                padding: "20px",
+                borderRadius: "8px",
+                margin: "20px",
+                border: "1px solid #ef5350",
+                textAlign: "center",
+              }}
+            >
+              <h2 style={{ color: "#d32f2f", margin: "0 0 10px" }}>
+                {modalMessage.title}
+              </h2>
+              <p style={{ color: "#666", margin: "0 0 15px" }}>
+                {modalMessage.body}
+              </p>
+
+              <button
+                onClick={handleModalClose}
+                style={{
+                  padding: "8px 16px",
+                  backgroundColor: "#ef5350",
+                  color: "white",
+                  border: "none",
+                  borderRadius: "4px",
+                  cursor: "pointer",
+                }}
               >
-                <option value="">Select</option>
-                <option value="open">Open to All (Public)</option>
-                <option value="inter">Inter-Colleges/Institutions</option>
-                <option value="private">Private to College/Institution</option>
-              </select>
+                {modalMessage.title === "Profile Incomplete"
+                  ? "Go to Profile"
+                  : "Close"}
+              </button>
             </div>
-          )}
-          <div className="form-row">
+          </div>
+        ) : (
+          <form onSubmit={handleSubmit} className="host-event-form">
             <div className="form-group">
-              <label>Date and Time</label>
+              <label>Event Title</label>
               <input
-                type="datetime-local"
-                name="dateTime"
-                value={formData.dateTime}
+                type="text"
+                name="eventTitle"
+                value={formData.eventTitle}
                 onChange={handleChange}
                 required
+                maxLength="100"
               />
             </div>
             <div className="form-group">
-              <label>Category</label>
-              <select
-                name="categoryID"
-                value={formData.categoryID}
+              <label>Event Details</label>
+              <input
+                type="text"
+                name="eventDetails"
+                value={formData.eventDetails}
                 onChange={handleChange}
                 required
-              >
-                <option value="">Select Category</option>
-                {categories.map((category) => (
-                  <option key={category.CategoryID} value={category.CategoryID}>
-                    {category.CategoryName}
+                maxLength="300"
+              />
+            </div>
+            {showDropdown && (
+              <div className="form-group">
+                <label>Target Audience</label>
+                <select
+                  name="eventType"
+                  value={formData.eventType}
+                  onChange={handleChange}
+                  required
+                >
+                  <option value="">Select</option>
+                  <option value="open">Open to All (Public)</option>
+                  <option value="inter">Inter-Colleges/Institutions</option>
+                  <option value="private">
+                    Private to College/Institution
                   </option>
-                ))}
-              </select>
-            </div>
-          </div>
-          <div className="form-row">
-            <div className="form-group">
-              <label>Highlight</label>
-              <input
-                type="text"
-                name="highlight"
-                value={formData.highlight}
-                onChange={handleChange}
-                required
-                placeholder="e.g., 10% discount, Free Entry"
-                maxLength="20"
-              />
-            </div>
-            <div className="form-group">
-              <label>Additional Info</label>
-              <input
-                type="text"
-                name="additionalInfo"
-                value={formData.additionalInfo}
-                onChange={handleChange}
-                placeholder="e.g., Arrive 10 minutes early"
-              />
-            </div>
-          </div>
-          <div className="form-row">
-            <div className="form-group">
-              <label>City</label>
-              <select
-                name="cityID"
-                value={formData.cityID}
-                onChange={handleChange}
-                required
-              >
-                <option value="">Select City</option>
-                {cities.map((city) => (
-                  <option key={city.CityID} value={city.CityID}>
-                    {city.CityName}
-                  </option>
-                ))}
-              </select>
-            </div>
-            <div className="form-group">
-              <label>Location</label>
-              <input
-                type="text"
-                name="location"
-                value={formData.location}
-                onChange={handleChange}
-                required
-                maxLength="50"
-              />
-            </div>
-          </div>
-          <div className="form-row">
-            <div className="form-group">
-              <label>Mode</label>
-              <select
-                name="eventMode"
-                value={formData.eventMode}
-                onChange={handleChange}
-                required
-              >
-                <option value="">Select Mode</option>
-                <option value="Online">Online</option>
-                <option value="Offline">Offline</option>
-              </select>
-            </div>
-            <div className="form-group">
-              <label>Tags</label>
-              <input
-                type="text"
-                name="tags"
-                value={formData.tags}
-                onChange={handleChange}
-                required
-                maxLength="20"
-                placeholder="Keywords for search"
-              />
-            </div>
-          </div>
-          <div className="form-group">
-            <label>What Audience Will Get</label>
-            {formData.audienceBenefits.map((benefit, index) => (
-              <input
-                key={index}
-                type="text"
-                name={`audienceBenefit${index}`}
-                value={benefit}
-                onChange={handleChange}
-                maxLength="50"
-                placeholder="e.g., Certificate, Interaction"
-                className="audience-benefit-input"
-              />
-            ))}
-          </div>
-          <div className="form-row">
-            <div className="form-group">
-              <label>Ticket Price</label>
-              <input
-                type="number"
-                name="ticketPrice"
-                value={formData.ticketPrice}
-                onChange={handleChange}
-                required
-                maxLength="4"
-              />
-            </div>
-            <div className="form-group">
-              <label>No of Seats</label>
-              <input
-                type="number"
-                name="noOfSeats"
-                value={formData.noOfSeats}
-                onChange={handleChange}
-                required
-                maxLength="4"
-              />
-            </div>
-            <div className="form-group">
-              <label>Reserve Seats</label>
-              <input
-                type="number"
-                name="reserveSeats"
-                value={formData.reserveSeats}
-                onChange={handleChange}
-                required
-                maxLength="4"
-              />
-            </div>
-          </div>
-          <div className="form-group image-upload-group">
-            <label>Upload Images</label>
-            <input
-              type="file"
-              accept="image/jpeg, image/png, image/gif"
-              multiple
-              onChange={handleImageUpload}
-              className="image-input"
-            />
-            <span className="upload-message">
-              Max 3 images for banner/thumbnails
-            </span>
-            {uploadedFiles.length >= 3 && (
-              <p className="error-message">Upload limit of 3 files reached.</p>
-            )}
-            {uploadedFiles.length > 0 && (
-              <div className="image-preview-table">
-                <table>
-                  <thead>
-                    <tr>
-                      <th>#</th>
-                      <th>File Name</th>
-                      <th>Preview</th>
-                      <th>Action</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {uploadedFiles.map((file, index) => (
-                      <tr key={index}>
-                        <td>{index + 1}</td>
-                        <td>{file.name}</td>
-                        <td>
-                          <img
-                            src={file.preview}
-                            alt={file.name}
-                            className="image-preview"
-                          />
-                        </td>
-                        <td>
-                          <button
-                            type="button"
-                            onClick={() => {
-                              const newFiles = uploadedFiles.filter(
-                                (_, i) => i !== index
-                              );
-                              setUploadedFiles(newFiles);
-                              setFormData((prev) => ({
-                                ...prev,
-                                images: prev.images.filter(
-                                  (_, i) => i !== index
-                                ),
-                              }));
-                            }}
-                            className="remove-btn"
-                          >
-                            <FontAwesomeIcon icon={faTimes} />
-                          </button>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+                </select>
               </div>
             )}
-          </div>
-          <div className="form-actions">
-            <button
-              type="submit"
-              className="submit-btn"
-              disabled={isSubmitDisabled || isSubmitting}
-            >
-              {isSubmitting ? "Submitting..." : "Submit"}
-            </button>
-            <button type="button" className="cancel-btn" onClick={handleCancel}>
-              Cancel
-            </button>
-            <button type="button" className="reset-btn" onClick={handleReset}>
-              Reset
-            </button>
-          </div>
-        </form>
+            <div className="form-row">
+              <div className="form-group">
+                <label>Date and Time</label>
+                <input
+                  type="datetime-local"
+                  name="dateTime"
+                  value={formData.dateTime}
+                  onChange={handleChange}
+                  required
+                />
+              </div>
+              <div className="form-group">
+                <label>Category</label>
+                <select
+                  name="categoryID"
+                  value={formData.categoryID}
+                  onChange={handleChange}
+                  required
+                >
+                  <option value="">Select Category</option>
+                  {categories.map((category) => (
+                    <option
+                      key={category.CategoryID}
+                      value={category.CategoryID}
+                    >
+                      {category.CategoryName}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+            <div className="form-row">
+              <div className="form-group">
+                <label>Highlight</label>
+                <input
+                  type="text"
+                  name="highlight"
+                  value={formData.highlight}
+                  onChange={handleChange}
+                  required
+                  placeholder="e.g., 10% discount, Free Entry"
+                  maxLength="20"
+                />
+              </div>
+              <div className="form-group">
+                <label>Additional Info</label>
+                <input
+                  type="text"
+                  name="additionalInfo"
+                  value={formData.additionalInfo}
+                  onChange={handleChange}
+                  placeholder="e.g., Arrive 10 minutes early"
+                />
+              </div>
+            </div>
+            <div className="form-row">
+              <div className="form-group">
+                <label>City</label>
+                <select
+                  name="cityID"
+                  value={formData.cityID}
+                  onChange={handleChange}
+                  required
+                >
+                  <option value="">Select City</option>
+                  {cities.map((city) => (
+                    <option key={city.CityID} value={city.CityID}>
+                      {city.CityName}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div className="form-group">
+                <label>Location</label>
+                <input
+                  type="text"
+                  name="location"
+                  value={formData.location}
+                  onChange={handleChange}
+                  required
+                  maxLength="50"
+                />
+              </div>
+            </div>
+            <div className="form-row">
+              <div className="form-group">
+                <label>Mode</label>
+                <select
+                  name="eventMode"
+                  value={formData.eventMode}
+                  onChange={handleChange}
+                  required
+                >
+                  <option value="">Select Mode</option>
+                  <option value="Online">Online</option>
+                  <option value="Offline">Offline</option>
+                </select>
+              </div>
+              <div className="form-group">
+                <label>Tags</label>
+                <input
+                  type="text"
+                  name="tags"
+                  value={formData.tags}
+                  onChange={handleChange}
+                  required
+                  maxLength="20"
+                  placeholder="Keywords for search"
+                />
+              </div>
+            </div>
+            <div className="form-group">
+              <label>What Audience Will Get</label>
+              {formData.audienceBenefits.map((benefit, index) => (
+                <input
+                  key={index}
+                  type="text"
+                  name={`audienceBenefit${index}`}
+                  value={benefit}
+                  onChange={handleChange}
+                  maxLength="50"
+                  placeholder="e.g., Certificate, Interaction"
+                  className="audience-benefit-input"
+                />
+              ))}
+            </div>
+            <div className="form-row">
+              <div className="form-group">
+                <label>Ticket Price</label>
+                <input
+                  type="number"
+                  name="ticketPrice"
+                  value={formData.ticketPrice}
+                  onChange={handleChange}
+                  required
+                  maxLength="4"
+                />
+              </div>
+              <div className="form-group">
+                <label>No of Seats</label>
+                <input
+                  type="number"
+                  name="noOfSeats"
+                  value={formData.noOfSeats}
+                  onChange={handleChange}
+                  required
+                  maxLength="4"
+                />
+              </div>
+              <div className="form-group">
+                <label>Reserve Seats</label>
+                <input
+                  type="number"
+                  name="reserveSeats"
+                  value={formData.reserveSeats}
+                  onChange={handleChange}
+                  required
+                  maxLength="4"
+                />
+              </div>
+            </div>
+            <div className="form-group image-upload-group">
+              <label>Upload Images</label>
+              <input
+                type="file"
+                accept="image/jpeg, image/png, image/gif"
+                multiple
+                onChange={handleImageUpload}
+                className="image-input"
+              />
+              <span className="upload-message">
+                Max 3 images for banner/thumbnails
+              </span>
+              {uploadedFiles.length >= 3 && (
+                <p className="error-message">
+                  Upload limit of 3 files reached.
+                </p>
+              )}
+              {uploadedFiles.length > 0 && (
+                <div className="image-preview-table">
+                  <table>
+                    <thead>
+                      <tr>
+                        <th>#</th>
+                        <th>File Name</th>
+                        <th>Preview</th>
+                        <th>Action</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {uploadedFiles.map((file, index) => (
+                        <tr key={index}>
+                          <td>{index + 1}</td>
+                          <td>{file.name}</td>
+                          <td>
+                            <img
+                              src={file.preview}
+                              alt={file.name}
+                              className="image-preview"
+                            />
+                          </td>
+                          <td>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                const newFiles = uploadedFiles.filter(
+                                  (_, i) => i !== index
+                                );
+                                setUploadedFiles(newFiles);
+                                setFormData((prev) => ({
+                                  ...prev,
+                                  images: prev.images.filter(
+                                    (_, i) => i !== index
+                                  ),
+                                }));
+                              }}
+                              className="remove-btn"
+                            >
+                              <FontAwesomeIcon icon={faTimes} />
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+            <div className="form-actions">
+              <button
+                type="submit"
+                className="submit-btn"
+                disabled={isSubmitDisabled || isSubmitting}
+              >
+                {isSubmitting ? "Submitting..." : "Submit"}
+              </button>
+              <button
+                type="button"
+                className="cancel-btn"
+                onClick={handleCancel}
+              >
+                Cancel
+              </button>
+              <button type="button" className="reset-btn" onClick={handleReset}>
+                Reset
+              </button>
+            </div>
+          </form>
+        )}
       </main>
     </div>
   );
