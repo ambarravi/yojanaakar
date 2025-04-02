@@ -17,12 +17,11 @@ body {
   max-width: 1280px;
   margin: 0 auto;
   padding: 0 1.5rem;
-  width: 100%; /* Ensure container takes full available width */
-  /* border: 1px solid red; */
+  width: 100%;
 }
 
 /* Header */
-.events-header {
+.header {
   background: #ffffff;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05), 0 1px 3px rgba(0, 0, 0, 0.1);
   padding: 1rem 0;
@@ -49,7 +48,7 @@ body {
   gap: 2rem;
 }
 
-.custom-link {
+.nav-link {
   color: #1f2937;
   text-decoration: none;
   font-weight: 500;
@@ -60,7 +59,7 @@ body {
   transition: all 0.3s ease;
 }
 
-.custom-link:hover {
+.nav-link:hover {
   color: #3b82f6;
 }
 
@@ -80,71 +79,73 @@ body {
   object-fit: cover;
 }
 
-/* Events Content */
-.events-page-content {
-  padding: 2rem 0;
+/* How It Works Section */
+.how-it-works-section {
+  padding: 4rem 0;
+  background-color: #f5f5f5;
 }
 
 .section-title {
-  font-size: 2rem;
-  font-weight: 600;
+  font-size: 2.5rem;
+  font-weight: 700;
   color: #1e3a8a;
-  margin-bottom: 2rem;
   text-align: center;
+  margin-bottom: 1rem;
 }
 
-/* Event Grid */
-.event-box-container {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 2rem;
-  width: 100%; /* Ensure grid takes full container width */
-  margin: 0; /* Remove any unintended margins */
-  padding: 0; /* Remove padding to avoid extra space */
+.section-description {
+  font-size: 1.1rem;
+  color: #666;
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.cards-container {
+  display: flex;
   justify-content: center;
-  /* border: 1px solid blue; */
+  gap: 2rem;
+  flex-wrap: wrap;
 }
 
-/* Event Cards */
-.event-box {
+.card {
   background: #ffffff;
   border-radius: 12px;
-  overflow: hidden;
+  padding: 2rem;
+  width: 300px;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05), 0 1px 3px rgba(0, 0, 0, 0.1);
-  transition: all 0.3s ease;
+  text-align: center;
+  transition: transform 0.3s ease;
 }
 
-.event-box:hover {
-  transform: translateY(-8px);
-  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+.card:hover {
+  transform: translateY(-5px);
 }
 
-.event-image {
-  width: 100%;
-  height: 160px;
-  object-fit: cover;
-}
-
-.event-details {
-  padding: 1.5rem;
-}
-
-.event-date {
-  font-size: 0.875rem;
-  color: #6b7280;
-  margin-bottom: 0.5rem;
-}
-
-.event-title {
-  font-size: 1.25rem;
-  font-weight: 600;
+.card h3 {
+  font-size: 1.5rem;
+  margin-bottom: 1rem;
   color: #1e3a8a;
-  margin-bottom: 0.75rem;
 }
 
-.event-location {
-  font-size: 0.95rem;
-  color: #4b5563;
+.card p {
+  font-size: 1rem;
+  color: #666;
+}
+
+/* Business Listing Section */
+.business-listing-section {
+  padding: 4rem 0;
+  background-color: #ffffff;
+}
+
+.business-listing-section .section-title {
+  color: #1e3a8a;
+}
+
+.business-listing-section .section-description {
+  color: #666;
+  margin-bottom: 2rem;
+  text-align: center;
 }
 
 /* Button */
@@ -158,6 +159,10 @@ body {
   border: none;
   cursor: pointer;
   transition: all 0.3s ease;
+  text-decoration: none;
+  text-align: center;
+  display: block;
+  margin: 0 auto;
 }
 
 .custom-button:hover {
@@ -183,9 +188,11 @@ body {
 @media (max-width: 768px) {
   .nav-links {
     gap: 1rem;
+    flex-wrap: wrap;
+    justify-content: center;
   }
 
-  .custom-link {
+  .nav-link {
     font-size: 0.9rem;
   }
 
@@ -194,11 +201,17 @@ body {
   }
 
   .section-title {
-    font-size: 1.75rem;
+    font-size: 2rem;
   }
 
-  .event-box-container {
-    grid-template-columns: 1fr; /* Single column on small screens */
+  .cards-container {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .card {
+    width: 100%;
+    max-width: 300px;
   }
 }
 
@@ -218,6 +231,14 @@ body {
   }
 
   .container {
-    padding: 0 1rem; /* Reduced padding on very small screens */
+    padding: 0 1rem;
+  }
+
+  .section-title {
+    font-size: 1.5rem;
+  }
+
+  .section-description {
+    font-size: 1rem;
   }
 }

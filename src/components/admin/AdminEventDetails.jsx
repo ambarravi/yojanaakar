@@ -7,7 +7,6 @@ import {
   submitEvent,
   fetchEventDetailsByEventID,
 } from "../../api/eventApi";
-import { fetchProfileDetails } from "../../api/organizerApi";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faTimes } from "@fortawesome/free-solid-svg-icons";
 import "./styles/AdminViewEvent.css";
@@ -67,9 +66,9 @@ function AdminEventDetails({ user, signOut }) {
         setCities(cityData);
 
         // Fetch organizer profile details
-        const orgProfile = await fetchProfileDetails();
-        const mappedValue =
-          orgProfile?.record?.associatedCollegeUniversity?.BOOL || false;
+        //  const orgProfile = await fetchProfileDetails();
+        const mappedValue = true;
+        //   orgProfile?.record?.associatedCollegeUniversity?.BOOL || false;
 
         setShowDropdown(mappedValue);
         console.log("set Form data", eventId);

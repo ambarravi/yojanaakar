@@ -131,6 +131,10 @@ function AdminEvents({ user, signOut }) {
   };
 
   const validateEventAction = (status, action) => {
+    console.log("ValidateAcion", action);
+    if (action === "Reject") {
+      action = "UnderReview";
+    }
     const role = sessionStorage.getItem("userRole");
     const allowedActions = {
       AwaitingApproval: ["Edit", "Delete", "UnderReview", "Approve"],
