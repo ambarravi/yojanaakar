@@ -289,7 +289,7 @@ function Hostevent({ user, signOut }) {
     }
 
     try {
-      await submitEvent(formData);
+      await submitEvent(formData, orgProfile?.record?.OrganizerName?.S || "");
       alert("Form submitted successfully!");
       sessionStorage.setItem("fromSidebar", false);
       navigate("/manage-events", { replace: true });
@@ -484,7 +484,7 @@ function Hostevent({ user, signOut }) {
                   onChange={handleChange}
                   required
                   placeholder="e.g., 10% discount, Free Entry"
-                  maxLength="20"
+                  maxLength="30"
                 />
               </div>
               <div className="form-group">
