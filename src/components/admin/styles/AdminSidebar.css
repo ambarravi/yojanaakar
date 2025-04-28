@@ -94,6 +94,14 @@
   color: #ffffff;
 }
 
+.logo-image {
+  height: 20px;
+  object-fit: contain;
+}
+.logo {
+  font-size: 1.5rem;
+}
+
 /* Font Consistency */
 body {
   font-family: "Inter", sans-serif;

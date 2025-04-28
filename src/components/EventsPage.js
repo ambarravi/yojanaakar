@@ -1,6 +1,6 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
-import { Heading, View } from "@aws-amplify/ui-react";
+import { View } from "@aws-amplify/ui-react";
 import "../styles/Events.css";
 import { Link } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -13,11 +13,14 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 
 // Import images explicitly from src/assets/images/
-import heroImage from "../assets/images/Tikto_BG_web_5.png";
+import heroImage from "../assets/images/Tikto_BG.png";
+import logoImage from "../assets/images/tikties_logo.png";
 // Import app screenshot images
-import appScreenshot1 from "../assets/images/event1.jpg";
-import appScreenshot2 from "../assets/images/event2.jpg";
-import appScreenshot3 from "../assets/images/event3.jpg";
+import appScreenshot1 from "../assets/images/Phone_frame_home.png";
+import appScreenshot2 from "../assets/images/Phone_frame_Event_Details.png";
+import appScreenshot3 from "../assets/images/Phone_frame_QRCode.png";
+import appScreenshot4 from "../assets/images/Phone_frame_Booking_History.png";
+import appScreenshot5 from "../assets/images/Phone_frame_Feedback.png";
 
 function EventsPage() {
   const navigate = useNavigate();
@@ -33,9 +36,14 @@ function EventsPage() {
       <header className="header">
         <div className="container">
           <View className="header-content">
-            <Heading level={1} className="logo">
-              Tikti
-            </Heading>
+            <div className="logo">
+              <img
+                src={logoImage}
+                alt="Logo"
+                className="logo-image"
+                style={{ height: "40px", objectFit: "contain" }}
+              />
+            </div>
             <nav className="nav-links">
               <a href="#download-app" className="nav-link">
                 <FontAwesomeIcon icon={faDownload} /> Download App
@@ -49,7 +57,7 @@ function EventsPage() {
               <Link
                 to="/organizer-landing"
                 onClick={handleOrganizerSignIn}
-                className="nav-link"
+                className="nav-link organizer-signin"
               >
                 <FontAwesomeIcon icon={faCrown} /> Organizer Sign In
               </Link>
@@ -75,31 +83,55 @@ function EventsPage() {
                 className="card"
                 style={{ backgroundColor: "#e3f2fd", color: "#1e3a8a" }}
               >
-                <h3>Personalized Event Discovery</h3>
+                <h3>
+                  <span style={{ color: "#F97316", fontWeight: "bold" }}>
+                    Discover
+                  </span>{" "}
+                  Events That Matter
+                </h3>
+
                 <p>
-                  Install the Tikties mobile app to find events tailored to your
-                  profile. Whether you're a student or a professional, Tikties
-                  connects you with affiliated college or organization events
-                  that match your interests. Explore workshops, hackathons,
-                  meetups, and more—all in one place!
+                  Explore events curated just for you with the Tikties mobile
+                  app. Whether you're a student or a working professional, find
+                  workshops, seminars, hackathons, and meetups that match your
+                  interests — all in one place!
                 </p>
               </div>
-              <div className="card">
-                <h3>Register & Connect</h3>
+              <div
+                className="card"
+                style={{ backgroundColor: "#e3f2fd", color: "#1e3a8a" }}
+              >
+                <h3>
+                  <span style={{ color: "#F97316", fontWeight: "bold" }}>
+                    One-Tap
+                  </span>{" "}
+                  Event Access
+                </h3>
                 <p>
-                  Sign up for events in just one tap and connect with attendees,
-                  organizers, and speakers from your college or professional
-                  network. Stay informed with event updates and exclusive
-                  community interactions.
+                  Sign up for events in one tap and start building connections
+                  instantly. Engage with organizers, attendees, and speakers
+                  from your academic or corporate community. Stay updated with
+                  announcements and event news!
                 </p>
               </div>
-              <div className="card">
-                <h3>Attend, Engage & Share Feedback</h3>
+              <div
+                className="card"
+                style={{ backgroundColor: "#e3f2fd", color: "#1e3a8a" }}
+              >
+                <h3>
+                  {" "}
+                  Experience{" "}
+                  <span style={{ color: "#F97316", fontWeight: "bold" }}>
+                    Engage
+                  </span>{" "}
+                  Evolve
+                </h3>
+
                 <p>
-                  Seamlessly check in, participate in discussions, and receive
-                  real-time event updates. After attending, share your reviews
-                  and feedback to improve future events and help others discover
-                  great experiences.
+                  Attend events seamlessly, participate in live discussions, and
+                  provide valuable feedback after the session. Help shape future
+                  events while discovering exciting new experiences within your
+                  network!
                 </p>
               </div>
             </div>
@@ -115,41 +147,61 @@ function EventsPage() {
               community anytime, anywhere.
             </p>
             <div className="cards-container">
-              <div className="card">
-                <div className="app-card">
-                  <img
-                    src={appScreenshot1}
-                    alt="App Screenshot 1"
-                    className="app-screenshot"
-                    width="280"
-                    height="500"
-                  />
-                  <p>Event Discovery</p>
-                </div>
+              <div className="app-card">
+                <img
+                  src={appScreenshot1}
+                  alt="App Screenshot 1"
+                  className="app-screenshot"
+                  width="280"
+                  height="500"
+                />
+                <p>Event Discovery</p>
               </div>
-              <div className="card">
-                <div className="app-card">
-                  <img
-                    src={appScreenshot2}
-                    alt="App Screenshot 2"
-                    className="app-screenshot"
-                    width="280"
-                    height="500"
-                  />
-                  <p>Registration & Networking</p>
-                </div>
+
+              <div className="app-card">
+                <img
+                  src={appScreenshot2}
+                  alt="App Screenshot 2"
+                  className="app-screenshot"
+                  width="280"
+                  height="500"
+                />
+                <p>Event Details </p>
               </div>
-              <div className="card">
-                <div className="app-card">
-                  <img
-                    src={appScreenshot3}
-                    alt="App Screenshot 3"
-                    className="app-screenshot"
-                    width="280"
-                    height="500"
-                  />
-                  <p>Review & Feedback</p>
-                </div>
+
+              <div className="app-card">
+                <img
+                  src={appScreenshot3}
+                  alt="App Screenshot 3"
+                  className="app-screenshot"
+                  width="280"
+                  height="500"
+                />
+                <p>Ticket (QR Code)</p>
+              </div>
+            </div>
+
+            <div className="cards-container">
+              <div className="app-card">
+                <img
+                  src={appScreenshot4}
+                  alt="App Screenshot 4"
+                  className="app-screenshot"
+                  width="280"
+                  height="500"
+                />
+                <p>Download / Share Ticket and Events</p>
+              </div>
+
+              <div className="app-card">
+                <img
+                  src={appScreenshot5}
+                  alt="App Screenshot 5"
+                  className="app-screenshot"
+                  width="280"
+                  height="500"
+                />
+                <p>Review and Feedback </p>
               </div>
             </div>
           </div>

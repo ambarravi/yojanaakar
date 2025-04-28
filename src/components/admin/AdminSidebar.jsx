@@ -3,6 +3,7 @@ import "bootstrap-icons/font/bootstrap-icons.css"; // Keep Bootstrap icons
 import { useNavigate } from "react-router-dom";
 import { AuthContext } from "../../context/AuthContext";
 import "./styles/AdminSidebar.css";
+import logoImage from "../../assets/images/tikties_logo.png"; //../assets/images/tikties_logo.png";
 
 const Sidebar = ({ isOpen, toggleSidebar }) => {
   // Changed to accept isOpen and toggleSidebar props
@@ -18,7 +19,14 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
   return (
     <aside className={`sidebar ${isOpen ? "open" : ""}`}>
       <div className="sidebar-header">
-        <h1 className="sidebar-logo">tikto</h1>
+        <div className="logo">
+          <img
+            src={logoImage}
+            alt="Logo"
+            className="logo-image"
+            style={{ height: "40px", objectFit: "contain" }}
+          />
+        </div>
         <hr />
         {!loading ? (
           user ? (

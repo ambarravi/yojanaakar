@@ -4,6 +4,7 @@ import { AuthContext } from "../context/AuthContext";
 import { fetchAuthSession, signOut } from "@aws-amplify/auth";
 import "../styles/Sidebar.css";
 import "bootstrap-icons/font/bootstrap-icons.css";
+import logoImage from "../assets/images/tikties_logo.png";
 
 const Sidebar = ({ user: propUser, signOut: propSignOut, isOpen }) => {
   const { loading: contextLoading } = useContext(AuthContext); // Rename to avoid conflict
@@ -68,7 +69,7 @@ const Sidebar = ({ user: propUser, signOut: propSignOut, isOpen }) => {
         localStorage.clear();
         await signOut({ global: true });
       }
-    
+
       console.log(await fetchAuthSession());
       navigate("/");
     } catch (error) {
@@ -87,7 +88,15 @@ const Sidebar = ({ user: propUser, signOut: propSignOut, isOpen }) => {
   return (
     <aside className={`sidebar ${isOpen ? "open" : ""}`}>
       <div className="sidebar-header">
-        <h1 className="sidebar-logo">tikto</h1>
+        <div className="logo">
+          <img
+            src={logoImage}
+            alt="Logo"
+            className="logo-image"
+            style={{ height: "40px", objectFit: "contain" }}
+          />
+        </div>
+
         <hr />
         {loading || contextLoading ? (
           <p className="sidebar-user">Loading...</p>

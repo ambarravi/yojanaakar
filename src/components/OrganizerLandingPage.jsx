@@ -24,7 +24,7 @@ function OrganizerLandingPage({ user, signOut }) {
       >
         <header className="dashboard-header">
           <h1 className="dashboard-title">
-            Welcome to Tikto Organizer Dashboard
+            Welcome to Tikties Organizer Dashboard
           </h1>
         </header>
         <section className="dashboard-main">

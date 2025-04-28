@@ -90,7 +90,7 @@ function AuthenticatedRoutes() {
           } else {
             console.log("No Role defined");
             Alert.alert(
-              "You are not authorized to access. Contact Tikto admin"
+              "You are not authorized to access. Contact Tikties admin"
             );
           }
         }

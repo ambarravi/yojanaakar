@@ -49,7 +49,7 @@ body {
 }
 
 .nav-link {
-  color: #1f2937;
+  color: #1e3a8a;
   text-decoration: none;
   font-weight: 500;
   font-size: 1rem;
@@ -61,6 +61,11 @@ body {
 
 .nav-link:hover {
   color: #3b82f6;
+}
+
+.nav-link.organizer-signin {
+  color: #f97316;
+  font-weight: 600;
 }
 
 /* Hero Section */
@@ -387,6 +392,10 @@ body {
 
   .contact-info svg {
     font-size: 0.9em;
+  }
+  .logo-image {
+    height: 20px;
+    object-fit: contain;
   }
 
   html {

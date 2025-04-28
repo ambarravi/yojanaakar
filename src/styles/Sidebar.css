@@ -29,6 +29,14 @@
   margin-bottom: 2rem;
 }
 
+.logo-image {
+  height: 20px;
+  object-fit: contain;
+}
+.logo {
+  font-size: 1.5rem;
+}
+
 .sidebar-logo {
   font-family: "Poppins", sans-serif;
   font-size: 2.25rem;

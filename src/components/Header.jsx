@@ -28,7 +28,7 @@ const Header = ({ signOut }) => {
             color: "var(--amplify-colors-font-primary)",
           }}
         >
-          tikto
+          Tikties
         </h4>
       </div>
       <nav>
