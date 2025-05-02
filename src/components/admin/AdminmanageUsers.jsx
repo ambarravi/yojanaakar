@@ -2,7 +2,6 @@ import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import Sidebar from "./AdminSidebar";
 import "../admin/styles/AdminManageUsers.css"; //"../styles/AdminManageUsers.css";
-
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faEye,

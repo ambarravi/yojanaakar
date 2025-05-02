@@ -34,7 +34,7 @@ import AdminDashBoard from "./components/admin/AdminDashboard.jsx";
 import AdminEventDetails from "./components/admin/AdminEventDetails.jsx";
 import AdminEvents from "./components/admin/AdminEvents.jsx";
 import AdminMaster from "./components/admin/AdminMaster.jsx";
-import AdminManageUsers from "./components/admin/AdminManageUsers.jsx";
+import AdminManageUsers from "./components/admin/AdminmanageUsers.jsx";
 
 import { AuthProvider } from "./context/AuthContext.js";
 import { updateRole } from "./api/userApi";
