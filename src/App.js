@@ -28,12 +28,13 @@ import OrganizerLandingPage from "./components/OrganizerLandingPage.jsx";
 import HostEvent from "./components/Hostevent.jsx";
 import ManageEvent from "./components/ManageEvents.jsx";
 import OrgProfile from "./components/OrgProfilePage.jsx";
-
+import BookingDetails from "./components/BookingDetails.jsx";
+import AdminBookingDetails from "./components/admin/AdminBookingDetails.jsx";
 import AdminDashBoard from "./components/admin/AdminDashboard.jsx";
 import AdminEventDetails from "./components/admin/AdminEventDetails.jsx";
 import AdminEvents from "./components/admin/AdminEvents.jsx";
 import AdminMaster from "./components/admin/AdminMaster.jsx";
-import AdminManageUsers from "./components/admin/AdminmanageUsers.jsx";
+import AdminManageUsers from "./components/admin/AdminManageUsers.jsx";
 
 import { AuthProvider } from "./context/AuthContext.js";
 import { updateRole } from "./api/userApi";
@@ -134,6 +135,11 @@ function AuthenticatedRoutes() {
               />
               <Route path="/host-event" element={<HostEvent />} />
               <Route path="/manage-events" element={<ManageEvent />} />
+              <Route path="/manage-events" element={<ManageEvent />} />
+              <Route
+                path="/showBookingDetails/:eventId"
+                element={<BookingDetails user={user} signOut={signOut} />}
+              />
               <Route
                 path="/host-profile"
                 element={<OrgProfile user={user} />}
@@ -147,6 +153,16 @@ function AuthenticatedRoutes() {
               {/* Admin Routes */}
               <Route path="/admin-dashboard" element={<AdminDashBoard />} />
               <Route path="/admin-events" element={<AdminEvents />} />
+              <Route
+                path="/admin-bookingdetails"
+                element={<AdminBookingDetails />}
+              />
+
+              <Route
+                path="/showAdminBookingDetails/:eventId"
+                element={<AdminBookingDetails user={user} signOut={signOut} />}
+              />
+
               <Route
                 path="/admin-event-details"
                 element={<AdminEventDetails />}

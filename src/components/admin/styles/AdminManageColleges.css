@@ -7,30 +7,25 @@ body {
 }
 
 /* Page Layout */
-.manage-events-page,
-.booking-details-page,
-.admin-events-page {
+.admin-manage-colleges-page {
   display: flex;
   min-height: 100vh;
 }
 
 /* Main Content */
-.events-content,
-.booking-content {
+.colleges-content {
   flex: 1;
-  margin-left: 260px;
+  margin-left: 260px; /* Sidebar open by default */
   padding: 2.5rem;
   transition: all 0.3s ease;
 }
 
-.events-content.sidebar-open,
-.booking-content.sidebar-open {
-  margin-left: 0;
+.colleges-content.sidebar-open {
+  margin-left: 0; /* Sidebar collapsed */
 }
 
 /* Title */
-.events-title,
-.booking-title {
+.colleges-title {
   font-size: 1.5rem;
   font-weight: 700;
   color: #1f2937;
@@ -39,8 +34,30 @@ body {
   text-transform: uppercase;
 }
 
-/* Event Details Section */
-.event-details {
+/* Search Bar */
+.search-bar {
+  margin-bottom: 2rem;
+  display: flex;
+  justify-content: center;
+}
+
+.search-input {
+  padding: 0.75rem;
+  width: 100%;
+  max-width: 400px;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  transition: border-color 0.3s ease;
+}
+
+.search-input:focus {
+  outline: none;
+  border-color: #374151;
+}
+
+/* Card Section */
+.colleges-section {
   background: #ffffff;
   padding: 2rem;
   border-radius: 12px;
@@ -49,59 +66,8 @@ body {
   border-left: 4px solid #374151;
 }
 
-.event-details-grid {
-  display: grid;
-  grid-template-columns: auto 1fr;
-  gap: 1rem;
-  align-items: center;
-}
-
-.event-details-grid p {
-  margin: 0.5rem 0;
-  font-size: 1rem;
-}
-
-.event-details-grid strong {
-  color: #374151;
-  font-weight: 600;
-  text-align: right;
-}
-
-/* Booking Stats */
-.booking-stats {
-  display: flex;
-  justify-content: space-between;
-  gap: 1rem;
-  margin-bottom: 2.5rem;
-}
-
-.stat-card {
-  flex: 1;
-  background: #ffffff;
-  padding: 1.5rem;
-  border-radius: 12px;
-  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
-  text-align: center;
-  transition: transform 0.2s ease;
-}
-
-.stat-card:hover {
-  transform: translateY(-4px);
-}
-
-.stat-card p {
-  margin: 0.5rem 0;
-  font-size: 1rem;
-}
-
-.stat-card strong {
-  color: #374151;
-  font-size: 1.2rem;
-  font-weight: 700;
-}
-
 /* Subtitle */
-.booking-subtitle {
+.colleges-subtitle {
   font-size: 1.25rem;
   font-weight: 600;
   color: #374151;
@@ -116,8 +82,7 @@ body {
 }
 
 /* Table Styles */
-.events-table,
-.bookings-table {
+.colleges-table {
   width: 100%;
   border-collapse: separate;
   border-spacing: 0;
@@ -126,10 +91,8 @@ body {
   box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
 }
 
-.events-table th,
-.events-table td,
-.bookings-table th,
-.bookings-table td {
+.colleges-table th,
+.colleges-table td {
   padding: 1.25rem;
   border-bottom: 1px solid #e5e7eb;
   border-right: 1px solid #e5e7eb;
@@ -137,15 +100,12 @@ body {
   font-size: 0.95rem;
 }
 
-.events-table th:last-child,
-.events-table td:last-child,
-.bookings-table th:last-child,
-.bookings-table td:last-child {
+.colleges-table th:last-child,
+.colleges-table td:last-child {
   border-right: none;
 }
 
-.events-table th,
-.bookings-table th {
+.colleges-table th {
   background: #374151;
   color: #ffffff;
   font-weight: 600;
@@ -153,18 +113,15 @@ body {
   transition: background 0.3s ease;
 }
 
-.events-table th:hover,
-.bookings-table th:hover {
+.colleges-table th:hover {
   background: #4b5563;
 }
 
-.events-table tr:nth-child(even),
-.bookings-table tr:nth-child(even) {
+.colleges-table tr:nth-child(even) {
   background: #f9fafb;
 }
 
-.events-table tr:hover,
-.bookings-table tr:hover {
+.colleges-table tr:hover {
   background: #e5e7eb;
 }
 
@@ -181,7 +138,6 @@ body {
   border-radius: 8px;
   cursor: pointer;
   transition: all 0.3s ease;
-  background: none;
   color: #ffffff;
   font-size: 0.95rem;
 }
@@ -198,36 +154,20 @@ body {
   background: #4b5563;
 }
 
-.publish-btn {
-  background: #15803d;
-}
-
 .edit-btn {
   background: #2563eb;
 }
 
-.cancel-btn {
-  background: #d97706;
+.edit-btn:hover {
+  background: #1e40af;
 }
 
 .delete-btn {
   background: #dc2626;
 }
 
-.approve-btn {
-  background: #15803d; /* Matches publish-btn for consistency */
-}
-
-.approve-btn:hover {
-  background: #166534;
-}
-
-.reject-btn {
-  background: #7f1d1d; /* Dark red for reject */
-}
-
-.reject-btn:hover {
-  background: #991b1b;
+.delete-btn:hover {
+  background: #b91c1c;
 }
 
 /* Footer Buttons */
@@ -235,7 +175,7 @@ body {
   display: flex;
   justify-content: center;
   gap: 1.5rem;
-  margin-top: 3rem;
+  margin-top: 2.5rem;
 }
 
 .footer-btn {
@@ -246,56 +186,19 @@ body {
   border-radius: 8px;
   cursor: pointer;
   transition: all 0.3s ease;
-  font-size: 1rem;
+  font-size: 0.95rem;
   display: flex;
   align-items: center;
   gap: 0.5rem;
 }
 
-.footer-btn:hover {
+.footer-btn:hover:not(:disabled) {
   background: #4b5563;
 }
 
-.footer-btn.print-btn {
-  background: #15803d;
-}
-
-.footer-btn.print-btn:hover {
-  background: #166534;
-}
-
-/* Pagination */
-.pagination {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 1.5rem;
-  margin-top: 2.5rem;
-}
-
-.pagination-btn {
-  padding: 0.75rem 1.5rem;
-  background: #374151;
-  color: #ffffff;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  font-size: 0.95rem;
-}
-
-.pagination-btn:hover:not(:disabled) {
-  background: #4b5563;
-}
-
-.pagination-btn:disabled {
+.footer-btn:disabled {
   background: #9ca3af;
   cursor: not-allowed;
-}
-
-.pagination-info {
-  font-size: 0.95rem;
-  color: #4b5563;
 }
 
 /* Loading Overlay */
@@ -348,21 +251,18 @@ body {
 
 /* Responsive Design */
 @media (max-width: 768px) {
-  .events-content,
-  .booking-content {
+  .colleges-content {
     margin-left: 0;
     padding: 2rem;
-    padding-top: 4rem;
+    padding-top: 4rem; /* Space for toggle button */
   }
 
   .sidebar-toggle {
     display: block;
   }
 
-  .events-table th,
-  .events-table td,
-  .bookings-table th,
-  .bookings-table td {
+  .colleges-table th,
+  .colleges-table td {
     padding: 1rem;
     font-size: 0.9rem;
   }
@@ -371,26 +271,18 @@ body {
     flex-wrap: wrap;
   }
 
-  .booking-stats {
-    flex-direction: column;
-    gap: 1rem;
-  }
-
-  .event-details-grid {
-    grid-template-columns: 1fr;
-    text-align: left;
+  .search-input {
+    width: 100%;
   }
 }
 
 @media (max-width: 480px) {
-  .events-content,
-  .booking-content {
+  .colleges-content {
     padding: 1.5rem;
     padding-top: 4rem;
   }
 
-  .events-title,
-  .booking-title {
+  .colleges-title {
     font-size: 1.25rem;
   }
 
@@ -399,24 +291,8 @@ body {
     font-size: 0.9rem;
   }
 
-  .pagination-btn,
   .footer-btn {
     padding: 0.5rem 1rem;
     font-size: 0.9rem;
-  }
-}
-
-/* Print Styles */
-@media print {
-  .sidebar-toggle,
-  .sidebar,
-  .footer-buttons {
-    display: none;
-  }
-  .booking-content,
-  .events-content {
-    margin-left: 0;
-    padding: 1rem;
-    background: #ffffff;
   }
 }

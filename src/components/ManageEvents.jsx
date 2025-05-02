@@ -10,12 +10,13 @@ import {
   faArrowRight,
   faPaperPlane,
   faStopCircle,
+  faEye,
 } from "@fortawesome/free-solid-svg-icons";
 import { fetchEventDetailsByOrgID, updateEventStatus } from "../api/eventApi";
 
 function ManageEvents({ user, signOut }) {
   const navigate = useNavigate();
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false); // Changed to isSidebarOpen
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [sortConfig, setSortConfig] = useState({ key: null, direction: "asc" });
   const [currentPage, setCurrentPage] = useState(1);
   const [events, setEvents] = useState([]);
@@ -129,6 +130,10 @@ function ManageEvents({ user, signOut }) {
     }
   };
 
+  const handleViewBookingDetails = (eventId) => {
+    navigate(`/showBookingDetails/${eventId}`);
+  };
+
   const sortedEvents = [...events].sort((a, b) => {
     if (!sortConfig.key) return 0;
     const direction = sortConfig.direction === "asc" ? 1 : -1;
@@ -152,87 +157,139 @@ function ManageEvents({ user, signOut }) {
       </button>
       <Sidebar user={user} signOut={signOut} isOpen={isSidebarOpen} />
       <main className={`events-content ${isSidebarOpen ? "sidebar-open" : ""}`}>
-        <h1 className="events-title">Manage Events</h1>
-        <div className="table-wrapper">
-          <table className="events-table">
-            <thead>
-              <tr>
-                <th onClick={() => handleSort("id")}>SrNo</th>
-                <th onClick={() => handleSort("ReadableEventID")}>Event ID</th>
-                <th onClick={() => handleSort("EventTitle")}>Event Name</th>
-                <th onClick={() => handleSort("EventDate")}>Date & Time</th>
-                <th onClick={() => handleSort("EventStatus")}>Status</th>
-                <th onClick={() => handleSort("Seats")}>Seats</th>
-                <th onClick={() => handleSort("TicketsBooked")}>
-                  Tickets Booked
-                </th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {currentEvents.map((event, index) => (
-                <tr key={event.id}>
-                  <td>{(currentPage - 1) * eventsPerPage + index + 1}</td>
-                  <td>{event.ReadableEventID}</td>
-                  <td>{event.EventTitle}</td>
-                  <td>{formatDateTime(event.EventDate)}</td>
-                  <td>{event.EventStatus}</td>
-                  <td>{event.Seats}</td>
-                  <td>{event.TicketsBooked}</td>
-                  <td className="action-buttons">
-                    <button
-                      className="action-btn publish-btn"
-                      title="Publish Event"
-                      onClick={() => handleActionButtonClick(event, "Publish")}
-                    >
-                      <FontAwesomeIcon icon={faPaperPlane} />
-                    </button>
-                    <button
-                      className="action-btn edit-btn"
-                      title="Edit Event Details"
-                      onClick={() => handleActionButtonClick(event, "Edit")}
-                    >
-                      <FontAwesomeIcon icon={faEdit} />
-                    </button>
-                    <button
-                      className="action-btn cancel-btn"
-                      title="Cancel Event"
-                      onClick={() => handleActionButtonClick(event, "Cancel")}
-                    >
-                      <FontAwesomeIcon icon={faStopCircle} />
-                    </button>
-                    <button
-                      className="action-btn delete-btn"
-                      title="Delete Event"
-                      onClick={() => handleActionButtonClick(event, "Delete")}
-                    >
-                      <FontAwesomeIcon icon={faTrash} />
-                    </button>
-                  </td>
+        <h2 className="events-title">Manage Events</h2>
+
+        {/* Events Table Section */}
+        <div className="event-details">
+          <h3 className="booking-subtitle">Event List</h3>
+          <div className="table-wrapper">
+            <table className="events-table">
+              <thead>
+                <tr>
+                  <th scope="col" onClick={() => handleSort("id")}>
+                    Sr.No.
+                  </th>
+                  <th scope="col" onClick={() => handleSort("ReadableEventID")}>
+                    Event ID
+                  </th>
+                  <th scope="col" onClick={() => handleSort("EventTitle")}>
+                    Event Name
+                  </th>
+                  <th scope="col" onClick={() => handleSort("EventDate")}>
+                    Date & Time
+                  </th>
+                  <th scope="col" onClick={() => handleSort("EventStatus")}>
+                    Status
+                  </th>
+                  <th scope="col" onClick={() => handleSort("Seats")}>
+                    Seats
+                  </th>
+                  <th scope="col" onClick={() => handleSort("TicketsBooked")}>
+                    Tickets Booked
+                  </th>
+                  <th scope="col">Actions</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {currentEvents.length === 0 ? (
+                  <tr>
+                    <td
+                      colSpan="8"
+                      style={{ textAlign: "center", padding: "2rem" }}
+                    >
+                      No events found.
+                    </td>
+                  </tr>
+                ) : (
+                  currentEvents.map((event, index) => (
+                    <tr key={event.id}>
+                      <td>{(currentPage - 1) * eventsPerPage + index + 1}</td>
+                      <td>{event.ReadableEventID}</td>
+                      <td>{event.EventTitle}</td>
+                      <td>{formatDateTime(event.EventDate)}</td>
+                      <td>{event.EventStatus}</td>
+                      <td>{event.Seats}</td>
+                      <td>{event.TicketsBooked}</td>
+                      <td className="action-buttons">
+                        <button
+                          className="action-btn view-btn"
+                          title="View Booking Details"
+                          onClick={() =>
+                            handleViewBookingDetails(event.EventID)
+                          }
+                          aria-label="View booking details"
+                        >
+                          <FontAwesomeIcon icon={faEye} />
+                        </button>
+                        <button
+                          className="action-btn publish-btn"
+                          title="Publish Event"
+                          onClick={() =>
+                            handleActionButtonClick(event, "Publish")
+                          }
+                          aria-label="Publish event"
+                        >
+                          <FontAwesomeIcon icon={faPaperPlane} />
+                        </button>
+                        <button
+                          className="action-btn edit-btn"
+                          title="Edit Event Details"
+                          onClick={() => handleActionButtonClick(event, "Edit")}
+                          aria-label="Edit event"
+                        >
+                          <FontAwesomeIcon icon={faEdit} />
+                        </button>
+                        <button
+                          className="action-btn cancel-btn"
+                          title="Cancel Event"
+                          onClick={() =>
+                            handleActionButtonClick(event, "Cancel")
+                          }
+                          aria-label="Cancel event"
+                        >
+                          <FontAwesomeIcon icon={faStopCircle} />
+                        </button>
+                        <button
+                          className="action-btn delete-btn"
+                          title="Delete Event"
+                          onClick={() =>
+                            handleActionButtonClick(event, "Delete")
+                          }
+                          aria-label="Delete event"
+                        >
+                          <FontAwesomeIcon icon={faTrash} />
+                        </button>
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
         </div>
-        <div className="pagination">
+
+        {/* Pagination Section */}
+        <div className="footer-buttons">
           <button
-            className="pagination-btn"
+            className="footer-btn"
             onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
             disabled={currentPage === 1}
+            aria-label="Previous page"
           >
-            <FontAwesomeIcon icon={faArrowLeft} />
+            <FontAwesomeIcon icon={faArrowLeft} /> Previous
           </button>
           <span className="pagination-info">
             Page {currentPage} of {totalPages}
           </span>
           <button
-            className="pagination-btn"
+            className="footer-btn"
             onClick={() =>
               setCurrentPage((prev) => Math.min(prev + 1, totalPages))
             }
             disabled={currentPage === totalPages}
+            aria-label="Next page"
           >
-            <FontAwesomeIcon icon={faArrowRight} />
+            Next <FontAwesomeIcon icon={faArrowRight} />
           </button>
         </div>
       </main>

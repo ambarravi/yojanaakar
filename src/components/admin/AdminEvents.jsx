@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Sidebar from "./AdminSidebar";
-import "./styles/AdminEvents.css"; // New CSS file
+import "../../styles/ManageEvent.css"; // Updated to use ManageEvent.css ManageEvent.css
 import { fetchAuthSession } from "@aws-amplify/auth";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
@@ -12,13 +12,14 @@ import {
   faInfoCircle,
   faThumbsUp,
   faThumbsDown,
+  faEye,
 } from "@fortawesome/free-solid-svg-icons";
 import { fetchAllEventDetails } from "../../api/adminApi";
 import { updateEventStatus } from "../../api/eventApi";
 
 function AdminEvents({ user, signOut }) {
   const navigate = useNavigate();
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false); // Changed to isSidebarOpen
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [sortConfig, setSortConfig] = useState({ key: null, direction: "asc" });
   const [currentPage, setCurrentPage] = useState(1);
   const [events, setEvents] = useState([]);
@@ -130,10 +131,14 @@ function AdminEvents({ user, signOut }) {
     }
   };
 
+  const handleViewBookingDetails = (eventId) => {
+    navigate(`/showAdminBookingDetails/${eventId}`);
+  };
+
   const validateEventAction = (status, action) => {
-    console.log("ValidateAcion", action);
+    let effectiveAction = action;
     if (action === "Reject") {
-      action = "UnderReview";
+      effectiveAction = "UnderReview";
     }
     const role = sessionStorage.getItem("userRole");
     const allowedActions = {
@@ -146,17 +151,17 @@ function AdminEvents({ user, signOut }) {
     if (role === "Admin") {
       allowedActions.Published.push("Cancel");
     }
-    if (!allowedActions[status]?.includes(action)) {
+    if (!allowedActions[status]?.includes(effectiveAction)) {
       alert(`Action ${action} is not allowed in status: ${status}`);
       return false;
     }
     if (action === "Edit") {
       if (status === "Approved") {
         alert("Event is Approved. Edits require re-approval.");
-        return true; // Changed to true to allow navigation
+        return true;
       } else if (status === "Published" || status === "Cancelled") {
         alert(`Event is ${status}. You can only view details.`);
-        return true; // Changed to true to allow navigation
+        return true;
       }
     }
     return true;
@@ -185,94 +190,149 @@ function AdminEvents({ user, signOut }) {
       </button>
       <Sidebar user={user} signOut={signOut} isOpen={isSidebarOpen} />
       <main className={`events-content ${isSidebarOpen ? "sidebar-open" : ""}`}>
-        <h1 className="events-title">Admin Manage Events</h1>
-        <div className="table-wrapper">
-          <table className="events-table">
-            <thead>
-              <tr>
-                <th onClick={() => handleSort("id")}>SrNo</th>
-                <th onClick={() => handleSort("ReadableEventID")}>Event ID</th>
-                <th onClick={() => handleSort("EventTitle")}>Event Name</th>
-                <th onClick={() => handleSort("EventDate")}>Date & Time</th>
-                <th onClick={() => handleSort("Status")}>Status</th>
-                <th onClick={() => handleSort("Seats")}>Seats</th>
-                <th onClick={() => handleSort("TicketsBooked")}>
-                  Tickets Booked
-                </th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {currentEvents.map((event, index) => (
-                <tr key={event.id}>
-                  <td>{(currentPage - 1) * eventsPerPage + index + 1}</td>
-                  <td>{event.ReadableEventID}</td>
-                  <td>{event.EventTitle}</td>
-                  <td>{formatDateTime(event.EventDate)}</td>
-                  <td>{event.Status}</td>
-                  <td>{event.Seats}</td>
-                  <td>{event.TicketsBooked}</td>
-                  <td className="action-buttons">
-                    <button
-                      className="action-btn approve-btn"
-                      title="Approve Event"
-                      onClick={() => handleActionButtonClick(event, "Approve")}
-                    >
-                      <FontAwesomeIcon icon={faThumbsUp} />
-                    </button>
-                    <button
-                      className="action-btn reject-btn"
-                      title="Reject Event"
-                      onClick={() => handleActionButtonClick(event, "Reject")}
-                    >
-                      <FontAwesomeIcon icon={faThumbsDown} />
-                    </button>
-                    <button
-                      className="action-btn edit-btn"
-                      title="Edit Event Details"
-                      onClick={() => handleActionButtonClick(event, "Edit")}
-                    >
-                      <FontAwesomeIcon icon={faInfoCircle} />
-                    </button>
-                    <button
-                      className="action-btn cancel-btn"
-                      title="Cancel Event"
-                      onClick={() => handleActionButtonClick(event, "Cancel")}
-                    >
-                      <FontAwesomeIcon icon={faStopCircle} />
-                    </button>
-                    <button
-                      className="action-btn delete-btn"
-                      title="Delete Event"
-                      onClick={() => handleActionButtonClick(event, "Delete")}
-                    >
-                      <FontAwesomeIcon icon={faTrash} />
-                    </button>
-                  </td>
+        <h2 className="events-title">Admin Manage Events</h2>
+
+        {/* Events Table Section */}
+        <div className="event-details">
+          <h3 className="booking-subtitle">Event List</h3>
+          <div className="table-wrapper">
+            <table className="events-table">
+              <thead>
+                <tr>
+                  <th scope="col" onClick={() => handleSort("id")}>
+                    Sr.No.
+                  </th>
+                  <th scope="col" onClick={() => handleSort("ReadableEventID")}>
+                    Event ID
+                  </th>
+                  <th scope="col" onClick={() => handleSort("EventTitle")}>
+                    Event Name
+                  </th>
+                  <th scope="col" onClick={() => handleSort("EventDate")}>
+                    Date & Time
+                  </th>
+                  <th scope="col" onClick={() => handleSort("EventStatus")}>
+                    Status
+                  </th>
+                  <th scope="col" onClick={() => handleSort("Seats")}>
+                    Seats
+                  </th>
+                  <th scope="col" onClick={() => handleSort("TicketsBooked")}>
+                    Tickets Booked
+                  </th>
+                  <th scope="col">Actions</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {currentEvents.length === 0 ? (
+                  <tr>
+                    <td
+                      colSpan="8"
+                      style={{ textAlign: "center", padding: "2rem" }}
+                    >
+                      No events found.
+                    </td>
+                  </tr>
+                ) : (
+                  currentEvents.map((event, index) => (
+                    <tr key={event.id}>
+                      <td>{(currentPage - 1) * eventsPerPage + index + 1}</td>
+                      <td>{event.ReadableEventID}</td>
+                      <td>{event.EventTitle}</td>
+                      <td>{formatDateTime(event.EventDate)}</td>
+                      <td>{event.Status}</td>
+                      <td>{event.Seats}</td>
+                      <td>{event.TicketsBooked}</td>
+                      <td className="action-buttons">
+                        <button
+                          className="action-btn view-btn"
+                          title="View Booking Details"
+                          onClick={() =>
+                            handleViewBookingDetails(event.EventID)
+                          }
+                          aria-label="View booking details"
+                        >
+                          <FontAwesomeIcon icon={faEye} />
+                        </button>
+                        <button
+                          className="action-btn approve-btn"
+                          title="Approve Event"
+                          onClick={() =>
+                            handleActionButtonClick(event, "Approve")
+                          }
+                          aria-label="Approve event"
+                        >
+                          <FontAwesomeIcon icon={faThumbsUp} />
+                        </button>
+                        <button
+                          className="action-btn reject-btn"
+                          title="Reject Event"
+                          onClick={() =>
+                            handleActionButtonClick(event, "Reject")
+                          }
+                          aria-label="Reject event"
+                        >
+                          <FontAwesomeIcon icon={faThumbsDown} />
+                        </button>
+                        <button
+                          className="action-btn edit-btn"
+                          title="Edit Event Details"
+                          onClick={() => handleActionButtonClick(event, "Edit")}
+                          aria-label="Edit event"
+                        >
+                          <FontAwesomeIcon icon={faInfoCircle} />
+                        </button>
+                        <button
+                          className="action-btn cancel-btn"
+                          title="Cancel Event"
+                          onClick={() =>
+                            handleActionButtonClick(event, "Cancel")
+                          }
+                          aria-label="Cancel event"
+                        >
+                          <FontAwesomeIcon icon={faStopCircle} />
+                        </button>
+                        <button
+                          className="action-btn delete-btn"
+                          title="Delete Event"
+                          onClick={() =>
+                            handleActionButtonClick(event, "Delete")
+                          }
+                          aria-label="Delete event"
+                        >
+                          <FontAwesomeIcon icon={faTrash} />
+                        </button>
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
         </div>
-        <div className="pagination">
+
+        {/* Pagination Section */}
+        <div className="footer-buttons">
           <button
-            className="pagination-btn"
+            className="footer-btn"
             onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
             disabled={currentPage === 1}
+            aria-label="Previous page"
           >
-            <FontAwesomeIcon icon={faArrowLeft} />
+            <FontAwesomeIcon icon={faArrowLeft} /> Previous
           </button>
           <span className="pagination-info">
             Page {currentPage} of {totalPages}
           </span>
           <button
-            className="pagination-btn"
+            className="footer-btn"
             onClick={() =>
               setCurrentPage((prev) => Math.min(prev + 1, totalPages))
             }
             disabled={currentPage === totalPages}
+            aria-label="Next page"
           >
-            <FontAwesomeIcon icon={faArrowRight} />
+            Next <FontAwesomeIcon icon={faArrowRight} />
           </button>
         </div>
       </main>

@@ -395,3 +395,56 @@ export const updateEventStatus = async (eventID, status) => {
 
   return await response.json();
 };
+
+export const fetchBookingDetailsEventID = async (eventID) => {
+  try {
+    // Fetch the current session
+    console.log("Fetch Booking details started", eventID);
+
+    // const session = await fetchAuthSession(); // Retrieves the session object
+    // const jwt = session.tokens.idToken.toString();
+    // const orgID = session.tokens.idToken.payload["cognito:username"];
+    //  console.log("userName", orgID);
+    //  console.log("eventID", eventID);
+
+    // Prepare the JSON object
+    const dataToSend = { eventID }; // Initialize with `username`
+
+    //  console.log("dataToSend contents:", JSON.stringify(eventID));
+
+    const apiUrl =
+      process.env.REACT_APP_API_BASE_URL +
+      process.env.REACT_APP_STAGE +
+      "/fetch-booking-by-eventid";
+    // console.log(apiUrl);
+
+    // Make the API request to save profile data
+    const response = await fetch(apiUrl, {
+      method: "POST",
+      headers: {
+        //   Authorization: `Bearer ${jwt}`, // Include the token if needed
+        "Content-Type": "application/json", // Send as JSON
+      },
+      body: JSON.stringify(dataToSend),
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.message || "Failed to fetch event Details");
+    }
+
+    const result = await response.json();
+
+    if (response.status === 200) {
+      console.log("API Response fetchBookingDetailsEventID:", result);
+
+      console.log("Data fecthed successfully!");
+    } else {
+      console.log("Error in API Response:", result);
+    }
+    return result; // Return the response object if needed
+  } catch (error) {
+    console.error("Error fetching EventDetails:", error.message);
+    throw error;
+  }
+};

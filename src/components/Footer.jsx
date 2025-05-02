@@ -4,7 +4,7 @@ import "../styles/Footer.css";
 
 const Footer = () => (
   <footer className="footer">
-    <span>tikto © 2024</span>
+    <span>Tikties © 2024</span>
   </footer>
 );
 
