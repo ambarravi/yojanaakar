@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import Sidebar from "./Sidebar";
-import { Pie, Bar, Doughnut } from "react-chartjs-2";
+import { Pie, Doughnut } from "react-chartjs-2";
 import {
   Chart as ChartJS,
   ArcElement,
@@ -104,9 +104,9 @@ function OrganizerLandingPage({ user, signOut }) {
     datasets: [
       {
         data: mockData.ticketSales.data,
-        backgroundColor: ["#0d9488", "#34d399"], // Vibrant blue and emerald green
+        backgroundColor: ["#0d9488", "#34d399"],
         borderWidth: 1,
-        borderColor: "#ffffff", // White border for clarity
+        borderColor: "#ffffff",
       },
     ],
   };
@@ -124,16 +124,9 @@ function OrganizerLandingPage({ user, signOut }) {
     ],
   };
 
-  const eventRatingsData = {
-    labels: mockData.eventRatings.labels,
-    datasets: [
-      {
-        label: "Percentage",
-        data: mockData.eventRatings.data,
-        backgroundColor: "#4F46E5",
-        borderRadius: 4,
-      },
-    ],
+  const handleSeeAllFeedback = () => {
+    // Placeholder for future navigation or action
+    console.log("See all feedback clicked");
   };
 
   return (
@@ -246,7 +239,7 @@ function OrganizerLandingPage({ user, signOut }) {
                 </h3>
                 <div className="w-full h-32 sm:h-40">
                   <Doughnut
-                    key={Date.now()} // Force re-render to ensure colors apply
+                    key={Date.now()}
                     data={popularEventsData}
                     options={{
                       maintainAspectRatio: false,
@@ -281,7 +274,6 @@ function OrganizerLandingPage({ user, signOut }) {
             </div>
           </div>
 
-          {/* Attendees Feedback */}
           <div className="dashboard-card feedback-card bg-white p-4 sm:p-5 rounded-lg shadow-md border border-gray-200 mb-6">
             <h3 className="text-base sm:text-lg font-semibold text-gray-600 mb-4">
               What Attendees Are Saying
@@ -296,12 +288,13 @@ function OrganizerLandingPage({ user, signOut }) {
                 ))}
               </tbody>
             </table>
-            <a
-              href="#"
-              className="see-all-link text-sm font-medium mt-4 inline-block"
+            <button
+              className="see-all-link text-sm font-medium mt-4 inline-block text-indigo-600 hover:text-indigo-800 transition-colors"
+              onClick={handleSeeAllFeedback}
+              aria-label="See all feedback"
             >
               See all
-            </a>
+            </button>
           </div>
         </section>
       </main>
