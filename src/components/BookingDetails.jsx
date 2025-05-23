@@ -1,5 +1,5 @@
 import { useNavigate, useParams } from "react-router-dom";
-import { useEffect, useState } from "react"; // Fixed import
+import { useEffect, useState } from "react";
 import Sidebar from "./Sidebar";
 import "../styles/ManageEvent.css";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -21,27 +21,20 @@ function BookingDetails({ user, signOut }) {
   const [bookings, setBookings] = useState([]);
   const [eventDetails, setEventDetails] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState(null); // Added error state
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     const fetchBookings = async () => {
       setIsLoading(true);
-      setError(null); // Reset error state
+      setError(null);
       try {
         console.log("eventID from UI", eventId);
         const response = await fetchBookingDetailsEventID(eventId);
-
-        console.log("Reponse from Booking", response);
-        // const response = await fetch("/api/fetch-booking-by-eventid", {
-        //   method: "POST",
-        //   headers: { "Content-Type": "application/json" },
-        //   body: JSON.stringify({ eventId }),
-        // });
-        if (!response.records && response.records.length > 0) {
+        console.log("Response from Booking", response);
+        if (!response.records || response.records.length === 0) {
           throw new Error("Failed to fetch booking details");
         }
-
-        console.log("Reponse from Booking", response.records);
+        console.log("Response from Booking", response.records);
         const data = response;
         setBookings(data.records || []);
         console.log(data.records[0]?.EventDetails);
@@ -81,7 +74,7 @@ function BookingDetails({ user, signOut }) {
   };
 
   return (
-    <div className="booking-details-page">
+    <div className="manage-events-page">
       {isLoading && (
         <div className="loading-overlay">
           <div className="spinner"></div>
@@ -91,12 +84,9 @@ function BookingDetails({ user, signOut }) {
         ☰
       </button>
       <Sidebar user={user} signOut={signOut} isOpen={isSidebarOpen} />
-      <main
-        className={`booking-content ${isSidebarOpen ? "sidebar-open" : ""}`}
-      >
-        <h2 className="booking-title">Booking Details</h2>
+      <main className={`events-content ${isSidebarOpen ? "sidebar-open" : ""}`}>
+        <h2 className="events-title">Booking Details</h2>
 
-        {/* Error Message */}
         {error && (
           <div
             style={{ color: "red", textAlign: "center", marginBottom: "1rem" }}
@@ -105,49 +95,88 @@ function BookingDetails({ user, signOut }) {
           </div>
         )}
 
-        {/* Event Details Section */}
         <div className="event-details">
-          <h3>Event Details</h3>
-          <div className="event-details-grid">
-            <p>
+          <h3 className="booking-subtitle">Event Details</h3>
+          <div
+            style={{
+              display: "flex",
+              flexWrap: "wrap",
+              gap: "1rem",
+              marginBottom: "1rem",
+            }}
+          >
+            <div style={{ flex: "1 1 200px" }}>
               <strong>
                 <FontAwesomeIcon icon={faIdBadge} /> Event ID:
               </strong>
-            </p>
-            <p>{eventDetails?.ReadableEventID || "N/A"}</p>
-            <p>
+              <p>{eventDetails?.ReadableEventID || "N/A"}</p>
+            </div>
+            <div style={{ flex: "1 1 200px" }}>
               <strong>
                 <FontAwesomeIcon icon={faCalendarAlt} /> Event Name:
               </strong>
-            </p>
-            <p>{eventDetails?.EventTitle || "N/A"}</p>
-            <p>
+              <p>{eventDetails?.EventTitle || "N/A"}</p>
+            </div>
+            <div style={{ flex: "1 1 200px" }}>
               <strong>
                 <FontAwesomeIcon icon={faCalendarAlt} /> Event Date & Time:
               </strong>
-            </p>
-            <p>{formatDateTime(eventDetails?.EventDate)}</p>
+              <p>{formatDateTime(eventDetails?.EventDate)}</p>
+            </div>
           </div>
         </div>
 
-        {/* Booking Details Section */}
-        <h3 className="booking-subtitle">Booking Details</h3>
-        <div className="booking-stats">
-          <div className="stat-card">
+        <h3 className="booking-subtitle">Booking Statistics</h3>
+        <div
+          style={{
+            display: "flex",
+            flexWrap: "wrap",
+            gap: "1rem",
+            marginBottom: "1rem",
+          }}
+        >
+          <div
+            style={{
+              flex: "1 1 150px",
+              background: "#ffffff",
+              padding: "1rem",
+              borderRadius: "0.5rem",
+              boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
+              textAlign: "center",
+            }}
+          >
             <FontAwesomeIcon icon={faChair} size="lg" color="#374151" />
             <p>
               <strong>{eventDetails?.Seats || 0}</strong>
             </p>
             <p>Total Seats</p>
           </div>
-          <div className="stat-card">
+          <div
+            style={{
+              flex: "1 1 150px",
+              background: "#ffffff",
+              padding: "1rem",
+              borderRadius: "0.5rem",
+              boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
+              textAlign: "center",
+            }}
+          >
             <FontAwesomeIcon icon={faTicketAlt} size="lg" color="#374151" />
             <p>
               <strong>{eventDetails?.ReservedSeats || 0}</strong>
             </p>
             <p>Seats Reserved</p>
           </div>
-          <div className="stat-card">
+          <div
+            style={{
+              flex: "1 1 150px",
+              background: "#ffffff",
+              padding: "1rem",
+              borderRadius: "0.5rem",
+              boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
+              textAlign: "center",
+            }}
+          >
             <FontAwesomeIcon icon={faUsers} size="lg" color="#374151" />
             <p>
               <strong>{eventDetails?.SeatsBooked || 0}</strong>
@@ -157,14 +186,24 @@ function BookingDetails({ user, signOut }) {
         </div>
 
         <div className="table-wrapper">
-          <table className="bookings-table">
+          <table className="events-table">
             <thead>
               <tr>
-                <th scope="col">Sr.No.</th>
-                <th scope="col">Booking Name</th>
-                <th scope="col">Tickets Booked</th>
-                <th scope="col">Email</th>
-                <th scope="col">Phone</th>
+                <th scope="col" style={{ width: "10%" }}>
+                  Sr.No.
+                </th>
+                <th scope="col" style={{ width: "25%" }}>
+                  Booking Name
+                </th>
+                <th scope="col" style={{ width: "15%" }}>
+                  Tickets Booked
+                </th>
+                <th scope="col" style={{ width: "25%" }}>
+                  Email
+                </th>
+                <th scope="col" style={{ width: "25%" }}>
+                  Phone
+                </th>
               </tr>
             </thead>
             <tbody>
@@ -192,7 +231,6 @@ function BookingDetails({ user, signOut }) {
           </table>
         </div>
 
-        {/* Footer Buttons */}
         <div className="footer-buttons">
           <button
             className="footer-btn"
@@ -202,7 +240,7 @@ function BookingDetails({ user, signOut }) {
             <FontAwesomeIcon icon={faArrowLeft} /> Back
           </button>
           <button
-            className="footer-btn print-btn"
+            className="footer-btn"
             onClick={handlePrint}
             aria-label="Print booking details"
           >

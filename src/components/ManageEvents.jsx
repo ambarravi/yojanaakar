@@ -152,14 +152,13 @@ function ManageEvents({ user, signOut }) {
           <div className="spinner"></div>
         </div>
       )}
-      <button className="sidebar-toggle" onClick={toggleSidebar}>
+      <button className="sidebar-toggle md:hidden" onClick={toggleSidebar}>
         ☰
       </button>
       <Sidebar user={user} signOut={signOut} isOpen={isSidebarOpen} />
       <main className={`events-content ${isSidebarOpen ? "sidebar-open" : ""}`}>
         <h2 className="events-title">Manage Events</h2>
 
-        {/* Events Table Section */}
         <div className="event-details">
           <h3 className="booking-subtitle">Event List</h3>
           <div className="table-wrapper">
@@ -195,7 +194,7 @@ function ManageEvents({ user, signOut }) {
                   <tr>
                     <td
                       colSpan="8"
-                      style={{ textAlign: "center", padding: "2rem" }}
+                      style={{ textAlign: "center", padding: "0.75rem" }}
                     >
                       No events found.
                     </td>
@@ -210,7 +209,17 @@ function ManageEvents({ user, signOut }) {
                       <td>{event.EventStatus}</td>
                       <td>{event.Seats}</td>
                       <td>{event.TicketsBooked}</td>
-                      <td className="action-buttons">
+                      <td
+                        className="action-buttons"
+                        style={{
+                          display: "flex",
+                          gap: "0.2rem",
+                          justifyContent: "center",
+                          flexWrap: "nowrap",
+                          minWidth: "auto",
+                          overflow: "visible",
+                        }}
+                      >
                         <button
                           className="action-btn view-btn"
                           title="View Booking Details"
@@ -218,8 +227,12 @@ function ManageEvents({ user, signOut }) {
                             handleViewBookingDetails(event.EventID)
                           }
                           aria-label="View booking details"
+                          style={{ width: "1rem", height: "1rem" }}
                         >
-                          <FontAwesomeIcon icon={faEye} />
+                          <FontAwesomeIcon
+                            icon={faEye}
+                            style={{ fontSize: "0.7rem" }}
+                          />
                         </button>
                         <button
                           className="action-btn publish-btn"
@@ -228,16 +241,24 @@ function ManageEvents({ user, signOut }) {
                             handleActionButtonClick(event, "Publish")
                           }
                           aria-label="Publish event"
+                          style={{ width: "1rem", height: "1rem" }}
                         >
-                          <FontAwesomeIcon icon={faPaperPlane} />
+                          <FontAwesomeIcon
+                            icon={faPaperPlane}
+                            style={{ fontSize: "0.7rem" }}
+                          />
                         </button>
                         <button
                           className="action-btn edit-btn"
                           title="Edit Event Details"
                           onClick={() => handleActionButtonClick(event, "Edit")}
                           aria-label="Edit event"
+                          style={{ width: "1rem", height: "1rem" }}
                         >
-                          <FontAwesomeIcon icon={faEdit} />
+                          <FontAwesomeIcon
+                            icon={faEdit}
+                            style={{ fontSize: "0.7rem" }}
+                          />
                         </button>
                         <button
                           className="action-btn cancel-btn"
@@ -246,8 +267,12 @@ function ManageEvents({ user, signOut }) {
                             handleActionButtonClick(event, "Cancel")
                           }
                           aria-label="Cancel event"
+                          style={{ width: "1rem", height: "1rem" }}
                         >
-                          <FontAwesomeIcon icon={faStopCircle} />
+                          <FontAwesomeIcon
+                            icon={faStopCircle}
+                            style={{ fontSize: "0.7rem" }}
+                          />
                         </button>
                         <button
                           className="action-btn delete-btn"
@@ -256,8 +281,12 @@ function ManageEvents({ user, signOut }) {
                             handleActionButtonClick(event, "Delete")
                           }
                           aria-label="Delete event"
+                          style={{ width: "1rem", height: "1rem" }}
                         >
-                          <FontAwesomeIcon icon={faTrash} />
+                          <FontAwesomeIcon
+                            icon={faTrash}
+                            style={{ fontSize: "0.7rem" }}
+                          />
                         </button>
                       </td>
                     </tr>
@@ -268,7 +297,6 @@ function ManageEvents({ user, signOut }) {
           </div>
         </div>
 
-        {/* Pagination Section */}
         <div className="footer-buttons">
           <button
             className="footer-btn"

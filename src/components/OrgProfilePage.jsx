@@ -3,6 +3,8 @@ import Sidebar from "./Sidebar";
 import { submitProfile, fetchProfileDetails } from "../api/organizerApi";
 import "../styles/OrgProfilePage.css";
 import { GetCollegeList } from "../api/eventApi";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faImage } from "@fortawesome/free-solid-svg-icons";
 
 function OrgProfilePage({ user, signOut }) {
   const [formData, setFormData] = useState({
@@ -22,6 +24,7 @@ function OrgProfilePage({ user, signOut }) {
     termsAccepted: false,
     collegeSearchText: "",
   });
+  const [errors, setErrors] = useState({});
   const [citySuggestions, setCitySuggestions] = useState([]);
   const [isOtherCity, setIsOtherCity] = useState(false);
   const [collegeSuggestions, setCollegeSuggestions] = useState([]);
@@ -42,7 +45,6 @@ function OrgProfilePage({ user, signOut }) {
       setIsLoading(true);
       try {
         const profile = await fetchProfileDetails();
-        console.log("Profile", profile);
         if (profile && profile.record) {
           const record = profile.record;
           const mappedValue = record.associatedCollegeUniversity?.BOOL
@@ -71,15 +73,17 @@ function OrgProfilePage({ user, signOut }) {
             address: record.address?.S || "",
             associatedCollegeUniversity: mappedValue,
             termsAccepted: record.termsAccepted?.BOOL || false,
-            logo: record.logoPath?.S || "",
-            collegeSearchText: record.collegeName?.S || "", // Use collegeName directly
+            logo: record.logoPath?.S || null,
+            collegeSearchText: record.collegeName?.S || "",
           });
           if (!matchedCity && cityID) {
             setIsOtherCity(true);
           }
         }
       } catch (error) {
-        alert("Error fetching profile details: " + error.message);
+        setErrors({
+          general: "Error fetching profile details: " + error.message,
+        });
       } finally {
         setIsLoading(false);
       }
@@ -131,6 +135,7 @@ function OrgProfilePage({ user, signOut }) {
 
   const handleCityChange = (e) => {
     const value = e.target.value;
+    setErrors({ ...errors, cityID: "" });
     if (value === "Other") {
       setIsOtherCity(true);
       setFormData({
@@ -162,6 +167,7 @@ function OrgProfilePage({ user, signOut }) {
 
   const handleOtherCityChange = (e) => {
     const text = e.target.value;
+    setErrors({ ...errors, cityName: "" });
     setFormData({
       ...formData,
       cityName: text,
@@ -195,6 +201,7 @@ function OrgProfilePage({ user, signOut }) {
 
   const handleCollegeSearchChange = (e) => {
     const text = e.target.value;
+    setErrors({ ...errors, collegeSearchText: "" });
     setFormData({
       ...formData,
       collegeSearchText: text,
@@ -218,6 +225,7 @@ function OrgProfilePage({ user, signOut }) {
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
+    setErrors({ ...errors, [name]: "" });
     setFormData({
       ...formData,
       [name]: type === "checkbox" ? checked : value,
@@ -226,6 +234,7 @@ function OrgProfilePage({ user, signOut }) {
 
   const handleFileChange = (e) => {
     const file = e.target.files[0];
+    setErrors({ ...errors, logo: "" });
     if (
       file &&
       file.size <= 5 * 1024 * 1024 &&
@@ -233,53 +242,52 @@ function OrgProfilePage({ user, signOut }) {
     ) {
       setFormData({ ...formData, logo: file });
     } else {
-      alert("Please upload an image file less than 5MB.");
+      setErrors({
+        ...errors,
+        logo: "Please upload an image file less than 5MB.",
+      });
     }
   };
 
   const validateForm = () => {
+    const errors = {};
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     const phoneRegex = /^[0-9]{10}$/;
+
     if (!formData.name || formData.name.length > 100) {
-      alert("Name is required and should not exceed 100 characters.");
-      return false;
+      errors.name = "Name is required and should not exceed 100 characters.";
     }
     if (!formData.contactPerson || formData.contactPerson.length > 30) {
-      alert("Contact Person is required and should not exceed 30 characters.");
-      return false;
+      errors.contactPerson =
+        "Contact Person is required and should not exceed 30 characters.";
     }
     if (!emailRegex.test(formData.contactEmail)) {
-      alert("Please enter a valid email.");
-      return false;
+      errors.contactEmail = "Please enter a valid email.";
     }
     if (!phoneRegex.test(formData.contactNumber)) {
-      alert("Contact Number should be exactly 10 digits.");
-      return false;
+      errors.contactNumber = "Contact Number should be exactly 10 digits.";
     }
     if (!phoneRegex.test(formData.alternateNumber)) {
-      alert("Alternate Number should be exactly 10 digits.");
-      return false;
+      errors.alternateNumber = "Alternate Number should be exactly 10 digits.";
     }
     if (!formData.logo) {
-      alert("Logo upload is required.");
-      return false;
+      errors.logo = "Logo upload is required.";
     }
     if (!formData.cityID) {
-      alert("Please select a valid city.");
-      return false;
+      errors.cityID = "Please select a valid city.";
     }
     if (
       formData.associatedCollegeUniversity === "Yes" &&
       !formData.collegeSearchText.trim()
     ) {
-      alert("Please enter or select a college name.");
-      return false;
+      errors.collegeSearchText = "Please enter or select a college name.";
     }
     if (!formData.termsAccepted) {
-      alert("You must agree to the Terms and Conditions.");
-      return false;
+      errors.termsAccepted = "You must agree to the Terms and Conditions.";
     }
-    return true;
+
+    setErrors(errors);
+    return Object.keys(errors).length === 0;
   };
 
   const handleSubmit = async (e) => {
@@ -316,9 +324,9 @@ function OrgProfilePage({ user, signOut }) {
 
     try {
       await submitProfile(formDataToSubmit, formData.logo);
-      alert("Profile Updated Successfully!");
+      setErrors({ general: "Profile Updated Successfully!" });
     } catch (error) {
-      alert("Error updating profile: " + error.message);
+      setErrors({ general: "Error updating profile: " + error.message });
     } finally {
       setIsLoading(false);
     }
@@ -335,7 +343,7 @@ function OrgProfilePage({ user, signOut }) {
           <div className="spinner"></div>
         </div>
       )}
-      <button className="sidebar-toggle" onClick={toggleSidebar}>
+      <button className="sidebar-toggle md:hidden" onClick={toggleSidebar}>
         ☰
       </button>
       <Sidebar user={user} signOut={signOut} isOpen={isSidebarOpen} />
@@ -344,25 +352,51 @@ function OrgProfilePage({ user, signOut }) {
       >
         <h1 className="profile-title">Organizer Profile</h1>
         <form onSubmit={handleSubmit} className="profile-form">
-          {formData.logo && (
-            <div className="logo-container">
-              <img
-                src={
-                  typeof formData.logo === "string"
-                    ? formData.logo
-                    : URL.createObjectURL(formData.logo)
-                }
-                alt="Organization Logo"
-                className="logo-preview"
-              />
-            </div>
-          )}
           <div className="form-note">
-            <p>All fields are mandatory.</p>
+            <p>
+              All fields marked with <span className="required">*</span> are
+              mandatory.
+            </p>
+            {errors.general && (
+              <p
+                className={`form-message ${
+                  errors.general.includes("Success") ? "success" : "error"
+                }`}
+              >
+                {errors.general}
+              </p>
+            )}
           </div>
           <div className="form-grid">
+            <div className="form-group full-width logo-group">
+              <label>
+                Logo <span className="required">*</span>
+              </label>
+              <div className="logo-container">
+                {formData.logo ? (
+                  <img
+                    src={
+                      typeof formData.logo === "string"
+                        ? formData.logo
+                        : URL.createObjectURL(formData.logo)
+                    }
+                    alt="Organization Logo"
+                    className="logo-preview"
+                  />
+                ) : (
+                  <div className="logo-placeholder">
+                    <FontAwesomeIcon icon={faImage} />
+                    <span>No Logo Uploaded</span>
+                  </div>
+                )}
+                <input type="file" name="logo" onChange={handleFileChange} />
+                {errors.logo && <p className="error">{errors.logo}</p>}
+              </div>
+            </div>
             <div className="form-group">
-              <label>Organization/Host Name</label>
+              <label>
+                Organization/Host Name <span className="required">*</span>
+              </label>
               <input
                 type="text"
                 name="name"
@@ -370,10 +404,14 @@ function OrgProfilePage({ user, signOut }) {
                 value={formData.name}
                 onChange={handleChange}
                 required
+                className={errors.name ? "error" : ""}
               />
+              {errors.name && <p className="error">{errors.name}</p>}
             </div>
             <div className="form-group">
-              <label>Contact Person</label>
+              <label>
+                Contact Person <span className="required">*</span>
+              </label>
               <input
                 type="text"
                 name="contactPerson"
@@ -381,10 +419,16 @@ function OrgProfilePage({ user, signOut }) {
                 value={formData.contactPerson}
                 onChange={handleChange}
                 required
+                className={errors.contactPerson ? "error" : ""}
               />
+              {errors.contactPerson && (
+                <p className="error">{errors.contactPerson}</p>
+              )}
             </div>
             <div className="form-group">
-              <label>Contact Email</label>
+              <label>
+                Contact Email <span className="required">*</span>
+              </label>
               <input
                 type="email"
                 name="contactEmail"
@@ -392,10 +436,16 @@ function OrgProfilePage({ user, signOut }) {
                 value={formData.contactEmail}
                 onChange={handleChange}
                 required
+                className={errors.contactEmail ? "error" : ""}
               />
+              {errors.contactEmail && (
+                <p className="error">{errors.contactEmail}</p>
+              )}
             </div>
             <div className="form-group">
-              <label>Contact Number</label>
+              <label>
+                Contact Number <span className="required">*</span>
+              </label>
               <input
                 type="text"
                 name="contactNumber"
@@ -403,10 +453,16 @@ function OrgProfilePage({ user, signOut }) {
                 value={formData.contactNumber}
                 onChange={handleChange}
                 required
+                className={errors.contactNumber ? "error" : ""}
               />
+              {errors.contactNumber && (
+                <p className="error">{errors.contactNumber}</p>
+              )}
             </div>
             <div className="form-group">
-              <label>Alternate Number</label>
+              <label>
+                Alternate Number <span className="required">*</span>
+              </label>
               <input
                 type="text"
                 name="alternateNumber"
@@ -414,19 +470,22 @@ function OrgProfilePage({ user, signOut }) {
                 value={formData.alternateNumber}
                 onChange={handleChange}
                 required
+                className={errors.alternateNumber ? "error" : ""}
               />
+              {errors.alternateNumber && (
+                <p className="error">{errors.alternateNumber}</p>
+              )}
             </div>
             <div className="form-group">
-              <label>Logo</label>
-              <input type="file" name="logo" onChange={handleFileChange} />
-            </div>
-            <div className="form-group">
-              <label>City</label>
+              <label>
+                City <span className="required">*</span>
+              </label>
               <select
                 name="cityID"
                 value={formData.cityID || "Select"}
                 onChange={handleCityChange}
                 required
+                className={errors.cityID ? "error" : ""}
               >
                 <option value="Select">Select City</option>
                 {majorCities.map((city) => (
@@ -436,17 +495,20 @@ function OrgProfilePage({ user, signOut }) {
                 ))}
                 <option value="Other">Other</option>
               </select>
+              {errors.cityID && <p className="error">{errors.cityID}</p>}
             </div>
             {isOtherCity && (
               <div className="form-group">
-                <label>Other City</label>
+                <label>
+                  Other City <span className="required">*</span>
+                </label>
                 <input
                   type="text"
                   name="otherCity"
                   value={formData.cityName}
                   onChange={handleOtherCityChange}
                   placeholder="Type city name..."
-                  className="city-input"
+                  className={`city-input ${errors.cityName ? "error" : ""}`}
                 />
                 {citySuggestions.length > 0 && (
                   <ul className="suggestions-list">
@@ -461,10 +523,13 @@ function OrgProfilePage({ user, signOut }) {
                     ))}
                   </ul>
                 )}
+                {errors.cityName && <p className="error">{errors.cityName}</p>}
               </div>
             )}
             <div className="form-group">
-              <label>Address</label>
+              <label>
+                Address <span className="required">*</span>
+              </label>
               <textarea
                 name="address"
                 value={formData.address}
@@ -472,31 +537,44 @@ function OrgProfilePage({ user, signOut }) {
                 onChange={handleChange}
                 required
                 rows="2"
+                className={errors.address ? "error" : ""}
               />
+              {errors.address && <p className="error">{errors.address}</p>}
             </div>
             <div className="form-group">
-              <label>Associated with College/University</label>
+              <label>
+                Associated with College/University{" "}
+                <span className="required">*</span>
+              </label>
               <select
                 name="associatedCollegeUniversity"
                 value={formData.associatedCollegeUniversity}
                 onChange={handleChange}
                 required
+                className={errors.associatedCollegeUniversity ? "error" : ""}
               >
                 <option value="">Select</option>
                 <option value="Yes">Yes</option>
                 <option value="No">No</option>
               </select>
+              {errors.associatedCollegeUniversity && (
+                <p className="error">{errors.associatedCollegeUniversity}</p>
+              )}
             </div>
             {formData.associatedCollegeUniversity === "Yes" && (
               <div className="form-group">
-                <label>College Name</label>
+                <label>
+                  College Name <span className="required">*</span>
+                </label>
                 <input
                   type="text"
                   name="collegeSearchText"
                   value={formData.collegeSearchText}
                   onChange={handleCollegeSearchChange}
                   placeholder="Type college name..."
-                  className="college-input"
+                  className={`college-input ${
+                    errors.collegeSearchText ? "error" : ""
+                  }`}
                   maxLength="100"
                 />
                 {collegeSuggestions.length > 0 && (
@@ -512,10 +590,15 @@ function OrgProfilePage({ user, signOut }) {
                     ))}
                   </ul>
                 )}
+                {errors.collegeSearchText && (
+                  <p className="error">{errors.collegeSearchText}</p>
+                )}
               </div>
             )}
             <div className="form-group full-width">
-              <label>About Organization</label>
+              <label>
+                About Organization <span className="required">*</span>
+              </label>
               <textarea
                 name="aboutOrganization"
                 maxLength="300"
@@ -523,10 +606,14 @@ function OrgProfilePage({ user, signOut }) {
                 onChange={handleChange}
                 rows="4"
                 required
+                className={errors.aboutOrganization ? "error" : ""}
               />
               <p className="char-count">
                 {formData.aboutOrganization.length}/300
               </p>
+              {errors.aboutOrganization && (
+                <p className="error">{errors.aboutOrganization}</p>
+              )}
             </div>
             <div className="form-group full-width terms">
               <label>
@@ -536,9 +623,16 @@ function OrgProfilePage({ user, signOut }) {
                   checked={formData.termsAccepted}
                   onChange={handleChange}
                   required
+                  className={errors.termsAccepted ? "error" : ""}
                 />
-                <span>I agree to the Terms and Conditions</span>
+                <span>
+                  I agree to the Terms and Conditions{" "}
+                  <span className="required">*</span>
+                </span>
               </label>
+              {errors.termsAccepted && (
+                <p className="error">{errors.termsAccepted}</p>
+              )}
             </div>
           </div>
           <button type="submit" className="submit-btn" disabled={isLoading}>

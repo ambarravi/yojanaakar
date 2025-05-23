@@ -1,62 +1,496 @@
-/* Dashboard.css (includes Sidebar.css above) */
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap");
 
-/* Dashboard Page */
-.dashboard-page {
-  display: flex;
-  min-height: 100vh;
+.tikties-dashboard {
+  font-family: "Inter", sans-serif;
+  background: #f3f4f6; /* Slightly darker for contrast */
+  line-height: 1.5;
+  margin: 0;
+  padding: 0;
+  max-width: 100vw;
+  width: 100%;
+  overflow-x: hidden;
+  box-sizing: border-box;
 }
 
-/* Main Content */
-.dashboard-content {
+/* Sidebar */
+.tikties-dashboard .sidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 260px;
+  height: 100vh;
+  background: #1f2937;
+  padding: 1.5rem;
+  z-index: 1100;
+  overflow-y: auto;
+  overflow-x: hidden;
+  box-sizing: border-box;
+  transition: transform 0.3s ease;
+}
+
+.tikties-dashboard .sidebar.open {
+  transform: translateX(0);
+}
+
+@media (max-width: 767px) {
+  .tikties-dashboard .sidebar {
+    transform: translateX(-100%);
+  }
+  .tikties-dashboard .sidebar.open {
+    transform: translateX(0);
+  }
+}
+
+@media (min-width: 768px) {
+  .tikties-dashboard .sidebar {
+    transform: translateX(0);
+  }
+}
+
+/* Content */
+.tikties-dashboard main.dashboard-content {
   flex: 1;
-  margin-left: var(--sidebar-width);
-  padding: 2rem;
-  transition: var(--transition);
+  padding: 1rem;
+  max-width: calc(100% - 260px);
+  width: calc(100% - 260px);
+  margin-left: 260px;
+  overflow-x: hidden;
+  box-sizing: border-box;
+  transition: margin-left 0.3s ease;
+  z-index: 1000;
+  background: #f3f4f6;
 }
 
-.dashboard-content.sidebar-open {
-  margin-left: 0; /* Full width when sidebar is hidden on mobile */
-}
-
-.dashboard-header {
-  margin-bottom: 2rem;
-}
-
-.dashboard-title {
-  font-size: 2rem;
-  font-weight: 600;
-  color: var(--primary-color);
-}
-
-.dashboard-main {
-  background: #ffffff;
-  padding: 2rem;
-  border-radius: 12px;
-  box-shadow: var(--shadow);
+@media (max-width: 767px) {
+  .tikties-dashboard main.dashboard-content {
+    margin-left: 0;
+    max-width: 100%;
+    width: 100%;
+  }
+  .tikties-dashboard main.dashboard-content.sidebar-open {
+    margin-left: 260px;
+    max-width: calc(100% - 260px);
+    width: calc(100% - 260px);
+  }
 }
 
 /* Toggle Button */
-.sidebar-toggle {
-  display: none;
+.tikties-dashboard .dashboard-sidebar-toggle {
   position: fixed;
   top: 1rem;
   left: 1rem;
-  background: var(--primary-color);
-  color: #ffffff;
+  z-index: 1200;
+  background: #0d9488; /* Teal */
+  color: white;
   border: none;
+  border-radius: 0.375rem;
   padding: 0.5rem 1rem;
   font-size: 1.25rem;
-  cursor: pointer;
-  z-index: 1100;
-  border-radius: 6px;
+  transition: background-color 0.2s ease-in-out;
 }
 
-@media (max-width: 768px) {
-  .dashboard-content {
-    margin-left: 0; /* No offset when sidebar is hidden */
-  }
+.tikties-dashboard .dashboard-sidebar-toggle:hover {
+  background: #10b981; /* Emerald */
+}
 
-  .sidebar-toggle {
-    display: block; /* Show toggle on mobile */
+@media (min-width: 768px) {
+  .tikties-dashboard .dashboard-sidebar-toggle {
+    display: none !important; /* Force hide on desktop */
+  }
+}
+
+/* Header */
+.tikties-dashboard .dashboard-header h1 {
+  font-size: 1.875rem;
+  font-weight: 700;
+  color: #1f2937; /* Navy */
+  position: relative;
+  padding-bottom: 0.5rem;
+}
+
+.tikties-dashboard .dashboard-header h1::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 4rem;
+  height: 3px;
+  background: #0d9488; /* Teal underline */
+}
+
+/* Cards and Charts */
+.tikties-dashboard .dashboard-cards {
+  display: grid;
+  grid-template-columns: repeat(1, minmax(0, 1fr));
+  gap: 1rem;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  margin: 0;
+}
+
+@media (min-width: 640px) {
+  .tikties-dashboard .dashboard-cards {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1024px) {
+  .tikties-dashboard .dashboard-cards {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 1.5rem;
+  }
+}
+
+.tikties-dashboard .ticket-sales-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  margin: 0;
+}
+
+@media (min-width: 768px) {
+  .tikties-dashboard .ticket-sales-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1.5rem;
+  }
+}
+
+.tikties-dashboard .dashboard-card {
+  padding: 1rem;
+  border-radius: 0.5rem;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Enhanced shadow */
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  border: 2px solid #d1d5db; /* Consistent border */
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start; /* Align content to top for charts */
+  gap: 0.5rem;
+  background: #ffffff; /* Solid white */
+  transition: transform 0.2s ease-in-out;
+}
+
+.tikties-dashboard .dashboard-card:hover {
+  transform: translateY(-2px); /* Subtle lift */
+}
+
+@media (min-width: 640px) {
+  .tikties-dashboard .dashboard-card {
+    padding: 1.25rem;
+  }
+}
+
+.tikties-dashboard .dashboard-card.ticket-sales {
+  padding: 1rem;
+}
+
+@media (min-width: 640px) {
+  .tikties-dashboard .dashboard-card.ticket-sales {
+    padding: 1.25rem;
+  }
+}
+
+.tikties-dashboard canvas {
+  max-width: 100%;
+  max-height: 160px; /* Match compacted height */
+  width: 100%;
+  height: auto;
+  box-sizing: border-box;
+}
+
+/* Calendar Styles */
+.tikties-dashboard .react-calendar {
+  border: none;
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  box-sizing: border-box;
+  border: 2px solid #d1d5db;
+  background: #ffffff;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  width: 100%;
+  max-width: 400px;
+  margin: 0 auto;
+}
+
+.tikties-dashboard .react-calendar__tile {
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.375rem;
+  padding: 0.5rem 0;
+  transition: all 0.2s ease-in-out;
+  font-weight: 500;
+}
+
+.tikties-dashboard .react-calendar__tile--now {
+  background: #facc15;
+  border: 2px solid #ca8a04;
+  color: #1f2937;
+  font-weight: bold;
+  border-radius: 0.375rem;
+}
+
+.tikties-dashboard .react-calendar__tile.event-date {
+  background: linear-gradient(135deg, #0d9488, #10b981);
+  border: 2px solid #0d7951;
+  color: #ffffff;
+  font-weight: 600;
+  border-radius: 0.375rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.tikties-dashboard .react-calendar__tile:enabled:hover {
+  background: #e6fffa;
+  border-color: #34d399;
+  color: #1f2937;
+  transform: scale(1.05);
+}
+
+.tikties-dashboard .react-calendar__tile--active {
+  background: #4f46e5;
+  color: #ffffff;
+  border-radius: 0.375rem;
+}
+
+.tikties-dashboard .event-indicator {
+  display: block;
+  width: 6px;
+  height: 6px;
+  background: #ffffff;
+  border-radius: 50%;
+  margin: 0 auto;
+  margin-top: 2px;
+}
+
+/* Navigation Buttons */
+.tikties-dashboard .react-calendar__navigation {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.tikties-dashboard .react-calendar__navigation button {
+  background: #f9fafb;
+  border: 1px solid #d1d5db;
+  border-radius: 0.375rem;
+  padding: 0.5rem;
+  font-size: 0.875rem;
+  color: #4b5563;
+  transition: all 0.2s ease-in-out;
+}
+
+.tikties-dashboard .react-calendar__navigation button:hover {
+  background: #e6fffa;
+  border-color: #34d399;
+  color: #1f2937;
+}
+
+.tikties-dashboard .react-calendar__navigation__label {
+  font-weight: 600;
+  font-size: 1rem;
+  color: #1f2937;
+}
+
+/* Feedback Card */
+.tikties-dashboard .dashboard-card.feedback-card {
+  padding: 1rem;
+  background: #ffffff;
+}
+
+@media (min-width: 640px) {
+  .tikties-dashboard .dashboard-card.feedback-card {
+    padding: 1.25rem;
+  }
+}
+
+.tikties-dashboard .dashboard-card.feedback-card h3 {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: #1f2937;
+  margin-bottom: 1rem;
+}
+
+.tikties-dashboard .dashboard-table.feedback-table {
+  width: 100%;
+  max-width: 100%;
+  border-collapse: collapse;
+}
+
+.tikties-dashboard .dashboard-table.feedback-table tr {
+  background: #ffffff;
+}
+
+.tikties-dashboard .dashboard-table.feedback-table tr:nth-child(odd) {
+  background: #f9fafb; /* Light gray for odd rows */
+}
+
+.tikties-dashboard .dashboard-table.feedback-table tr:hover {
+  background: #e6fffa; /* Light teal on hover */
+}
+
+.tikties-dashboard .dashboard-table.feedback-table td {
+  padding: 0.5rem;
+  font-size: 0.875rem;
+  border: none;
+  overflow-wrap: break-word;
+}
+
+.tikties-dashboard .dashboard-table.feedback-table td:first-child {
+  font-weight: 500;
+  color: #111827; /* Darker navy */
+}
+
+.tikties-dashboard .dashboard-table.feedback-table td:last-child {
+  font-size: 0.75rem;
+  font-weight: 400;
+  color: #6b7280; /* Gray-500 */
+}
+
+@media (min-width: 640px) {
+  .tikties-dashboard .dashboard-table.feedback-table td {
+    padding: 0.75rem;
+    font-size: 0.875rem;
+  }
+  .tikties-dashboard .dashboard-table.feedback-table td:last-child {
+    font-size: 0.875rem;
+  }
+}
+
+.tikties-dashboard .see-all-link {
+  color: #0d9488; /* Teal */
+  text-decoration: none;
+  transition: color 0.2s ease-in-out;
+}
+
+.tikties-dashboard .see-all-link:hover {
+  color: #10b981; /* Emerald */
+  text-decoration: underline;
+}
+
+/* Upcoming Events Table */
+.tikties-dashboard .dashboard-table.upcoming-events {
+  width: 100%;
+  max-width: 100%;
+  border-collapse: collapse;
+}
+
+.tikties-dashboard .dashboard-table.upcoming-events td {
+  padding: 0.75rem;
+  font-size: 0.875rem;
+  border-bottom: 1px solid #d1d5db;
+  transition: background-color 0.2s ease-in-out;
+}
+
+@media (min-width: 640px) {
+  .tikties-dashboard .dashboard-table.upcoming-events td {
+    padding: 1rem;
+    font-size: 1rem;
+  }
+}
+
+/* Other Styles */
+.tikties-dashboard .dashboard-table {
+  border-collapse: collapse;
+  width: 100%;
+  max-width: 100%;
+  background: transparent;
+  box-shadow: none;
+  margin: 0;
+  box-sizing: border-box;
+}
+
+.tikties-dashboard .dashboard-table th,
+.tikties-dashboard .dashboard-table td {
+  padding: 0.5rem;
+  font-size: 0.875rem;
+  border: none;
+  border-bottom: 1px solid #d1d5db;
+  box-sizing: border-box;
+}
+
+@media (min-width: 640px) {
+  .tikties-dashboard .dashboard-table th,
+  .tikties-dashboard .dashboard-table td {
+    padding: 0.75rem;
+    font-size: 1rem;
+  }
+}
+
+.tikties-dashboard hr {
+  border-top: 1px solid #d1d5db;
+  margin: 1.25rem 0;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.tikties-dashboard .bg-white {
+  border-left: none;
+}
+
+.tikties-dashboard .grid {
+  display: grid;
+}
+
+.tikties-dashboard .grid-cols-1 {
+  grid-template-columns: 1fr;
+}
+
+.tikties-dashboard .grid-cols-2 {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.tikties-dashboard .grid-cols-3 {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+@media (min-width: 768px) {
+  .tikties-dashboard .md\:grid-cols-2 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+/* Ensure text styles for chart titles */
+.tikties-dashboard .dashboard-card h3 {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #1f2937;
+  line-height: 1.25;
+  text-align: left;
+}
+
+@media (min-width: 640px) {
+  .tikties-dashboard .dashboard-card h3 {
+    font-size: 1.125rem;
+  }
+}
+
+.tikties-dashboard .dashboard-card p {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #1f2937;
+  line-height: 1.25;
+  text-align: left;
+}
+
+@media (min-width: 640px) {
+  .tikties-dashboard .dashboard-card p {
+    font-size: 1.875rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .tikties-dashboard .lg\:grid-cols-2 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .tikties-dashboard .lg\:grid-cols-3 {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 }

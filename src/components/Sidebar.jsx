@@ -7,16 +7,14 @@ import "bootstrap-icons/font/bootstrap-icons.css";
 import logoImage from "../assets/images/tikties_logo.png";
 
 const Sidebar = ({ user: propUser, signOut: propSignOut, isOpen }) => {
-  const { loading: contextLoading } = useContext(AuthContext); // Rename to avoid conflict
+  const { loading: contextLoading } = useContext(AuthContext);
   const navigate = useNavigate();
   const [userDetails, setUserDetails] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // Fetch user details from sessionStorage or AuthSession
   useEffect(() => {
     const fetchUserDetails = async () => {
       try {
-        // Check sessionStorage first
         const cachedUser = sessionStorage.getItem("userDetails");
         if (cachedUser) {
           const parsedUser = JSON.parse(cachedUser);
@@ -25,7 +23,6 @@ const Sidebar = ({ user: propUser, signOut: propSignOut, isOpen }) => {
           return;
         }
 
-        // If no firstName in propUser or cached data, fetch from AuthSession
         if (!propUser?.firstName && !propUser?.given_name) {
           const session = await fetchAuthSession();
           const idToken = session.tokens?.idToken;
@@ -33,19 +30,19 @@ const Sidebar = ({ user: propUser, signOut: propSignOut, isOpen }) => {
             const userData = {
               username: idToken.payload["sub"],
               given_name: idToken.payload["given_name"],
-              firstName: idToken.payload["custom:firstName"], // If using custom attribute
+              firstName: idToken.payload["custom:firstName"],
               email: idToken.payload["email"],
               role: idToken.payload["custom:role"],
             };
             setUserDetails(userData);
-            sessionStorage.setItem("userDetails", JSON.stringify(userData)); // Cache it
+            sessionStorage.setItem("userDetails", JSON.stringify(userData));
           }
         } else {
-          setUserDetails(propUser); // Use propUser if it has firstName
+          setUserDetails(propUser);
         }
       } catch (error) {
         console.error("Error fetching user details:", error);
-        setUserDetails(propUser || { username: "Guest" }); // Fallback
+        setUserDetails(propUser || { username: "Guest" });
       } finally {
         setLoading(false);
       }
@@ -69,15 +66,11 @@ const Sidebar = ({ user: propUser, signOut: propSignOut, isOpen }) => {
         localStorage.clear();
         await signOut({ global: true });
       }
-
-      console.log(await fetchAuthSession());
       navigate("/");
     } catch (error) {
       console.error("Error signing out:", error);
     }
   };
-
-  console.log("Sidebar - Loading:", loading, "User Details:", userDetails);
 
   const displayName =
     userDetails?.given_name ||
@@ -96,7 +89,6 @@ const Sidebar = ({ user: propUser, signOut: propSignOut, isOpen }) => {
             style={{ height: "40px", objectFit: "contain" }}
           />
         </div>
-
         <hr />
         {loading || contextLoading ? (
           <p className="sidebar-user">Loading...</p>

@@ -1,189 +1,302 @@
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap");
+
 /* Base Styles */
 body {
   font-family: "Inter", sans-serif;
-  background: linear-gradient(180deg, #f9fafb, #e5e7eb);
+  background: #f3f4f6;
   color: #1f2937;
-  font-size: 0.95rem;
+  font-size: 0.75rem;
 }
 
 /* Page Layout */
-.manage-events-page,
-.booking-details-page,
-.admin-events-page {
+.manage-events-page {
   display: flex;
   min-height: 100vh;
+  max-width: 100%;
+  width: 100%;
+  overflow-x: hidden;
+  box-sizing: border-box;
+}
+
+/* Sidebar */
+.manage-events-page .sidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 260px;
+  height: 100vh;
+  background: #1f2937;
+  padding: 1rem;
+  z-index: 1100;
+  overflow-y: auto;
+  overflow-x: hidden;
+  box-sizing: border-box;
+  transition: transform 0.3s ease;
+}
+
+.manage-events-page .sidebar.open {
+  transform: translateX(0);
+}
+
+@media (max-width: 767px) {
+  .manage-events-page .sidebar {
+    transform: translateX(-100%);
+  }
+  .manage-events-page .sidebar.open {
+    transform: translateX(0);
+  }
+}
+
+@media (min-width: 768px) {
+  .manage-events-page .sidebar {
+    transform: translateX(0);
+  }
+}
+
+/* Sidebar Toggle Button */
+.sidebar-toggle {
+  display: none;
+  position: fixed;
+  top: 0.75rem;
+  left: 0.75rem;
+  background: #0d9488;
+  color: #ffffff;
+  border: none;
+  padding: 0.5rem 1rem;
+  font-size: 1rem;
+  cursor: pointer;
+  z-index: 1200;
+  border-radius: 0.375rem;
+  transition: background 0.2s ease;
+}
+
+.sidebar-toggle:hover {
+  background: #10b981;
+}
+
+@media (max-width: 767px) {
+  .sidebar-toggle {
+    display: block;
+  }
+}
+
+@media (min-width: 768px) {
+  .sidebar-toggle {
+    display: none !important;
+  }
 }
 
 /* Main Content */
-.events-content,
-.booking-content {
+.events-content {
   flex: 1;
   margin-left: 260px;
-  padding: 2.5rem;
-  transition: all 0.3s ease;
+  padding: 0.75rem;
+  transition: margin-left 0.3s ease;
+  max-width: calc(100% - 260px);
+  box-sizing: border-box;
+  background: #f3f4f6;
 }
 
-.events-content.sidebar-open,
-.booking-content.sidebar-open {
+.events-content.sidebar-open {
   margin-left: 0;
+  max-width: 100%;
+}
+
+@media (max-width: 767px) {
+  .events-content {
+    margin-left: 0;
+    padding: 0.75rem;
+    padding-top: 3rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .events-content {
+    padding: 0.5rem;
+    padding-top: 3rem;
+  }
 }
 
 /* Title */
-.events-title,
-.booking-title {
-  font-size: 1.5rem;
+.events-title {
+  font-size: 1.25rem;
   font-weight: 700;
   color: #1f2937;
-  text-align: center;
-  margin-bottom: 2.5rem;
-  text-transform: uppercase;
+  text-align: left;
+  margin-bottom: 0.75rem;
+}
+
+@media (min-width: 640px) {
+  .events-title {
+    font-size: 1.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .events-title {
+    font-size: 1rem;
+  }
+}
+
+/* Subtitle */
+.booking-subtitle {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #1f2937;
+  margin-bottom: 0.5rem;
+}
+
+@media (min-width: 640px) {
+  .booking-subtitle {
+    font-size: 1.125rem;
+  }
 }
 
 /* Event Details Section */
 .event-details {
   background: #ffffff;
-  padding: 2rem;
-  border-radius: 12px;
-  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
-  margin-bottom: 2.5rem;
-  border-left: 4px solid #374151;
+  padding: 0.75rem;
+  border-radius: 0.5rem;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  margin-bottom: 0.75rem;
 }
 
-.event-details-grid {
-  display: grid;
-  grid-template-columns: auto 1fr;
-  gap: 1rem;
-  align-items: center;
-}
-
-.event-details-grid p {
-  margin: 0.5rem 0;
-  font-size: 1rem;
-}
-
-.event-details-grid strong {
-  color: #374151;
-  font-weight: 600;
-  text-align: right;
-}
-
-/* Booking Stats */
-.booking-stats {
-  display: flex;
-  justify-content: space-between;
-  gap: 1rem;
-  margin-bottom: 2.5rem;
-}
-
-.stat-card {
-  flex: 1;
-  background: #ffffff;
-  padding: 1.5rem;
-  border-radius: 12px;
-  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
-  text-align: center;
-  transition: transform 0.2s ease;
-}
-
-.stat-card:hover {
-  transform: translateY(-4px);
-}
-
-.stat-card p {
-  margin: 0.5rem 0;
-  font-size: 1rem;
-}
-
-.stat-card strong {
-  color: #374151;
-  font-size: 1.2rem;
-  font-weight: 700;
-}
-
-/* Subtitle */
-.booking-subtitle {
-  font-size: 1.25rem;
-  font-weight: 600;
-  color: #374151;
-  margin-bottom: 1.5rem;
-  text-transform: uppercase;
+@media (min-width: 640px) {
+  .event-details {
+    padding: 1rem;
+  }
 }
 
 /* Table Wrapper */
 .table-wrapper {
   overflow-x: auto;
-  margin-bottom: 2.5rem;
+  margin-bottom: 0.75rem;
+  max-width: 100%;
 }
 
 /* Table Styles */
-.events-table,
-.bookings-table {
+.events-table {
   width: 100%;
-  border-collapse: separate;
-  border-spacing: 0;
+  border-collapse: collapse;
   background: #ffffff;
-  border-radius: 12px;
-  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+  border-radius: 0.5rem;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  max-width: 100%;
 }
 
 .events-table th,
-.events-table td,
-.bookings-table th,
-.bookings-table td {
-  padding: 1.25rem;
+.events-table td {
+  padding: 0.5rem;
   border-bottom: 1px solid #e5e7eb;
-  border-right: 1px solid #e5e7eb;
   text-align: left;
-  font-size: 0.95rem;
+  font-size: 0.75rem;
+  font-weight: 500;
 }
 
-.events-table th:last-child,
-.events-table td:last-child,
-.bookings-table th:last-child,
-.bookings-table td:last-child {
-  border-right: none;
+@media (min-width: 640px) {
+  .events-table th,
+  .events-table td {
+    padding: 0.75rem;
+    font-size: 0.875rem;
+  }
 }
 
-.events-table th,
-.bookings-table th {
+@media (max-width: 767px) {
+  .events-table th:nth-child(6), /* Seats */
+  .events-table td:nth-child(6),
+  .events-table th:nth-child(7), /* Tickets Booked */
+  .events-table td:nth-child(7) {
+    display: none;
+  }
+}
+
+.events-table th {
   background: #374151;
   color: #ffffff;
   font-weight: 600;
   cursor: pointer;
-  transition: background 0.3s ease;
+  transition: background 0.2s ease;
 }
 
-.events-table th:hover,
-.bookings-table th:hover {
+.events-table th:hover {
   background: #4b5563;
 }
 
-.events-table tr:nth-child(even),
-.bookings-table tr:nth-child(even) {
+.events-table tr:nth-child(even) {
   background: #f9fafb;
 }
 
-.events-table tr:hover,
-.bookings-table tr:hover {
+.events-table tr:hover {
   background: #e5e7eb;
+}
+
+/* Table Column Widths */
+.events-table th:nth-child(1),
+.events-table td:nth-child(1) {
+  width: 5%; /* Sr.No. */
+}
+
+.events-table th:nth-child(2),
+.events-table td:nth-child(2) {
+  width: 10%; /* Event ID */
+}
+
+.events-table th:nth-child(3),
+.events-table td:nth-child(3) {
+  width: 20%; /* Event Name */
+}
+
+.events-table th:nth-child(4),
+.events-table td:nth-child(4) {
+  width: 15%; /* Date & Time, reduced from 25% */
+  overflow-wrap: break-word;
+  max-width: 150px;
+}
+
+.events-table th:nth-child(5),
+.events-table td:nth-child(5) {
+  width: 10%; /* Status */
+}
+
+.events-table th:nth-child(6),
+.events-table td:nth-child(6) {
+  width: 10%; /* Seats */
+}
+
+.events-table th:nth-child(7),
+.events-table td:nth-child(7) {
+  width: 10%; /* Tickets Booked */
+}
+
+.events-table th:nth-child(8),
+.events-table td:nth-child(8) {
+  width: 20%; /* Actions, increased from 10% */
 }
 
 /* Action Buttons */
 .action-buttons {
   display: flex;
-  gap: 0.75rem;
+  gap: 0.25rem; /* Reduced from 0.5rem */
   justify-content: center;
+  flex-wrap: nowrap; /* Force horizontal */
+  min-width: 8.5rem; /* 5 buttons × 1.5rem + 4 gaps × 0.25rem */
+  overflow: hidden;
 }
 
 .action-btn {
-  padding: 0.75rem;
+  padding: 0.5rem;
   border: none;
-  border-radius: 8px;
+  border-radius: 0.25rem;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all 0.2s ease;
   background: none;
   color: #ffffff;
-  font-size: 0.95rem;
+  font-size: 0.75rem;
+  width: 1.5rem;
+  height: 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .action-btn:hover {
@@ -214,88 +327,54 @@ body {
   background: #dc2626;
 }
 
-.approve-btn {
-  background: #15803d; /* Matches publish-btn for consistency */
-}
-
-.approve-btn:hover {
-  background: #166534;
-}
-
-.reject-btn {
-  background: #7f1d1d; /* Dark red for reject */
-}
-
-.reject-btn:hover {
-  background: #991b1b;
-}
-
 /* Footer Buttons */
 .footer-buttons {
   display: flex;
   justify-content: center;
-  gap: 1.5rem;
-  margin-top: 3rem;
+  gap: 0.75rem;
+  margin-top: 0.75rem;
+}
+
+@media (max-width: 767px) {
+  .footer-buttons {
+    flex-direction: column;
+    align-items: center;
+  }
 }
 
 .footer-btn {
-  padding: 0.75rem 1.5rem;
+  padding: 0.5rem 1rem;
   background: #374151;
   color: #ffffff;
   border: none;
-  border-radius: 8px;
+  border-radius: 0.25rem;
   cursor: pointer;
-  transition: all 0.3s ease;
-  font-size: 1rem;
+  transition: all 0.2s ease;
+  font-size: 0.75rem;
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 0.25rem;
 }
 
 .footer-btn:hover {
   background: #4b5563;
 }
 
-.footer-btn.print-btn {
-  background: #15803d;
-}
-
-.footer-btn.print-btn:hover {
-  background: #166534;
-}
-
-/* Pagination */
-.pagination {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 1.5rem;
-  margin-top: 2.5rem;
-}
-
-.pagination-btn {
-  padding: 0.75rem 1.5rem;
-  background: #374151;
-  color: #ffffff;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  font-size: 0.95rem;
-}
-
-.pagination-btn:hover:not(:disabled) {
-  background: #4b5563;
-}
-
-.pagination-btn:disabled {
+.footer-btn:disabled {
   background: #9ca3af;
   cursor: not-allowed;
 }
 
 .pagination-info {
-  font-size: 0.95rem;
+  font-size: 0.75rem;
   color: #4b5563;
+}
+
+@media (min-width: 640px) {
+  .footer-btn,
+  .pagination-info {
+    font-size: 0.875rem;
+  }
 }
 
 /* Loading Overlay */
@@ -314,10 +393,10 @@ body {
 
 .spinner {
   border: 4px solid rgba(255, 255, 255, 0.3);
-  border-top: 4px solid #374151;
+  border-top: 4px solid #0d9488;
   border-radius: 50%;
-  width: 40px;
-  height: 40px;
+  width: 32px;
+  height: 32px;
   animation: spin 1s linear infinite;
 }
 
@@ -330,82 +409,6 @@ body {
   }
 }
 
-/* Sidebar Toggle Button */
-.sidebar-toggle {
-  display: none;
-  position: fixed;
-  top: 1rem;
-  left: 1rem;
-  background: #374151;
-  color: #ffffff;
-  border: none;
-  padding: 0.75rem 1.25rem;
-  font-size: 1rem;
-  cursor: pointer;
-  z-index: 1200;
-  border-radius: 8px;
-}
-
-/* Responsive Design */
-@media (max-width: 768px) {
-  .events-content,
-  .booking-content {
-    margin-left: 0;
-    padding: 2rem;
-    padding-top: 4rem;
-  }
-
-  .sidebar-toggle {
-    display: block;
-  }
-
-  .events-table th,
-  .events-table td,
-  .bookings-table th,
-  .bookings-table td {
-    padding: 1rem;
-    font-size: 0.9rem;
-  }
-
-  .action-buttons {
-    flex-wrap: wrap;
-  }
-
-  .booking-stats {
-    flex-direction: column;
-    gap: 1rem;
-  }
-
-  .event-details-grid {
-    grid-template-columns: 1fr;
-    text-align: left;
-  }
-}
-
-@media (max-width: 480px) {
-  .events-content,
-  .booking-content {
-    padding: 1.5rem;
-    padding-top: 4rem;
-  }
-
-  .events-title,
-  .booking-title {
-    font-size: 1.25rem;
-  }
-
-  .action-btn {
-    padding: 0.5rem;
-    font-size: 0.9rem;
-  }
-
-  .pagination-btn,
-  .footer-btn {
-    padding: 0.5rem 1rem;
-    font-size: 0.9rem;
-  }
-}
-
 /* Print Styles */
 @media print {
   .sidebar-toggle,
@@ -413,10 +416,9 @@ body {
   .footer-buttons {
     display: none;
   }
-  .booking-content,
   .events-content {
     margin-left: 0;
-    padding: 1rem;
+    padding: 0.5rem;
     background: #ffffff;
   }
 }
