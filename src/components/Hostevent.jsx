@@ -66,9 +66,9 @@ function Hostevent({ user, signOut }) {
         console.log("OrgProfile details ", orgProfile);
         const profileCompletedStatus =
           orgProfile?.record?.OrganizerName?.S || "";
-        const eventLimit = parseInt(
-          orgProfile?.record?.publishedEvent?.N || "0"
-        );
+        // const eventLimit = parseInt(
+        //   orgProfile?.record?.publishedEvent?.N || "0"
+        // );
         const eventsRemaining = parseInt(
           orgProfile?.record?.eventsRemaining?.N || "0"
         );
@@ -84,7 +84,7 @@ function Hostevent({ user, signOut }) {
           setShowModal(true);
         }
         // Check event limit if profile is complete
-        else if (eventLimit >= eventsRemaining) {
+        else if (eventsRemaining <= 0) {
           setModalMessage({
             title: "Event Limit Reached",
             body: "We regret to inform you that the monthly event hosting limit has been reached. Please try again next month or contact support for assistance.",
@@ -218,7 +218,7 @@ function Hostevent({ user, signOut }) {
 
     // Check event limit
     const orgProfile = await fetchProfileDetails();
-    const eventLimit = parseInt(orgProfile?.record?.publishedEvent?.N || "0");
+    //const eventLimit = parseInt(orgProfile?.record?.publishedEvent?.N || "0");
     const eventsRemaining = parseInt(
       orgProfile?.record?.eventsRemaining?.N || "0"
     );
