@@ -23,6 +23,8 @@ function BookingDetails({ user, signOut }) {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  const isMobile = window.innerWidth <= 767;
+
   useEffect(() => {
     const fetchBookings = async () => {
       setIsLoading(true);
@@ -74,7 +76,10 @@ function BookingDetails({ user, signOut }) {
   };
 
   return (
-    <div className="manage-events-page">
+    <div
+      className="manage-events-page"
+      style={{ maxWidth: "100%", overflowX: "hidden" }}
+    >
       {isLoading && (
         <div className="loading-overlay">
           <div className="spinner"></div>
@@ -84,40 +89,71 @@ function BookingDetails({ user, signOut }) {
         ☰
       </button>
       <Sidebar user={user} signOut={signOut} isOpen={isSidebarOpen} />
-      <main className={`events-content ${isSidebarOpen ? "sidebar-open" : ""}`}>
+      <main
+        className={`events-content ${isSidebarOpen ? "sidebar-open" : ""}`}
+        style={{
+          maxWidth: "100%",
+          padding: isMobile ? "0.5rem" : "0.75rem",
+          paddingTop: isMobile ? "2.5rem" : "0.75rem",
+        }}
+      >
         <h2 className="events-title">Booking Details</h2>
 
         {error && (
           <div
-            style={{ color: "red", textAlign: "center", marginBottom: "1rem" }}
+            style={{
+              color: "red",
+              textAlign: "center",
+              marginBottom: "1rem",
+              fontSize: isMobile ? "0.75rem" : "1rem",
+            }}
           >
             {error}
           </div>
         )}
 
-        <div className="event-details">
+        <div
+          className="event-details"
+          style={{ padding: isMobile ? "0.5rem" : "0.75rem" }}
+        >
           <h3 className="booking-subtitle">Event Details</h3>
           <div
             style={{
               display: "flex",
               flexWrap: "wrap",
-              gap: "1rem",
-              marginBottom: "1rem",
+              gap: "0.5rem",
+              marginBottom: "0.5rem",
+              maxWidth: "100%",
             }}
           >
-            <div style={{ flex: "1 1 200px" }}>
+            <div
+              style={{
+                flex: isMobile ? "1 1 100px" : "1 1 200px",
+                fontSize: isMobile ? "0.75rem" : "0.875rem",
+              }}
+            >
               <strong>
                 <FontAwesomeIcon icon={faIdBadge} /> Event ID:
               </strong>
               <p>{eventDetails?.ReadableEventID || "N/A"}</p>
             </div>
-            <div style={{ flex: "1 1 200px" }}>
+            <div
+              style={{
+                flex: isMobile ? "1 1 100px" : "1 1 200px",
+                fontSize: isMobile ? "0.75rem" : "0.875rem",
+              }}
+            >
               <strong>
                 <FontAwesomeIcon icon={faCalendarAlt} /> Event Name:
               </strong>
               <p>{eventDetails?.EventTitle || "N/A"}</p>
             </div>
-            <div style={{ flex: "1 1 200px" }}>
+            <div
+              style={{
+                flex: isMobile ? "1 1 100px" : "1 1 200px",
+                fontSize: isMobile ? "0.75rem" : "0.875rem",
+              }}
+            >
               <strong>
                 <FontAwesomeIcon icon={faCalendarAlt} /> Event Date & Time:
               </strong>
@@ -131,18 +167,20 @@ function BookingDetails({ user, signOut }) {
           style={{
             display: "flex",
             flexWrap: "wrap",
-            gap: "1rem",
-            marginBottom: "1rem",
+            gap: "0.5rem",
+            marginBottom: "0.5rem",
+            maxWidth: "100%",
           }}
         >
           <div
             style={{
-              flex: "1 1 150px",
+              flex: isMobile ? "1 1 100px" : "1 1 150px",
               background: "#ffffff",
-              padding: "1rem",
+              padding: isMobile ? "0.5rem" : "1rem",
               borderRadius: "0.5rem",
               boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
               textAlign: "center",
+              fontSize: isMobile ? "0.75rem" : "0.875rem",
             }}
           >
             <FontAwesomeIcon icon={faChair} size="lg" color="#374151" />
@@ -153,12 +191,13 @@ function BookingDetails({ user, signOut }) {
           </div>
           <div
             style={{
-              flex: "1 1 150px",
+              flex: isMobile ? "1 1 100px" : "1 1 150px",
               background: "#ffffff",
-              padding: "1rem",
+              padding: isMobile ? "0.5rem" : "1rem",
               borderRadius: "0.5rem",
               boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
               textAlign: "center",
+              fontSize: isMobile ? "0.75rem" : "0.875rem",
             }}
           >
             <FontAwesomeIcon icon={faTicketAlt} size="lg" color="#374151" />
@@ -169,12 +208,13 @@ function BookingDetails({ user, signOut }) {
           </div>
           <div
             style={{
-              flex: "1 1 150px",
+              flex: isMobile ? "1 1 100px" : "1 1 150px",
               background: "#ffffff",
-              padding: "1rem",
+              padding: isMobile ? "0.5rem" : "1rem",
               borderRadius: "0.5rem",
               boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
               textAlign: "center",
+              fontSize: isMobile ? "0.75rem" : "0.875rem",
             }}
           >
             <FontAwesomeIcon icon={faUsers} size="lg" color="#374151" />
@@ -185,23 +225,69 @@ function BookingDetails({ user, signOut }) {
           </div>
         </div>
 
-        <div className="table-wrapper">
-          <table className="events-table">
+        <div
+          className="table-wrapper"
+          style={{ maxWidth: "100%", overflowX: "auto" }}
+        >
+          <table
+            className="events-table"
+            style={{
+              width: "100%",
+              maxWidth: "100%",
+              fontSize: isMobile ? "0.65rem" : "0.875rem",
+            }}
+          >
             <thead>
               <tr>
-                <th scope="col" style={{ width: "10%" }}>
+                <th
+                  scope="col"
+                  style={{
+                    width: isMobile ? "8%" : "10%",
+                    padding: isMobile ? "0.3rem" : "0.75rem",
+                  }}
+                >
                   Sr.No.
                 </th>
-                <th scope="col" style={{ width: "25%" }}>
+                <th
+                  scope="col"
+                  style={{
+                    width: isMobile ? "25%" : "25%",
+                    padding: isMobile ? "0.3rem" : "0.75rem",
+                  }}
+                >
                   Booking Name
                 </th>
-                <th scope="col" style={{ width: "15%" }}>
+                <th
+                  scope="col"
+                  style={{
+                    width: isMobile ? "12%" : "15%",
+                    padding: isMobile ? "0.3rem" : "0.75rem",
+                  }}
+                >
                   Tickets Booked
                 </th>
-                <th scope="col" style={{ width: "25%" }}>
+                <th
+                  scope="col"
+                  style={{
+                    width: isMobile ? "25%" : "25%",
+                    padding: isMobile ? "0.3rem" : "0.75rem",
+                    textOverflow: "ellipsis",
+                    overflow: "hidden",
+                    whiteSpace: "nowrap",
+                  }}
+                >
                   Email
                 </th>
-                <th scope="col" style={{ width: "25%" }}>
+                <th
+                  scope="col"
+                  style={{
+                    width: isMobile ? "25%" : "25%",
+                    padding: isMobile ? "0.3rem" : "0.75rem",
+                    textOverflow: "ellipsis",
+                    overflow: "hidden",
+                    whiteSpace: "nowrap",
+                  }}
+                >
                   Phone
                 </th>
               </tr>
@@ -211,7 +297,10 @@ function BookingDetails({ user, signOut }) {
                 <tr>
                   <td
                     colSpan="5"
-                    style={{ textAlign: "center", padding: "2rem" }}
+                    style={{
+                      textAlign: "center",
+                      padding: isMobile ? "1rem" : "2rem",
+                    }}
                   >
                     No bookings found.
                   </td>
@@ -219,11 +308,35 @@ function BookingDetails({ user, signOut }) {
               ) : (
                 bookings.map((booking, index) => (
                   <tr key={booking.BookingID}>
-                    <td>{index + 1}</td>
-                    <td>{booking.BookingName || "N/A"}</td>
-                    <td>{booking.SeatsBooked || 0}</td>
-                    <td>{booking.BookingEmail || "N/A"}</td>
-                    <td>{booking.BookingContact || "N/A"}</td>
+                    <td style={{ padding: isMobile ? "0.3rem" : "0.75rem" }}>
+                      {index + 1}
+                    </td>
+                    <td style={{ padding: isMobile ? "0.3rem" : "0.75rem" }}>
+                      {booking.BookingName || "N/A"}
+                    </td>
+                    <td style={{ padding: isMobile ? "0.3rem" : "0.75rem" }}>
+                      {booking.SeatsBooked || 0}
+                    </td>
+                    <td
+                      style={{
+                        padding: isMobile ? "0.3rem" : "0.75rem",
+                        textOverflow: "ellipsis",
+                        overflow: "hidden",
+                        whiteSpace: "nowrap",
+                      }}
+                    >
+                      {booking.BookingEmail || "N/A"}
+                    </td>
+                    <td
+                      style={{
+                        padding: isMobile ? "0.3rem" : "0.75rem",
+                        textOverflow: "ellipsis",
+                        overflow: "hidden",
+                        whiteSpace: "nowrap",
+                      }}
+                    >
+                      {booking.BookingContact || "N/A"}
+                    </td>
                   </tr>
                 ))
               )}
@@ -231,11 +344,21 @@ function BookingDetails({ user, signOut }) {
           </table>
         </div>
 
-        <div className="footer-buttons">
+        <div
+          className="footer-buttons"
+          style={{
+            flexDirection: isMobile ? "column" : "row",
+            gap: isMobile ? "0.5rem" : "0.75rem",
+          }}
+        >
           <button
             className="footer-btn"
             onClick={handleBack}
             aria-label="Go back to previous page"
+            style={{
+              fontSize: isMobile ? "0.65rem" : "0.875rem",
+              padding: isMobile ? "0.4rem 0.8rem" : "0.5rem 1rem",
+            }}
           >
             <FontAwesomeIcon icon={faArrowLeft} /> Back
           </button>
@@ -243,6 +366,10 @@ function BookingDetails({ user, signOut }) {
             className="footer-btn"
             onClick={handlePrint}
             aria-label="Print booking details"
+            style={{
+              fontSize: isMobile ? "0.65rem" : "0.875rem",
+              padding: isMobile ? "0.4rem 0.8rem" : "0.5rem 1rem",
+            }}
           >
             <FontAwesomeIcon icon={faPrint} /> Print
           </button>

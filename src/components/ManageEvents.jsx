@@ -23,6 +23,7 @@ function ManageEvents({ user, signOut }) {
   const [isLoading, setIsLoading] = useState(true);
 
   const eventsPerPage = 5;
+  const isMobile = window.innerWidth <= 767;
 
   const fetchEvents = async () => {
     setIsLoading(true);
@@ -146,7 +147,10 @@ function ManageEvents({ user, signOut }) {
   const totalPages = Math.ceil(events.length / eventsPerPage);
 
   return (
-    <div className="manage-events-page">
+    <div
+      className="manage-events-page"
+      style={{ maxWidth: "100%", overflowX: "hidden" }}
+    >
       {isLoading && (
         <div className="loading-overlay">
           <div className="spinner"></div>
@@ -156,37 +160,117 @@ function ManageEvents({ user, signOut }) {
         ☰
       </button>
       <Sidebar user={user} signOut={signOut} isOpen={isSidebarOpen} />
-      <main className={`events-content ${isSidebarOpen ? "sidebar-open" : ""}`}>
+      <main
+        className={`events-content ${isSidebarOpen ? "sidebar-open" : ""}`}
+        style={{
+          maxWidth: "100%",
+          padding: isMobile ? "0.5rem" : "0.75rem",
+          paddingTop: isMobile ? "2.5rem" : "0.75rem",
+        }}
+      >
         <h2 className="events-title">Manage Events</h2>
 
-        <div className="event-details">
+        <div
+          className="event-details"
+          style={{ padding: isMobile ? "0.5rem" : "0.75rem" }}
+        >
           <h3 className="booking-subtitle">Event List</h3>
-          <div className="table-wrapper">
-            <table className="events-table">
+          <div
+            className="table-wrapper"
+            style={{ maxWidth: "100%", overflowX: "auto" }}
+          >
+            <table
+              className="events-table"
+              style={{
+                width: "100%",
+                maxWidth: "100%",
+                fontSize: isMobile ? "0.65rem" : "0.875rem",
+              }}
+            >
               <thead>
                 <tr>
-                  <th scope="col" onClick={() => handleSort("id")}>
+                  <th
+                    scope="col"
+                    onClick={() => handleSort("id")}
+                    style={{
+                      width: isMobile ? "8%" : "5%",
+                      padding: isMobile ? "0.3rem" : "0.75rem",
+                    }}
+                  >
                     Sr.No.
                   </th>
-                  <th scope="col" onClick={() => handleSort("ReadableEventID")}>
+                  <th
+                    scope="col"
+                    onClick={() => handleSort("ReadableEventID")}
+                    style={{
+                      width: isMobile ? "12%" : "10%",
+                      padding: isMobile ? "0.3rem" : "0.75rem",
+                    }}
+                  >
                     Event ID
                   </th>
-                  <th scope="col" onClick={() => handleSort("EventTitle")}>
+                  <th
+                    scope="col"
+                    onClick={() => handleSort("EventTitle")}
+                    style={{
+                      width: isMobile ? "25%" : "20%",
+                      padding: isMobile ? "0.3rem" : "0.75rem",
+                    }}
+                  >
                     Event Name
                   </th>
-                  <th scope="col" onClick={() => handleSort("EventDate")}>
+                  <th
+                    scope="col"
+                    onClick={() => handleSort("EventDate")}
+                    style={{
+                      width: isMobile ? "20%" : "15%",
+                      padding: isMobile ? "0.3rem" : "0.75rem",
+                      maxWidth: isMobile ? "auto" : "150px",
+                    }}
+                  >
                     Date & Time
                   </th>
-                  <th scope="col" onClick={() => handleSort("EventStatus")}>
+                  <th
+                    scope="col"
+                    onClick={() => handleSort("EventStatus")}
+                    style={{
+                      width: isMobile ? "15%" : "10%",
+                      padding: isMobile ? "0.3rem" : "0.75rem",
+                    }}
+                  >
                     Status
                   </th>
-                  <th scope="col" onClick={() => handleSort("Seats")}>
+                  <th
+                    scope="col"
+                    onClick={() => handleSort("Seats")}
+                    style={{
+                      width: isMobile ? "0%" : "10%",
+                      padding: isMobile ? "0.3rem" : "0.75rem",
+                      display: isMobile ? "none" : "table-cell",
+                    }}
+                  >
                     Seats
                   </th>
-                  <th scope="col" onClick={() => handleSort("TicketsBooked")}>
+                  <th
+                    scope="col"
+                    onClick={() => handleSort("TicketsBooked")}
+                    style={{
+                      width: isMobile ? "0%" : "10%",
+                      padding: isMobile ? "0.3rem" : "0.75rem",
+                      display: isMobile ? "none" : "table-cell",
+                    }}
+                  >
                     Tickets Booked
                   </th>
-                  <th scope="col">Actions</th>
+                  <th
+                    scope="col"
+                    style={{
+                      width: isMobile ? "20%" : "20%",
+                      padding: isMobile ? "0.3rem" : "0.75rem",
+                    }}
+                  >
+                    Actions
+                  </th>
                 </tr>
               </thead>
               <tbody>
@@ -194,7 +278,10 @@ function ManageEvents({ user, signOut }) {
                   <tr>
                     <td
                       colSpan="8"
-                      style={{ textAlign: "center", padding: "0.75rem" }}
+                      style={{
+                        textAlign: "center",
+                        padding: isMobile ? "0.5rem" : "0.75rem",
+                      }}
                     >
                       No events found.
                     </td>
@@ -202,22 +289,47 @@ function ManageEvents({ user, signOut }) {
                 ) : (
                   currentEvents.map((event, index) => (
                     <tr key={event.id}>
-                      <td>{(currentPage - 1) * eventsPerPage + index + 1}</td>
-                      <td>{event.ReadableEventID}</td>
-                      <td>{event.EventTitle}</td>
-                      <td>{formatDateTime(event.EventDate)}</td>
-                      <td>{event.EventStatus}</td>
-                      <td>{event.Seats}</td>
-                      <td>{event.TicketsBooked}</td>
+                      <td style={{ padding: isMobile ? "0.3rem" : "0.75rem" }}>
+                        {(currentPage - 1) * eventsPerPage + index + 1}
+                      </td>
+                      <td style={{ padding: isMobile ? "0.3rem" : "0.75rem" }}>
+                        {event.ReadableEventID}
+                      </td>
+                      <td style={{ padding: isMobile ? "0.3rem" : "0.75rem" }}>
+                        {event.EventTitle}
+                      </td>
+                      <td style={{ padding: isMobile ? "0.3rem" : "0.75rem" }}>
+                        {formatDateTime(event.EventDate)}
+                      </td>
+                      <td style={{ padding: isMobile ? "0.3rem" : "0.75rem" }}>
+                        {event.EventStatus}
+                      </td>
+                      <td
+                        style={{
+                          padding: isMobile ? "0.3rem" : "0.75rem",
+                          display: isMobile ? "none" : "table-cell",
+                        }}
+                      >
+                        {event.Seats}
+                      </td>
+                      <td
+                        style={{
+                          padding: isMobile ? "0.3rem" : "0.75rem",
+                          display: isMobile ? "none" : "table-cell",
+                        }}
+                      >
+                        {event.TicketsBooked}
+                      </td>
                       <td
                         className="action-buttons"
                         style={{
                           display: "flex",
-                          gap: "0.2rem",
+                          gap: "0.2rem !important",
                           justifyContent: "center",
-                          flexWrap: "nowrap",
-                          minWidth: "auto",
-                          overflow: "visible",
+                          flexWrap: "nowrap !important",
+                          minWidth: "auto !important",
+                          overflow: "visible !important",
+                          padding: isMobile ? "0.3rem" : "0.75rem",
                         }}
                       >
                         <button
@@ -227,11 +339,15 @@ function ManageEvents({ user, signOut }) {
                             handleViewBookingDetails(event.EventID)
                           }
                           aria-label="View booking details"
-                          style={{ width: "1rem", height: "1rem" }}
+                          style={{
+                            width: isMobile ? "0.9rem" : "1rem",
+                            height: isMobile ? "0.9rem" : "1rem",
+                            padding: "0",
+                          }}
                         >
                           <FontAwesomeIcon
                             icon={faEye}
-                            style={{ fontSize: "0.7rem" }}
+                            style={{ fontSize: isMobile ? "0.6rem" : "0.7rem" }}
                           />
                         </button>
                         <button
@@ -241,11 +357,15 @@ function ManageEvents({ user, signOut }) {
                             handleActionButtonClick(event, "Publish")
                           }
                           aria-label="Publish event"
-                          style={{ width: "1rem", height: "1rem" }}
+                          style={{
+                            width: isMobile ? "0.9rem" : "1rem",
+                            height: isMobile ? "0.9rem" : "1rem",
+                            padding: "0",
+                          }}
                         >
                           <FontAwesomeIcon
                             icon={faPaperPlane}
-                            style={{ fontSize: "0.7rem" }}
+                            style={{ fontSize: isMobile ? "0.6rem" : "0.7rem" }}
                           />
                         </button>
                         <button
@@ -253,11 +373,15 @@ function ManageEvents({ user, signOut }) {
                           title="Edit Event Details"
                           onClick={() => handleActionButtonClick(event, "Edit")}
                           aria-label="Edit event"
-                          style={{ width: "1rem", height: "1rem" }}
+                          style={{
+                            width: isMobile ? "0.9rem" : "1rem",
+                            height: isMobile ? "0.9rem" : "1rem",
+                            padding: "0",
+                          }}
                         >
                           <FontAwesomeIcon
                             icon={faEdit}
-                            style={{ fontSize: "0.7rem" }}
+                            style={{ fontSize: isMobile ? "0.6rem" : "0.7rem" }}
                           />
                         </button>
                         <button
@@ -267,11 +391,15 @@ function ManageEvents({ user, signOut }) {
                             handleActionButtonClick(event, "Cancel")
                           }
                           aria-label="Cancel event"
-                          style={{ width: "1rem", height: "1rem" }}
+                          style={{
+                            width: isMobile ? "0.9rem" : "1rem",
+                            height: isMobile ? "0.9rem" : "1rem",
+                            padding: "0",
+                          }}
                         >
                           <FontAwesomeIcon
                             icon={faStopCircle}
-                            style={{ fontSize: "0.7rem" }}
+                            style={{ fontSize: isMobile ? "0.6rem" : "0.7rem" }}
                           />
                         </button>
                         <button
@@ -281,11 +409,15 @@ function ManageEvents({ user, signOut }) {
                             handleActionButtonClick(event, "Delete")
                           }
                           aria-label="Delete event"
-                          style={{ width: "1rem", height: "1rem" }}
+                          style={{
+                            width: isMobile ? "0.9rem" : "1rem",
+                            height: isMobile ? "0.9rem" : "1rem",
+                            padding: "0",
+                          }}
                         >
                           <FontAwesomeIcon
                             icon={faTrash}
-                            style={{ fontSize: "0.7rem" }}
+                            style={{ fontSize: isMobile ? "0.6rem" : "0.7rem" }}
                           />
                         </button>
                       </td>
@@ -297,16 +429,29 @@ function ManageEvents({ user, signOut }) {
           </div>
         </div>
 
-        <div className="footer-buttons">
+        <div
+          className="footer-buttons"
+          style={{
+            flexDirection: isMobile ? "column" : "row",
+            gap: isMobile ? "0.5rem" : "0.75rem",
+          }}
+        >
           <button
             className="footer-btn"
             onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
             disabled={currentPage === 1}
             aria-label="Previous page"
+            style={{
+              fontSize: isMobile ? "0.65rem" : "0.875rem",
+              padding: isMobile ? "0.4rem 0.8rem" : "0.5rem 1rem",
+            }}
           >
             <FontAwesomeIcon icon={faArrowLeft} /> Previous
           </button>
-          <span className="pagination-info">
+          <span
+            className="pagination-info"
+            style={{ fontSize: isMobile ? "0.65rem" : "0.875rem" }}
+          >
             Page {currentPage} of {totalPages}
           </span>
           <button
@@ -316,6 +461,10 @@ function ManageEvents({ user, signOut }) {
             }
             disabled={currentPage === totalPages}
             aria-label="Next page"
+            style={{
+              fontSize: isMobile ? "0.65rem" : "0.875rem",
+              padding: isMobile ? "0.4rem 0.8rem" : "0.5rem 1rem",
+            }}
           >
             Next <FontAwesomeIcon icon={faArrowRight} />
           </button>

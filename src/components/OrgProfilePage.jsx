@@ -5,6 +5,7 @@ import "../styles/OrgProfilePage.css";
 import { GetCollegeList } from "../api/eventApi";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faImage } from "@fortawesome/free-solid-svg-icons";
+import citiesData from "../data/cities.json"; // Correct path for src/data/cities.json
 
 function OrgProfilePage({ user, signOut }) {
   const [formData, setFormData] = useState({
@@ -23,6 +24,8 @@ function OrgProfilePage({ user, signOut }) {
     associatedCollegeUniversity: "",
     termsAccepted: false,
     collegeSearchText: "",
+    latitude: "",
+    longitude: "",
   });
   const [errors, setErrors] = useState({});
   const [citySuggestions, setCitySuggestions] = useState([]);
@@ -30,12 +33,34 @@ function OrgProfilePage({ user, signOut }) {
   const [collegeSuggestions, setCollegeSuggestions] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [isCitySelected, setIsCitySelected] = useState(false); // New state to track city selection
+
+  const isMobile = window.innerWidth <= 767;
+  const isSmallScreen = window.innerHeight <= 800 || window.innerWidth <= 1366;
 
   const majorCities = useMemo(
     () => [
-      { cityName: "Pune", cityId: "1259229", state: "Maharashtra" },
-      { cityName: "Mumbai", cityId: "1275339", state: "Maharashtra" },
-      { cityName: "Delhi", cityId: "1273294", state: "Delhi" },
+      {
+        cityName: "Pune",
+        cityId: "1259229",
+        state: "Maharashtra",
+        latitude: "18.5204",
+        longitude: "73.8567",
+      },
+      {
+        cityName: "Mumbai",
+        cityId: "1275339",
+        state: "Maharashtra",
+        latitude: "19.0760",
+        longitude: "72.8777",
+      },
+      {
+        cityName: "Delhi",
+        cityId: "1273294",
+        state: "Delhi",
+        latitude: "28.7041",
+        longitude: "77.1025",
+      },
     ],
     []
   );
@@ -75,40 +100,46 @@ function OrgProfilePage({ user, signOut }) {
             termsAccepted: record.termsAccepted?.BOOL || false,
             logo: record.logoPath?.S || null,
             collegeSearchText: record.collegeName?.S || "",
+            latitude: record.latitude?.S || "",
+            longitude: record.longitude?.S || "",
           });
           if (!matchedCity && cityID) {
             setIsOtherCity(true);
+            setIsCitySelected(!!record.cityName?.S); // Set if city is pre-filled
           }
         }
       } catch (error) {
         setErrors({
-          general: "Error fetching profile details: " + error.message,
+          general: "Error fetching profile details.",
         });
       } finally {
         setIsLoading(false);
       }
     };
     loadProfile();
-  }, [user, majorCities]);
+  }, [majorCities]);
 
-  const fetchCitySuggestions = async (query) => {
-    const username = "tikto_city";
-    const url = `http://api.geonames.org/searchJSON?q=${query}&maxRows=10&username=${username}&country=IN`;
-    try {
-      const response = await fetch(url);
-      if (!response.ok)
-        throw new Error(`HTTP error! Status: ${response.status}`);
-      const data = await response.json();
-      const cities = data.geonames
-        .filter((c) => c.countryCode === "IN")
-        .map((c) => ({
-          cityName: c.name,
-          cityId: c.geonameId.toString(),
-          state: c.adminName1 || "Unknown",
+  const fetchCitySuggestions = (query) => {
+    console.log("fetchCitySuggestions called with query:", query);
+    console.log("citiesData:", citiesData);
+    if (query.length > 2) {
+      const filteredCities = citiesData
+        .filter(
+          (city) =>
+            city.city_name?.toLowerCase().includes(query.toLowerCase()) ||
+            city.state_name?.toLowerCase().includes(query.toLowerCase())
+        )
+        .slice(0, 10)
+        .map((city) => ({
+          cityName: city.city_name,
+          cityId: city.city_id.toString(),
+          state: city.state_name,
+          latitude: city.latitude.toString(),
+          longitude: city.longitude.toString(),
         }));
-      setCitySuggestions(cities);
-    } catch (error) {
-      console.error("Error fetching GeoNames suggestions:", error.message);
+      console.log("Filtered cities:", filteredCities);
+      setCitySuggestions(filteredCities);
+    } else {
       setCitySuggestions([]);
     }
   };
@@ -138,6 +169,7 @@ function OrgProfilePage({ user, signOut }) {
     setErrors({ ...errors, cityID: "" });
     if (value === "Other") {
       setIsOtherCity(true);
+      setIsCitySelected(false); // Reset on selecting "Other"
       setFormData({
         ...formData,
         cityID: "",
@@ -146,19 +178,25 @@ function OrgProfilePage({ user, signOut }) {
         associatedCollegeUniversity: "",
         collegeID: "",
         collegeSearchText: "",
+        latitude: "",
+        longitude: "",
       });
+      setCitySuggestions([]);
       setCollegeSuggestions([]);
     } else {
       const selectedCity = majorCities.find((city) => city.cityId === value);
       setIsOtherCity(false);
+      setIsCitySelected(true); // City selected from dropdown
       setFormData({
         ...formData,
-        cityID: selectedCity.cityId,
-        cityName: selectedCity.cityName,
-        state: selectedCity.state,
+        cityID: value,
+        cityName: selectedCity?.cityName || "",
+        state: selectedCity?.state || "",
         associatedCollegeUniversity: "",
         collegeID: "",
         collegeSearchText: "",
+        latitude: selectedCity?.latitude || "",
+        longitude: selectedCity?.longitude || "",
       });
       setCitySuggestions([]);
       setCollegeSuggestions([]);
@@ -167,6 +205,7 @@ function OrgProfilePage({ user, signOut }) {
 
   const handleOtherCityChange = (e) => {
     const text = e.target.value;
+    console.log("handleOtherCityChange called with text:", text);
     setErrors({ ...errors, cityName: "" });
     setFormData({
       ...formData,
@@ -176,16 +215,15 @@ function OrgProfilePage({ user, signOut }) {
       associatedCollegeUniversity: "",
       collegeID: "",
       collegeSearchText: "",
+      latitude: "",
+      longitude: "",
     });
-    setCollegeSuggestions([]);
-    if (text.length > 2) {
-      fetchCitySuggestions(text);
-    } else {
-      setCitySuggestions([]);
-    }
+    setIsCitySelected(false); // User is typing, not selecting
+    fetchCitySuggestions(text);
   };
 
   const handleSuggestionSelect = (suggestion) => {
+    console.log("Selected suggestion:", suggestion);
     setFormData({
       ...formData,
       cityName: suggestion.cityName,
@@ -194,8 +232,11 @@ function OrgProfilePage({ user, signOut }) {
       associatedCollegeUniversity: "",
       collegeID: "",
       collegeSearchText: "",
+      latitude: suggestion.latitude,
+      longitude: suggestion.longitude,
     });
     setCitySuggestions([]);
+    setIsCitySelected(true); // Mark city as selected
     setCollegeSuggestions([]);
   };
 
@@ -310,6 +351,8 @@ function OrgProfilePage({ user, signOut }) {
       aboutOrganization: formData.aboutOrganization,
       associatedCollegeUniversity: formData.associatedCollegeUniversity,
       termsAccepted: formData.termsAccepted,
+      latitude: formData.latitude,
+      longitude: formData.longitude,
     };
 
     Object.keys(fieldsToSubmit).forEach((key) => {
@@ -337,7 +380,15 @@ function OrgProfilePage({ user, signOut }) {
   };
 
   return (
-    <div className="profile-page">
+    <div
+      className="profile-page"
+      style={{
+        maxWidth: "100%",
+        overflowX: "hidden",
+        minHeight: "100%",
+        height: "auto",
+      }}
+    >
       {isLoading && (
         <div className="loading-overlay">
           <div className="spinner"></div>
@@ -349,10 +400,37 @@ function OrgProfilePage({ user, signOut }) {
       <Sidebar user={user} signOut={signOut} isOpen={isSidebarOpen} />
       <main
         className={`profile-content ${isSidebarOpen ? "sidebar-open" : ""}`}
+        style={{
+          maxWidth: "100%",
+          minHeight: "100%",
+          height: "auto",
+          padding: isSmallScreen ? "0.5rem" : "0.75rem",
+          paddingTop: isMobile ? "2rem" : "0.75rem",
+        }}
       >
-        <h1 className="profile-title">Organizer Profile</h1>
-        <form onSubmit={handleSubmit} className="profile-form">
-          <div className="form-note">
+        <h1
+          className="profile-title"
+          style={{ fontSize: isSmallScreen ? "1.25rem" : "1.5rem" }}
+        >
+          Organizer Profile
+        </h1>
+        <form
+          onSubmit={handleSubmit}
+          className="profile-form"
+          style={{
+            maxWidth: "100%",
+            boxSizing: "border-box",
+            height: "auto",
+            maxHeight: "none",
+          }}
+        >
+          <div
+            className="form-note"
+            style={{
+              fontSize: isSmallScreen ? "0.75rem" : "0.875rem",
+              marginBottom: isSmallScreen ? "0.5rem" : "0.75rem",
+            }}
+          >
             <p>
               All fields marked with <span className="required">*</span> are
               mandatory.
@@ -362,17 +440,39 @@ function OrgProfilePage({ user, signOut }) {
                 className={`form-message ${
                   errors.general.includes("Success") ? "success" : "error"
                 }`}
+                style={{ fontSize: isSmallScreen ? "0.75rem" : "0.875rem" }}
               >
                 {errors.general}
               </p>
             )}
           </div>
-          <div className="form-grid">
-            <div className="form-group full-width logo-group">
-              <label>
+          <div
+            className="form-grid"
+            style={{
+              display: "flex",
+              flexWrap: "wrap",
+              gap: isSmallScreen ? "0.5rem" : "0.75rem",
+              maxWidth: "100%",
+              height: "auto",
+            }}
+          >
+            <div
+              className="form-group full-width logo-group"
+              style={{
+                flex: "1 1 100%",
+                maxWidth: "100%",
+                padding: isSmallScreen ? "0.5rem 0" : "0.75rem 0",
+              }}
+            >
+              <label
+                style={{ fontSize: isSmallScreen ? "0.75rem" : "0.875rem" }}
+              >
                 Logo <span className="required">*</span>
               </label>
-              <div className="logo-container">
+              <div
+                className="logo-container"
+                style={{ maxWidth: "100%", overflow: "hidden" }}
+              >
                 {formData.logo ? (
                   <img
                     src={
@@ -382,19 +482,55 @@ function OrgProfilePage({ user, signOut }) {
                     }
                     alt="Organization Logo"
                     className="logo-preview"
+                    style={{
+                      maxWidth: isSmallScreen ? "100px" : "150px",
+                      height: "auto",
+                      display: "block",
+                    }}
                   />
                 ) : (
-                  <div className="logo-placeholder">
+                  <div
+                    className="logo-placeholder"
+                    style={{
+                      maxWidth: isSmallScreen ? "100px" : "150px",
+                      height: isSmallScreen ? "100px" : "150px",
+                      fontSize: isSmallScreen ? "0.75rem" : "0.875rem",
+                    }}
+                  >
                     <FontAwesomeIcon icon={faImage} />
                     <span>No Logo Uploaded</span>
                   </div>
                 )}
-                <input type="file" name="logo" onChange={handleFileChange} />
-                {errors.logo && <p className="error">{errors.logo}</p>}
+                <input
+                  type="file"
+                  name="logo"
+                  onChange={handleFileChange}
+                  style={{
+                    fontSize: isSmallScreen ? "0.75rem" : "0.875rem",
+                    maxWidth: "100%",
+                  }}
+                />
+                {errors.logo && (
+                  <p
+                    className="error"
+                    style={{ fontSize: isSmallScreen ? "0.75rem" : "0.875rem" }}
+                  >
+                    {errors.logo}
+                  </p>
+                )}
               </div>
             </div>
-            <div className="form-group">
-              <label>
+            <div
+              className="form-group"
+              style={{
+                flex: isMobile ? "1 1 100%" : "1 1 45%",
+                maxWidth: "100%",
+                padding: isSmallScreen ? "0.5rem 0" : "0.75rem 0",
+              }}
+            >
+              <label
+                style={{ fontSize: isSmallScreen ? "0.75rem" : "0.875rem" }}
+              >
                 Organization/Host Name <span className="required">*</span>
               </label>
               <input
@@ -405,11 +541,32 @@ function OrgProfilePage({ user, signOut }) {
                 onChange={handleChange}
                 required
                 className={errors.name ? "error" : ""}
+                style={{
+                  maxWidth: "100%",
+                  boxSizing: "border-box",
+                  fontSize: isSmallScreen ? "0.75rem" : "0.875rem",
+                }}
               />
-              {errors.name && <p className="error">{errors.name}</p>}
+              {errors.name && (
+                <p
+                  className="error"
+                  style={{ fontSize: isSmallScreen ? "0.75rem" : "0.875rem" }}
+                >
+                  {errors.name}
+                </p>
+              )}
             </div>
-            <div className="form-group">
-              <label>
+            <div
+              className="form-group"
+              style={{
+                flex: isMobile ? "1 1 100%" : "1 1 45%",
+                maxWidth: "100%",
+                padding: isSmallScreen ? "0.5rem 0" : "0.75rem 0",
+              }}
+            >
+              <label
+                style={{ fontSize: isSmallScreen ? "0.75rem" : "0.875rem" }}
+              >
                 Contact Person <span className="required">*</span>
               </label>
               <input
@@ -420,13 +577,32 @@ function OrgProfilePage({ user, signOut }) {
                 onChange={handleChange}
                 required
                 className={errors.contactPerson ? "error" : ""}
+                style={{
+                  maxWidth: "100%",
+                  boxSizing: "border-box",
+                  fontSize: isSmallScreen ? "0.75rem" : "0.875rem",
+                }}
               />
               {errors.contactPerson && (
-                <p className="error">{errors.contactPerson}</p>
+                <p
+                  className="error"
+                  style={{ fontSize: isSmallScreen ? "0.75rem" : "0.875rem" }}
+                >
+                  {errors.contactPerson}
+                </p>
               )}
             </div>
-            <div className="form-group">
-              <label>
+            <div
+              className="form-group"
+              style={{
+                flex: isMobile ? "1 1 100%" : "1 1 45%",
+                maxWidth: "100%",
+                padding: isSmallScreen ? "0.5rem 0" : "0.75rem 0",
+              }}
+            >
+              <label
+                style={{ fontSize: isSmallScreen ? "0.75rem" : "0.875rem" }}
+              >
                 Contact Email <span className="required">*</span>
               </label>
               <input
@@ -437,13 +613,32 @@ function OrgProfilePage({ user, signOut }) {
                 onChange={handleChange}
                 required
                 className={errors.contactEmail ? "error" : ""}
+                style={{
+                  maxWidth: "100%",
+                  boxSizing: "border-box",
+                  fontSize: isSmallScreen ? "0.75rem" : "0.875rem",
+                }}
               />
               {errors.contactEmail && (
-                <p className="error">{errors.contactEmail}</p>
+                <p
+                  className="error"
+                  style={{ fontSize: isSmallScreen ? "0.75rem" : "0.875rem" }}
+                >
+                  {errors.contactEmail}
+                </p>
               )}
             </div>
-            <div className="form-group">
-              <label>
+            <div
+              className="form-group"
+              style={{
+                flex: isMobile ? "1 1 100%" : "1 1 45%",
+                maxWidth: "100%",
+                padding: isSmallScreen ? "0.5rem 0" : "0.75rem 0",
+              }}
+            >
+              <label
+                style={{ fontSize: isSmallScreen ? "0.75rem" : "0.875rem" }}
+              >
                 Contact Number <span className="required">*</span>
               </label>
               <input
@@ -454,13 +649,32 @@ function OrgProfilePage({ user, signOut }) {
                 onChange={handleChange}
                 required
                 className={errors.contactNumber ? "error" : ""}
+                style={{
+                  maxWidth: "100%",
+                  boxSizing: "border-box",
+                  fontSize: isSmallScreen ? "0.75rem" : "0.875rem",
+                }}
               />
               {errors.contactNumber && (
-                <p className="error">{errors.contactNumber}</p>
+                <p
+                  className="error"
+                  style={{ fontSize: isSmallScreen ? "0.75rem" : "0.875rem" }}
+                >
+                  {errors.contactNumber}
+                </p>
               )}
             </div>
-            <div className="form-group">
-              <label>
+            <div
+              className="form-group"
+              style={{
+                flex: isMobile ? "1 1 100%" : "1 1 45%",
+                maxWidth: "100%",
+                padding: isSmallScreen ? "0.5rem 0" : "0.75rem 0",
+              }}
+            >
+              <label
+                style={{ fontSize: isSmallScreen ? "0.75rem" : "0.875rem" }}
+              >
                 Alternate Number <span className="required">*</span>
               </label>
               <input
@@ -471,13 +685,32 @@ function OrgProfilePage({ user, signOut }) {
                 onChange={handleChange}
                 required
                 className={errors.alternateNumber ? "error" : ""}
+                style={{
+                  maxWidth: "100%",
+                  boxSizing: "border-box",
+                  fontSize: isSmallScreen ? "0.75rem" : "0.875rem",
+                }}
               />
               {errors.alternateNumber && (
-                <p className="error">{errors.alternateNumber}</p>
+                <p
+                  className="error"
+                  style={{ fontSize: isSmallScreen ? "0.75rem" : "0.875rem" }}
+                >
+                  {errors.alternateNumber}
+                </p>
               )}
             </div>
-            <div className="form-group">
-              <label>
+            <div
+              className="form-group"
+              style={{
+                flex: isMobile ? "1 1 100%" : "1 1 45%",
+                maxWidth: "100%",
+                padding: isSmallScreen ? "0.5rem 0" : "0.75rem 0",
+              }}
+            >
+              <label
+                style={{ fontSize: isSmallScreen ? "0.75rem" : "0.875rem" }}
+              >
                 City <span className="required">*</span>
               </label>
               <select
@@ -486,6 +719,11 @@ function OrgProfilePage({ user, signOut }) {
                 onChange={handleCityChange}
                 required
                 className={errors.cityID ? "error" : ""}
+                style={{
+                  maxWidth: "100%",
+                  boxSizing: "border-box",
+                  fontSize: isSmallScreen ? "0.75rem" : "0.875rem",
+                }}
               >
                 <option value="Select">Select City</option>
                 {majorCities.map((city) => (
@@ -495,11 +733,28 @@ function OrgProfilePage({ user, signOut }) {
                 ))}
                 <option value="Other">Other</option>
               </select>
-              {errors.cityID && <p className="error">{errors.cityID}</p>}
+              {errors.cityID && (
+                <p
+                  className="error"
+                  style={{ fontSize: isSmallScreen ? "0.75rem" : "0.875rem" }}
+                >
+                  {errors.cityID}
+                </p>
+              )}
             </div>
             {isOtherCity && (
-              <div className="form-group">
-                <label>
+              <div
+                className="form-group"
+                style={{
+                  flex: isMobile ? "1 1 100%" : "1 1 45%",
+                  maxWidth: "100%",
+                  padding: isSmallScreen ? "0.5rem 0" : "0.75rem 0",
+                  position: "relative",
+                }}
+              >
+                <label
+                  style={{ fontSize: isSmallScreen ? "0.75rem" : "0.875rem" }}
+                >
                   Other City <span className="required">*</span>
                 </label>
                 <input
@@ -507,27 +762,84 @@ function OrgProfilePage({ user, signOut }) {
                   name="otherCity"
                   value={formData.cityName}
                   onChange={handleOtherCityChange}
-                  placeholder="Type city name..."
+                  placeholder="Type city or state name..."
                   className={`city-input ${errors.cityName ? "error" : ""}`}
+                  style={{
+                    maxWidth: "100%",
+                    boxSizing: "border-box",
+                    fontSize: isSmallScreen ? "0.75rem" : "0.875rem",
+                  }}
                 />
-                {citySuggestions.length > 0 && (
-                  <ul className="suggestions-list">
-                    {citySuggestions.map((suggestion) => (
+                {formData.cityName.length > 2 && !isCitySelected && (
+                  <ul
+                    className="suggestions-list"
+                    style={{
+                      maxWidth: "100%",
+                      boxSizing: "border-box",
+                      fontSize: isSmallScreen ? "0.75rem" : "0.875rem",
+                      position: "absolute",
+                      background: "white",
+                      border: "1px solid #ccc",
+                      listStyle: "none",
+                      padding: 0,
+                      margin: 0,
+                      zIndex: 1000,
+                      maxHeight: "200px",
+                      overflowY: "auto",
+                      width: "100%",
+                      boxShadow: "0 2px 4px rgba(0, 0, 0, 0.1)",
+                    }}
+                  >
+                    {citySuggestions.length > 0 ? (
+                      citySuggestions.map((suggestion) => (
+                        <li
+                          key={suggestion.cityId}
+                          onClick={() => handleSuggestionSelect(suggestion)}
+                          className="suggestion-item"
+                          style={{
+                            padding: "8px",
+                            cursor: "pointer",
+                            textOverflow: "ellipsis",
+                            overflow: "hidden",
+                            whiteSpace: "nowrap",
+                          }}
+                        >
+                          {`${suggestion.cityName}, ${suggestion.state}`}
+                        </li>
+                      ))
+                    ) : (
                       <li
-                        key={suggestion.cityId}
-                        onClick={() => handleSuggestionSelect(suggestion)}
-                        className="suggestion-item"
+                        style={{
+                          padding: "8px",
+                          color: "#888",
+                        }}
                       >
-                        {`${suggestion.cityName}, ${suggestion.state}`}
+                        No matching cities found
                       </li>
-                    ))}
+                    )}
                   </ul>
                 )}
-                {errors.cityName && <p className="error">{errors.cityName}</p>}
+                {errors.cityName && (
+                  <p
+                    className="error"
+                    style={{ fontSize: isSmallScreen ? "0.75rem" : "0.875rem" }}
+                  >
+                    {errors.cityName}
+                  </p>
+                )}
               </div>
             )}
-            <div className="form-group">
-              <label>
+            <div
+              className="form-group"
+              style={{
+                flex: isMobile ? "1 1 100%" : "1 1 45%",
+                maxWidth: "100%",
+                padding: isSmallScreen ? "0.5rem 0" : "0.75rem 0",
+              }}
+            >
+              <label
+                style={{ fontSize: isSmallScreen ? "0.75rem" : "0.875rem" }}
+              >
                 Address <span className="required">*</span>
               </label>
               <textarea
@@ -538,11 +850,32 @@ function OrgProfilePage({ user, signOut }) {
                 required
                 rows="2"
                 className={errors.address ? "error" : ""}
+                style={{
+                  maxWidth: "100%",
+                  boxSizing: "border-box",
+                  fontSize: isSmallScreen ? "0.75rem" : "0.875rem",
+                }}
               />
-              {errors.address && <p className="error">{errors.address}</p>}
+              {errors.address && (
+                <p
+                  className="error"
+                  style={{ fontSize: isSmallScreen ? "0.75rem" : "0.875rem" }}
+                >
+                  {errors.address}
+                </p>
+              )}
             </div>
-            <div className="form-group">
-              <label>
+            <div
+              className="form-group"
+              style={{
+                flex: isMobile ? "1 1 100%" : "1 1 45%",
+                maxWidth: "100%",
+                padding: isSmallScreen ? "0.5rem 0" : "0.75rem 0",
+              }}
+            >
+              <label
+                style={{ fontSize: isSmallScreen ? "0.75rem" : "0.875rem" }}
+              >
                 Associated with College/University{" "}
                 <span className="required">*</span>
               </label>
@@ -552,18 +885,37 @@ function OrgProfilePage({ user, signOut }) {
                 onChange={handleChange}
                 required
                 className={errors.associatedCollegeUniversity ? "error" : ""}
+                style={{
+                  maxWidth: "100%",
+                  boxSizing: "border-box",
+                  fontSize: isSmallScreen ? "0.75rem" : "0.875rem",
+                }}
               >
                 <option value="">Select</option>
                 <option value="Yes">Yes</option>
                 <option value="No">No</option>
               </select>
               {errors.associatedCollegeUniversity && (
-                <p className="error">{errors.associatedCollegeUniversity}</p>
+                <p
+                  className="error"
+                  style={{ fontSize: isSmallScreen ? "0.75rem" : "0.875rem" }}
+                >
+                  {errors.associatedCollegeUniversity}
+                </p>
               )}
             </div>
             {formData.associatedCollegeUniversity === "Yes" && (
-              <div className="form-group">
-                <label>
+              <div
+                className="form-group"
+                style={{
+                  flex: isMobile ? "1 1 100%" : "1 1 45%",
+                  maxWidth: "100%",
+                  padding: isSmallScreen ? "0.5rem 0" : "0.75rem 0",
+                }}
+              >
+                <label
+                  style={{ fontSize: isSmallScreen ? "0.75rem" : "0.875rem" }}
+                >
                   College Name <span className="required">*</span>
                 </label>
                 <input
@@ -576,14 +928,44 @@ function OrgProfilePage({ user, signOut }) {
                     errors.collegeSearchText ? "error" : ""
                   }`}
                   maxLength="100"
+                  style={{
+                    maxWidth: "100%",
+                    boxSizing: "border-box",
+                    fontSize: isSmallScreen ? "0.75rem" : "0.875rem",
+                  }}
                 />
                 {collegeSuggestions.length > 0 && (
-                  <ul className="suggestions-list">
+                  <ul
+                    className="suggestions-list"
+                    style={{
+                      maxWidth: "100%",
+                      boxSizing: "border-box",
+                      fontSize: isSmallScreen ? "0.75rem" : "0.875rem",
+                      position: "absolute",
+                      background: "white",
+                      border: "1px solid #ccc",
+                      listStyle: "none",
+                      padding: 0,
+                      margin: 0,
+                      zIndex: 1000,
+                      maxHeight: "200px",
+                      overflowY: "auto",
+                      width: "100%",
+                      boxShadow: "0 2px 4px rgba(0, 0, 0, 0.1)",
+                    }}
+                  >
                     {collegeSuggestions.map((college) => (
                       <li
                         key={college.CollegeID}
                         onClick={() => handleCollegeSuggestionSelect(college)}
                         className="suggestion-item"
+                        style={{
+                          padding: "8px",
+                          cursor: "pointer",
+                          textOverflow: "ellipsis",
+                          overflow: "hidden",
+                          whiteSpace: "nowrap",
+                        }}
                       >
                         {`${college.Name} (${college.Shortform})`}
                       </li>
@@ -591,12 +973,26 @@ function OrgProfilePage({ user, signOut }) {
                   </ul>
                 )}
                 {errors.collegeSearchText && (
-                  <p className="error">{errors.collegeSearchText}</p>
+                  <p
+                    className="error"
+                    style={{ fontSize: isSmallScreen ? "0.75rem" : "0.875rem" }}
+                  >
+                    {errors.collegeSearchText}
+                  </p>
                 )}
               </div>
             )}
-            <div className="form-group full-width">
-              <label>
+            <div
+              className="form-group full-width"
+              style={{
+                flex: "1 1 100%",
+                maxWidth: "100%",
+                padding: isSmallScreen ? "0.5rem 0" : "0.75rem 0",
+              }}
+            >
+              <label
+                style={{ fontSize: isSmallScreen ? "0.75rem" : "0.875rem" }}
+              >
                 About Organization <span className="required">*</span>
               </label>
               <textarea
@@ -604,19 +1000,41 @@ function OrgProfilePage({ user, signOut }) {
                 maxLength="300"
                 value={formData.aboutOrganization}
                 onChange={handleChange}
-                rows="4"
+                rows={isSmallScreen ? "3" : "4"}
                 required
                 className={errors.aboutOrganization ? "error" : ""}
+                style={{
+                  maxWidth: "100%",
+                  boxSizing: "border-box",
+                  fontSize: isSmallScreen ? "0.75rem" : "0.875rem",
+                }}
               />
-              <p className="char-count">
+              <p
+                className="char-count"
+                style={{ fontSize: isSmallScreen ? "0.75rem" : "0.875rem" }}
+              >
                 {formData.aboutOrganization.length}/300
               </p>
               {errors.aboutOrganization && (
-                <p className="error">{errors.aboutOrganization}</p>
+                <p
+                  className="error"
+                  style={{ fontSize: isSmallScreen ? "0.75rem" : "0.875rem" }}
+                >
+                  {errors.aboutOrganization}
+                </p>
               )}
             </div>
-            <div className="form-group full-width terms">
-              <label>
+            <div
+              className="form-group full-width terms"
+              style={{
+                flex: "1 1 100%",
+                maxWidth: "100%",
+                padding: isSmallScreen ? "0.5rem 0" : "0.75rem 0",
+              }}
+            >
+              <label
+                style={{ fontSize: isSmallScreen ? "0.75rem" : "0.875rem" }}
+              >
                 <input
                   type="checkbox"
                   name="termsAccepted"
@@ -624,6 +1042,7 @@ function OrgProfilePage({ user, signOut }) {
                   onChange={handleChange}
                   required
                   className={errors.termsAccepted ? "error" : ""}
+                  style={{ marginRight: "0.5rem" }}
                 />
                 <span>
                   I agree to the Terms and Conditions{" "}
@@ -631,11 +1050,30 @@ function OrgProfilePage({ user, signOut }) {
                 </span>
               </label>
               {errors.termsAccepted && (
-                <p className="error">{errors.termsAccepted}</p>
+                <p
+                  className="error"
+                  style={{ fontSize: isSmallScreen ? "0.75rem" : "0.875rem" }}
+                >
+                  {errors.termsAccepted}
+                </p>
               )}
             </div>
           </div>
-          <button type="submit" className="submit-btn" disabled={isLoading}>
+          <button
+            type="submit"
+            className="submit-btn"
+            disabled={isLoading}
+            style={{
+              maxWidth: isSmallScreen ? "100%" : "200px",
+              padding: isSmallScreen ? "0.4rem 0.8rem" : "0.5rem 1rem",
+              fontSize: isSmallScreen ? "0.75rem" : "0.875rem",
+              marginTop: isSmallScreen ? "0.5rem" : "0.75rem",
+              position: isSmallScreen ? "sticky" : "static",
+              bottom: isSmallScreen ? "1rem" : "auto",
+              zIndex: 10,
+              alignSelf: "center",
+            }}
+          >
             {isLoading ? "Updating..." : "Update Profile"}
           </button>
         </form>
