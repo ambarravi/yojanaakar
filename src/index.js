@@ -11,7 +11,7 @@ Amplify.configure({
       userPoolClientId: process.env.REACT_APP_POOL_CLIENT_ID,
       userPoolId: process.env.REACT_APP_COGNITO_USER_POOL_ID,
       mandatorySignIn: true, // Forces sign-in
-      hostedUI: true,
+      //  hostedUI: true,
       loginWith: {
         // Optional
         oauth: {
@@ -21,7 +21,7 @@ Amplify.configure({
           redirectSignOut: [process.env.REACT_APP_COGNITO_REDIRECT_SIGN_OUT],
           responseType: "code",
         },
-        username: "true",
+        //  username: "true",
       },
     },
   },

@@ -110,8 +110,9 @@ function AuthenticatedRoutes() {
 
   return (
     <Authenticator
+      loginMechanisms={[]}
       socialProviders={["google"]}
-      signUpAttributes={["phone_number"]}
+      hideSignUp={true}
     >
       {({ signOut, user }) => {
         if (!user) {
