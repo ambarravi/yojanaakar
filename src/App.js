@@ -27,6 +27,7 @@ import OrganizerLoginPage from "./components/OrganizerLoginPage.jsx";
 import OrganizerLandingPage from "./components/OrganizerLandingPage.jsx";
 import HostEvent from "./components/Hostevent.jsx";
 import ManageEvent from "./components/ManageEvents.jsx";
+import Subscription from "./components/Subscription.jsx";
 import OrgProfile from "./components/OrgProfilePage.jsx";
 import BookingDetails from "./components/BookingDetails.jsx";
 import AdminBookingDetails from "./components/admin/AdminBookingDetails.jsx";
@@ -35,6 +36,7 @@ import AdminEventDetails from "./components/admin/AdminEventDetails.jsx";
 import AdminEvents from "./components/admin/AdminEvents.jsx";
 import AdminMaster from "./components/admin/AdminMaster.jsx";
 import AdminManageUsers from "./components/admin/AdminManage_users.jsx";
+import TermsAndConditions from "./components/TermsAndConditions.jsx";
 
 import { AuthProvider } from "./context/AuthContext.js";
 import { updateRole } from "./api/userApi";
@@ -136,7 +138,8 @@ function AuthenticatedRoutes() {
               />
               <Route path="/host-event" element={<HostEvent />} />
               <Route path="/manage-events" element={<ManageEvent />} />
-              <Route path="/manage-events" element={<ManageEvent />} />
+              <Route path="/subscription" element={<Subscription />} />
+
               <Route
                 path="/showBookingDetails/:eventId"
                 element={<BookingDetails user={user} signOut={signOut} />}
@@ -191,6 +194,10 @@ function App() {
             <Route path="/" element={<EventsPage />} />
             <Route path="/organizer-login" element={<OrganizerLoginPage />} />
             <Route path="*" element={<AuthenticatedRoutes />} />
+            <Route
+              path="/terms-and-conditions"
+              element={<TermsAndConditions />}
+            />
           </Routes>
         </Router>
       </AuthProvider>

@@ -37,6 +37,10 @@ function EventsPage() {
     const redirectUri = process.env.REACT_APP_COGNITO_REDIRECT_SIGN_IN;
 
     const loginUrl = `https://${domain}/login?client_id=${clientId}&response_type=code&scope=email+openid+profile&redirect_uri=${redirectUri}`;
+    // const loginUrl = `https://${domain}/oauth2/authorize?identity_provider=Google&response_type=code&client_id=${clientId}&redirect_uri=${encodeURIComponent(
+    //   redirectUri
+    // )}&scope=email+openid+profile`;
+
     window.location.href = loginUrl;
   };
 

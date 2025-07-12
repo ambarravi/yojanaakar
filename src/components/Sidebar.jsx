@@ -115,8 +115,8 @@ const Sidebar = ({ user: propUser, signOut: propSignOut, isOpen }) => {
             </Link>
           </li>
           <li>
-            <Link to="/dashboard">
-              <i className="bi bi-speedometer2"></i> Dashboard
+            <Link to="/subscription">
+              <i className="bi bi-speedometer2"></i> Subscription
             </Link>
           </li>
           <li>

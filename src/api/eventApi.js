@@ -311,6 +311,50 @@ export const fetchEventDetailsByOrgID = async () => {
   }
 };
 
+export const fetchDashboardData = async () => {
+  try {
+    console.log("Fetching dashboard data...");
+
+    // Get current Cognito session
+    const session = await fetchAuthSession();
+    const orgID = session.tokens.idToken.payload["cognito:username"];
+
+    const dataToSend = { orgID }; // Payload to send
+
+    const apiUrl =
+      process.env.REACT_APP_API_BASE_URL +
+      process.env.REACT_APP_STAGE +
+      "/get-dashboard-data";
+
+    const response = await fetch(apiUrl, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        // Authorization: `Bearer ${jwt}`, // Add if your API is protected
+      },
+      body: JSON.stringify(dataToSend),
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.message || "Failed to fetch dashboard data");
+    }
+
+    const result = await response.json();
+
+    if (response.status === 200) {
+      console.log("Dashboard data fetched successfully!");
+    } else {
+      console.warn("Unexpected status in dashboard fetch:", result);
+    }
+
+    return result;
+  } catch (error) {
+    console.error("Error fetching dashboard data:", error.message);
+    throw error;
+  }
+};
+
 export const fetchEventDetailsByEventID = async (eventID) => {
   try {
     // Fetch the current session

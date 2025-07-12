@@ -1045,7 +1045,15 @@ function OrgProfilePage({ user, signOut }) {
                   style={{ marginRight: "0.5rem" }}
                 />
                 <span>
-                  I agree to the Terms and Conditions{" "}
+                  I agree to the{" "}
+                  <a
+                    href="/terms-and-conditions"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    style={{ color: "#007bff", textDecoration: "underline" }}
+                  >
+                    Terms and Conditions
+                  </a>{" "}
                   <span className="required">*</span>
                 </span>
               </label>
