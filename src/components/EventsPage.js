@@ -1,5 +1,5 @@
 import React from "react";
-//import { useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { View } from "@aws-amplify/ui-react";
 import "../styles/Events.css";
 //import { Link } from "react-router-dom";
@@ -23,25 +23,25 @@ import appScreenshot4 from "../assets/images/Phone_frame_Booking_History.png";
 import appScreenshot5 from "../assets/images/Phone_frame_Feedback.png";
 
 function EventsPage() {
-  //const navigate = useNavigate();
+  const navigate = useNavigate();
 
   const handleOrganizerSignIn = () => {
-    // sessionStorage.setItem("tempRole", "organizer");
-    // localStorage.setItem("local_tempRole", "organizer");
-    // navigate("/organizer-landing");
+    sessionStorage.setItem("tempRole", "organizer");
+    localStorage.setItem("local_tempRole", "organizer");
+    navigate("/organizer-landing");
 
-    //  sessionStorage.setItem("tempRole", "organizer");
-    //  localStorage.setItem("local_tempRole", "organizer");
-    const domain = process.env.REACT_APP_COGNITO_OAUTH_DOMAIN;
-    const clientId = process.env.REACT_APP_POOL_CLIENT_ID;
-    const redirectUri = process.env.REACT_APP_COGNITO_REDIRECT_SIGN_IN;
+    // //  sessionStorage.setItem("tempRole", "organizer");
+    // //  localStorage.setItem("local_tempRole", "organizer");
+    // const domain = process.env.REACT_APP_COGNITO_OAUTH_DOMAIN;
+    // const clientId = process.env.REACT_APP_POOL_CLIENT_ID;
+    // const redirectUri = process.env.REACT_APP_COGNITO_REDIRECT_SIGN_IN;
 
-    const loginUrl = `https://${domain}/login?client_id=${clientId}&response_type=code&scope=email+openid+profile&redirect_uri=${redirectUri}`;
-    // const loginUrl = `https://${domain}/oauth2/authorize?identity_provider=Google&response_type=code&client_id=${clientId}&redirect_uri=${encodeURIComponent(
-    //   redirectUri
-    // )}&scope=email+openid+profile`;
+    // const loginUrl = `https://${domain}/login?client_id=${clientId}&response_type=code&scope=email+openid+profile&redirect_uri=${redirectUri}`;
+    // // const loginUrl = `https://${domain}/oauth2/authorize?identity_provider=Google&response_type=code&client_id=${clientId}&redirect_uri=${encodeURIComponent(
+    // //   redirectUri
+    // // )}&scope=email+openid+profile`;
 
-    window.location.href = loginUrl;
+    // window.location.href = loginUrl;
   };
 
   return (
