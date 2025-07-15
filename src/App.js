@@ -58,6 +58,7 @@ function AuthenticatedRoutes() {
         console.log("Current URL:", window.location.href);
 
         const session = await fetchAuthSession();
+        console.log("session" + JSON.stringify(session));
         const idToken = session.tokens?.idToken;
 
         if (!idToken) {

@@ -1,11 +1,72 @@
 import React, { useState, useEffect, useMemo } from "react";
+import { useNavigate } from "react-router-dom"; // Added for navigation
 import Sidebar from "./Sidebar";
 import { submitProfile, fetchProfileDetails } from "../api/organizerApi";
 import "../styles/OrgProfilePage.css";
 import { GetCollegeList } from "../api/eventApi";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faImage } from "@fortawesome/free-solid-svg-icons";
-import citiesData from "../data/cities.json"; // Correct path for src/data/cities.json
+import citiesData from "../data/cities.json";
+
+// Popup Component
+const Popup = ({ message, onClose }) => (
+  <div
+    style={{
+      position: "fixed",
+      top: 0,
+      left: 0,
+      width: "100%",
+      height: "100%",
+      background: "rgba(0, 0, 0, 0.5)",
+      display: "flex",
+      justifyContent: "center",
+      alignItems: "center",
+      zIndex: 1300, // Above sidebar (1100) and suggestions (1000)
+    }}
+  >
+    <div
+      style={{
+        background: "#ffffff",
+        padding: "1.5rem",
+        borderRadius: "0.5rem",
+        boxShadow: "0 4px 8px rgba(0, 0, 0, 0.2)",
+        textAlign: "center",
+        maxWidth: "400px",
+        width: "90%",
+      }}
+    >
+      <p
+        style={{
+          fontSize: "1rem",
+          fontWeight: 500,
+          color: "#1f2937",
+          marginBottom: "1rem",
+          fontFamily: "'Inter', sans-serif",
+        }}
+      >
+        {message}
+      </p>
+      <button
+        onClick={onClose}
+        style={{
+          padding: "0.5rem 1rem",
+          background: "#0d9488",
+          color: "#ffffff",
+          fontWeight: 500,
+          fontSize: "0.875rem",
+          border: "none",
+          borderRadius: "0.375rem",
+          cursor: "pointer",
+          transition: "background-color 0.2s ease",
+        }}
+        onMouseOver={(e) => (e.target.style.background = "#10b981")}
+        onMouseOut={(e) => (e.target.style.background = "#0d9488")}
+      >
+        OK
+      </button>
+    </div>
+  </div>
+);
 
 function OrgProfilePage({ user, signOut }) {
   const [formData, setFormData] = useState({
@@ -33,7 +94,11 @@ function OrgProfilePage({ user, signOut }) {
   const [collegeSuggestions, setCollegeSuggestions] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const [isCitySelected, setIsCitySelected] = useState(false); // New state to track city selection
+  const [isCitySelected, setIsCitySelected] = useState(false);
+  const [showPopup, setShowPopup] = useState(false); // Added for popup
+
+  // Navigation
+  const navigate = useNavigate();
 
   const isMobile = window.innerWidth <= 767;
   const isSmallScreen = window.innerHeight <= 800 || window.innerWidth <= 1366;
@@ -105,7 +170,7 @@ function OrgProfilePage({ user, signOut }) {
           });
           if (!matchedCity && cityID) {
             setIsOtherCity(true);
-            setIsCitySelected(!!record.cityName?.S); // Set if city is pre-filled
+            setIsCitySelected(!!record.cityName?.S);
           }
         }
       } catch (error) {
@@ -146,16 +211,29 @@ function OrgProfilePage({ user, signOut }) {
 
   const fetchCollegeSuggestions = async (query) => {
     if (!formData.cityName || !query) {
+      console.log(
+        "Skipping fetch: cityName:",
+        formData.cityName,
+        "query:",
+        query
+      );
       setCollegeSuggestions([]);
       return;
     }
     setIsLoading(true);
     try {
+      console.log(
+        "Fetching colleges for city:",
+        formData.cityName,
+        "query:",
+        query
+      );
       const collegeData = await GetCollegeList(
         formData.cityName.toLowerCase(),
         query.toLowerCase()
       );
-      setCollegeSuggestions(collegeData);
+      console.log("CollegeData", collegeData);
+      setCollegeSuggestions(collegeData || []);
     } catch (error) {
       console.error("Error fetching college suggestions:", error);
       setCollegeSuggestions([]);
@@ -169,7 +247,7 @@ function OrgProfilePage({ user, signOut }) {
     setErrors({ ...errors, cityID: "" });
     if (value === "Other") {
       setIsOtherCity(true);
-      setIsCitySelected(false); // Reset on selecting "Other"
+      setIsCitySelected(false);
       setFormData({
         ...formData,
         cityID: "",
@@ -186,7 +264,7 @@ function OrgProfilePage({ user, signOut }) {
     } else {
       const selectedCity = majorCities.find((city) => city.cityId === value);
       setIsOtherCity(false);
-      setIsCitySelected(true); // City selected from dropdown
+      setIsCitySelected(true);
       setFormData({
         ...formData,
         cityID: value,
@@ -218,7 +296,7 @@ function OrgProfilePage({ user, signOut }) {
       latitude: "",
       longitude: "",
     });
-    setIsCitySelected(false); // User is typing, not selecting
+    setIsCitySelected(false);
     fetchCitySuggestions(text);
   };
 
@@ -236,7 +314,7 @@ function OrgProfilePage({ user, signOut }) {
       longitude: suggestion.longitude,
     });
     setCitySuggestions([]);
-    setIsCitySelected(true); // Mark city as selected
+    setIsCitySelected(true);
     setCollegeSuggestions([]);
   };
 
@@ -367,12 +445,17 @@ function OrgProfilePage({ user, signOut }) {
 
     try {
       await submitProfile(formDataToSubmit, formData.logo);
-      setErrors({ general: "Profile Updated Successfully!" });
+      setShowPopup(true); // Show popup on success
     } catch (error) {
       setErrors({ general: "Error updating profile: " + error.message });
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handlePopupClose = () => {
+    setShowPopup(false);
+    navigate("/organizer-landing"); // Navigate to dashboard
   };
 
   const toggleSidebar = () => {
@@ -393,6 +476,9 @@ function OrgProfilePage({ user, signOut }) {
         <div className="loading-overlay">
           <div className="spinner"></div>
         </div>
+      )}
+      {showPopup && (
+        <Popup message="Profile Updated" onClose={handlePopupClose} />
       )}
       <button className="sidebar-toggle md:hidden" onClick={toggleSidebar}>
         ☰

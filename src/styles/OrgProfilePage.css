@@ -35,6 +35,10 @@ body {
   transition: transform 0.3s ease;
 }
 
+.profile-page .sidebar {
+  overflow: visible; /* Prevent clipping of suggestions-list */
+}
+
 .profile-page .sidebar.open {
   transform: translateX(0);
 }
@@ -88,6 +92,7 @@ body {
 .form-group {
   display: flex;
   flex-direction: column;
+  position: relative; /* Ensure suggestions-list positions relative to this */
 }
 
 .form-group label {
@@ -239,7 +244,7 @@ body {
 
 .suggestions-list {
   position: absolute;
-  top: 100%;
+  top: 100%; /* Align directly below the input */
   left: 0;
   width: 100%;
   max-height: 150px;
@@ -251,7 +256,7 @@ body {
   list-style: none;
   padding: 0;
   margin: 0.25rem 0 0;
-  z-index: 1000;
+  z-index: 1200; /* Higher than sidebar's z-index: 1100 */
 }
 
 .suggestion-item {
@@ -326,6 +331,55 @@ body {
   }
 }
 
+/* Popup Styles */
+.popup-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1300; /* Above sidebar (1100) and suggestions (1200) */
+}
+
+.popup-content {
+  background: #ffffff;
+  padding: 1.5rem;
+  border-radius: 0.5rem;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  text-align: center;
+  max-width: 400px;
+  width: 90%;
+}
+
+.popup-message {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #1f2937;
+  margin-bottom: 1rem;
+  font-family: "Inter", sans-serif;
+}
+
+.popup-btn {
+  display: inline-block;
+  padding: 0.5rem 1rem;
+  background: #0d9488;
+  color: #ffffff;
+  font-weight: 500;
+  font-size: 0.875rem;
+  border: none;
+  border-radius: 0.375rem;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.popup-btn:hover {
+  background: #10b981;
+}
+
 /* Responsive Design */
 @media (min-width: 640px) {
   .profile-title {
@@ -360,6 +414,15 @@ body {
   .submit-btn {
     font-size: 0.875rem;
   }
+
+  .popup-message {
+    font-size: 1rem;
+  }
+
+  .popup-btn {
+    font-size: 1rem;
+    padding: 0.75rem 1.5rem;
+  }
 }
 
 @media (max-width: 767px) {
@@ -380,6 +443,20 @@ body {
   .form-grid {
     grid-template-columns: 1fr;
   }
+
+  .popup-content {
+    padding: 1rem;
+    width: 95%;
+  }
+
+  .popup-message {
+    font-size: 0.75rem;
+  }
+
+  .popup-btn {
+    font-size: 0.75rem;
+    padding: 0.4rem 0.8rem;
+  }
 }
 
 @media (max-width: 480px) {
@@ -395,6 +472,10 @@ body {
   .profile-form {
     padding: 0.5rem;
   }
+
+  .popup-content {
+    padding: 0.75rem;
+  }
 }
 
 /* Print Styles */
@@ -407,5 +488,10 @@ body {
     margin-left: 0;
     padding: 0.5rem;
     background: #ffffff;
+  }
+
+  .popup-overlay,
+  .popup-content {
+    display: none; /* Hide popup when printing */
   }
 }

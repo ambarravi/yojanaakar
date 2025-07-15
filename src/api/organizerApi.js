@@ -8,7 +8,7 @@ export const fetchProfileDetails = async () => {
     console.log("Fetch Profiles details started");
 
     const session = await fetchAuthSession(); // Retrieves the session object
-    // const jwt = session.tokens.idToken.toString();
+    const jwt = session.tokens.idToken.toString();
     const username = session.tokens.idToken.payload["cognito:username"];
     // console.log("userName", username);
 
@@ -27,7 +27,7 @@ export const fetchProfileDetails = async () => {
     const response = await fetch(apiUrl, {
       method: "POST",
       headers: {
-        //   Authorization: `Bearer ${jwt}`, // Include the token if needed
+        Authorization: `Bearer ${jwt}`, // Include the token if needed
         "Content-Type": "application/json", // Send as JSON
       },
       body: JSON.stringify(dataToSend),

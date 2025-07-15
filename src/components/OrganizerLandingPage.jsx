@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import Sidebar from "./Sidebar";
 import { Pie, Doughnut } from "react-chartjs-2";
 import {
@@ -15,6 +15,7 @@ import "react-calendar/dist/Calendar.css";
 import "../styles/OrganizerLandingPage.css";
 import { isSameDay } from "date-fns";
 import { fetchDashboardData } from "../api/eventApi";
+import lottie from "lottie-web";
 
 ChartJS.register(
   ArcElement,
@@ -29,6 +30,8 @@ function OrganizerLandingPage({ user, signOut }) {
   const [dashboardData, setDashboardData] = useState(null);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [calendarDate, setCalendarDate] = useState(new Date());
+  const [animationData, setAnimationData] = useState(null);
+  const lottieContainer = useRef(null);
 
   useEffect(() => {
     const loadDashboardData = async () => {
@@ -43,12 +46,74 @@ function OrganizerLandingPage({ user, signOut }) {
     loadDashboardData();
   }, []);
 
+  useEffect(() => {
+    // Preload Lottie animation JSON
+    const loadAnimation = async () => {
+      try {
+        const response = await fetch(
+          "/animations/Isometric_data_analysis.json"
+        );
+        if (!response.ok) {
+          throw new Error(`Failed to fetch animation: ${response.statusText}`);
+        }
+        const data = await response.json();
+        setAnimationData(data);
+        console.log("Animation data loaded:", data); // Debugging log
+      } catch (error) {
+        console.error("Failed to load Lottie animation:", error.message);
+      }
+    };
+
+    loadAnimation();
+  }, []);
+
+  useEffect(() => {
+    if (!dashboardData && lottieContainer.current && animationData) {
+      lottie.loadAnimation({
+        container: lottieContainer.current,
+        renderer: "svg",
+        loop: true,
+        autoplay: true,
+        animationData: animationData, // Use preloaded JSON data
+      });
+
+      return () => {
+        lottie.destroy();
+      };
+    }
+  }, [dashboardData, animationData]);
+
   const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen);
   };
 
   if (!dashboardData) {
-    return <div className="p-6 text-gray-600">Loading dashboard...</div>;
+    return (
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          minHeight: "100vh",
+          backgroundColor: "#f7fafc",
+        }}
+      >
+        <div style={{ textAlign: "center" }}>
+          <div
+            ref={lottieContainer}
+            style={{
+              width: "min(50vw, 300px)",
+              height: "min(50vw, 300px)",
+            }}
+          ></div>
+          {!animationData && (
+            <span style={{ color: "#4b5563", fontSize: "16px" }}>
+              Loading dashboard...
+            </span>
+          )}
+        </div>
+      </div>
+    );
   }
 
   const pieChartData = {
