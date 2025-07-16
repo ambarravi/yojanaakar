@@ -3,6 +3,9 @@ import { fetchAuthSession } from "@aws-amplify/auth"; // Ensure correct import p
 export const GetCityList = () => {
   return new Promise(async (resolve, reject) => {
     try {
+      const session = await fetchAuthSession(); // Retrieves the session object
+      const jwt = session.tokens.idToken.toString();
+
       const baseUrl = process.env.REACT_APP_API_BASE_URL;
       const stage = process.env.REACT_APP_STAGE;
 
@@ -17,7 +20,7 @@ export const GetCityList = () => {
       const response = await fetch(apiUrl, {
         method: "GET",
         headers: {
-          // Authorization: `Bearer ${jwt}`, // Include the token if needed
+          Authorization: `Bearer ${jwt}`, // Include the token if needed
           "Content-Type": "application/json", // Send as JSON
         },
       });
@@ -39,6 +42,9 @@ export const GetCityList = () => {
 export const GetCategory = () => {
   return new Promise(async (resolve, reject) => {
     try {
+      const session = await fetchAuthSession(); // Retrieves the session object
+      const jwt = session.tokens.idToken.toString();
+
       const baseUrl = process.env.REACT_APP_API_BASE_URL;
       const stage = process.env.REACT_APP_STAGE;
 
@@ -53,7 +59,7 @@ export const GetCategory = () => {
       const response = await fetch(apiUrl, {
         method: "GET",
         headers: {
-          // Authorization: `Bearer ${jwt}`, // Include the token if needed
+          Authorization: `Bearer ${jwt}`, // Include the token if needed
           "Content-Type": "application/json", // Send as JSON
         },
       });
@@ -78,6 +84,9 @@ export const GetCategory = () => {
 export const GetCollegeList = (city, searchText) => {
   return new Promise(async (resolve, reject) => {
     try {
+      const session = await fetchAuthSession(); // Retrieves the session object
+      const jwt = session.tokens.idToken.toString();
+
       const baseUrl = process.env.REACT_APP_API_BASE_URL;
       const stage = process.env.REACT_APP_STAGE;
 
@@ -92,7 +101,7 @@ export const GetCollegeList = (city, searchText) => {
       const response = await fetch(apiUrl, {
         method: "GET",
         headers: {
-          // Authorization: `Bearer ${jwt}`, // Include the token if needed
+          Authorization: `Bearer ${jwt}`, // Include the token if needed
           "Content-Type": "application/json", // Send as JSON
         },
       });
@@ -118,7 +127,7 @@ export const submitEvent = (eventData, organizerName) => {
   return new Promise(async (resolve, reject) => {
     try {
       const session = await fetchAuthSession(); // Retrieves the session object
-      // const jwt = session.tokens.idToken.toString();
+      const jwt = session.tokens.idToken.toString();
       const username = session.tokens.idToken.payload["cognito:username"];
 
       const oldImageArray = [];
@@ -197,6 +206,7 @@ export const submitEvent = (eventData, organizerName) => {
       const response = await fetch(url, {
         method: "POST",
         headers: {
+          Authorization: `Bearer ${jwt}`, // Include the token if needed
           "Content-Type": "application/json",
         },
         body: JSON.stringify(eventPayload),
@@ -265,7 +275,7 @@ export const fetchEventDetailsByOrgID = async () => {
     console.log("Fetch Profiles details started");
 
     const session = await fetchAuthSession(); // Retrieves the session object
-    //  const jwt = session.tokens.idToken.toString();
+    const jwt = session.tokens.idToken.toString();
     const orgID = session.tokens.idToken.payload["cognito:username"];
     // console.log("userName", orgID);
 
@@ -284,7 +294,7 @@ export const fetchEventDetailsByOrgID = async () => {
     const response = await fetch(apiUrl, {
       method: "POST",
       headers: {
-        //   Authorization: `Bearer ${jwt}`, // Include the token if needed
+        Authorization: `Bearer ${jwt}`, // Include the token if needed
         "Content-Type": "application/json", // Send as JSON
       },
       body: JSON.stringify(dataToSend),
@@ -316,7 +326,9 @@ export const fetchDashboardData = async () => {
     console.log("Fetching dashboard data...");
 
     // Get current Cognito session
+
     const session = await fetchAuthSession();
+    const jwt = session.tokens.idToken.toString();
     const orgID = session.tokens.idToken.payload["cognito:username"];
 
     const dataToSend = { orgID }; // Payload to send
@@ -330,7 +342,7 @@ export const fetchDashboardData = async () => {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        // Authorization: `Bearer ${jwt}`, // Add if your API is protected
+        Authorization: `Bearer ${jwt}`, // Add if your API is protected
       },
       body: JSON.stringify(dataToSend),
     });
@@ -360,8 +372,8 @@ export const fetchEventDetailsByEventID = async (eventID) => {
     // Fetch the current session
     console.log("Fetch Event Details started");
 
-    // const session = await fetchAuthSession(); // Retrieves the session object
-    // const jwt = session.tokens.idToken.toString();
+    const session = await fetchAuthSession(); // Retrieves the session object
+    const jwt = session.tokens.idToken.toString();
     // const orgID = session.tokens.idToken.payload["cognito:username"];
     //  console.log("userName", orgID);
     //  console.log("eventID", eventID);
@@ -381,7 +393,7 @@ export const fetchEventDetailsByEventID = async (eventID) => {
     const response = await fetch(apiUrl, {
       method: "POST",
       headers: {
-        //   Authorization: `Bearer ${jwt}`, // Include the token if needed
+        Authorization: `Bearer ${jwt}`, // Include the token if needed
         "Content-Type": "application/json", // Send as JSON
       },
       body: JSON.stringify(dataToSend),
@@ -412,6 +424,7 @@ export const updateEventStatus = async (eventID, status) => {
   // return "Event updated";
 
   const session = await fetchAuthSession(); // Retrieves the session object
+  const jwt = session.tokens.idToken.toString();
   const idTokenPayload = session.tokens.idToken.payload;
   // Option 1: If role is stored as a custom attribute in Cognito User Pool
   const userRole = idTokenPayload["custom:role"];
@@ -424,6 +437,7 @@ export const updateEventStatus = async (eventID, status) => {
   const response = await fetch(apiUrl, {
     method: "POST",
     headers: {
+      Authorization: `Bearer ${jwt}`,
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
@@ -445,8 +459,8 @@ export const fetchBookingDetailsEventID = async (eventID) => {
     // Fetch the current session
     console.log("Fetch Booking details started", eventID);
 
-    // const session = await fetchAuthSession(); // Retrieves the session object
-    // const jwt = session.tokens.idToken.toString();
+    const session = await fetchAuthSession(); // Retrieves the session object
+    const jwt = session.tokens.idToken.toString();
     // const orgID = session.tokens.idToken.payload["cognito:username"];
     //  console.log("userName", orgID);
     //  console.log("eventID", eventID);
@@ -466,7 +480,7 @@ export const fetchBookingDetailsEventID = async (eventID) => {
     const response = await fetch(apiUrl, {
       method: "POST",
       headers: {
-        //   Authorization: `Bearer ${jwt}`, // Include the token if needed
+        Authorization: `Bearer ${jwt}`, // Include the token if needed
         "Content-Type": "application/json", // Send as JSON
       },
       body: JSON.stringify(dataToSend),

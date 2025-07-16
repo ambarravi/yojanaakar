@@ -5,6 +5,7 @@ export const updateRole = async (username, tempRole) => {
     // Fetch the current session
     console.log("Update Role started");
     const session = await fetchAuthSession(); // Retrieves the session object
+
     // const token = session.tokens.idToken; // Access the ID token
     const customRole = session.tokens.idToken.payload["custom:role"];
     if (customRole === "user") console.log("customRole", customRole);
