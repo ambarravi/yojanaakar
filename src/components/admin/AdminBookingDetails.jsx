@@ -41,10 +41,10 @@ function BookingDetails({ user, signOut }) {
           throw new Error("Failed to fetch booking details");
         }
 
-        console.log("Reponse from Booking", response.records);
+        // console.log("Reponse from Booking", response.records);
         const data = response;
         setBookings(data.records || []);
-        console.log(data.records[0]?.EventDetails);
+        //  console.log(data.records[0]?.EventDetails);
         setEventDetails(data.records[0]?.EventDetails || null);
       } catch (error) {
         console.error("Error fetching bookings:", error);

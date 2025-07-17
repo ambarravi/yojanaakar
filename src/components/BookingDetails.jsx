@@ -30,16 +30,15 @@ function BookingDetails({ user, signOut }) {
       setIsLoading(true);
       setError(null);
       try {
-        console.log("eventID from UI", eventId);
         const response = await fetchBookingDetailsEventID(eventId);
-        console.log("Response from Booking", response);
+
         if (!response.records || response.records.length === 0) {
           throw new Error("Failed to fetch booking details");
         }
-        console.log("Response from Booking", response.records);
+
         const data = response;
         setBookings(data.records || []);
-        console.log(data.records[0]?.EventDetails);
+
         setEventDetails(data.records[0]?.EventDetails || null);
       } catch (error) {
         console.error("Error fetching bookings:", error);

@@ -58,12 +58,9 @@ export const submitProfile = async (profileData, logo) => {
   try {
     // Fetch the current session
 
-    console.log("UpdateAPI Logo image", logo);
-
     const session = await fetchAuthSession(); // Retrieves the session object
     const jwt = session.tokens.idToken.toString();
     const username = session.tokens.idToken.payload["cognito:username"];
-    //   console.log("userName", username);
 
     // Prepare the JSON object
     const dataToSend = { username }; // Initialize with `username`
@@ -83,7 +80,6 @@ export const submitProfile = async (profileData, logo) => {
       process.env.REACT_APP_API_BASE_URL +
       process.env.REACT_APP_STAGE +
       "/submit-profile";
-    //   console.log(apiUrl);
 
     // Make the API request to save profile data
     const response = await fetch(apiUrl, {
@@ -102,12 +98,10 @@ export const submitProfile = async (profileData, logo) => {
 
     const result = await response.json(); // Assume the API returns the pre-signed URL
 
-    console.log("API Response:", result);
     //  const responseBody = JSON.parse(result.body); // Parse the JSON string in the body
 
     if (result.presignedUrl) {
       const uploadUrl = result.presignedUrl; // Pre-signed URL for file upload
-      console.log("Upload URL:", uploadUrl);
 
       // Upload the logo file to S3 using the pre-signed URL
       const uploadResponse = await fetch(uploadUrl, {

@@ -50,9 +50,7 @@ const ProfilePage = () => {
     setUser((prevUser) => ({ ...prevUser, [name]: value }));
   };
 
-  const handleUpdate = () => {
-    console.log("Updated User Data:", user);
-  };
+  const handleUpdate = () => {};
 
   if (loading) {
     return <p>Loading...</p>;

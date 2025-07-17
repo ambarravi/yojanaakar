@@ -390,9 +390,9 @@ body {
     padding: 1rem;
   }
 
-  .form-group label {
+  /* .form-group label {
     font-size: 1rem;
-  }
+  } */
 
   .form-group input,
   .form-group textarea,

@@ -185,8 +185,8 @@ function OrgProfilePage({ user, signOut }) {
   }, [majorCities]);
 
   const fetchCitySuggestions = (query) => {
-    console.log("fetchCitySuggestions called with query:", query);
-    console.log("citiesData:", citiesData);
+    //  console.log("fetchCitySuggestions called with query:", query);
+    //   console.log("citiesData:", citiesData);
     if (query.length > 2) {
       const filteredCities = citiesData
         .filter(
@@ -202,7 +202,7 @@ function OrgProfilePage({ user, signOut }) {
           latitude: city.latitude.toString(),
           longitude: city.longitude.toString(),
         }));
-      console.log("Filtered cities:", filteredCities);
+      //   console.log("Filtered cities:", filteredCities);
       setCitySuggestions(filteredCities);
     } else {
       setCitySuggestions([]);
@@ -211,28 +211,22 @@ function OrgProfilePage({ user, signOut }) {
 
   const fetchCollegeSuggestions = async (query) => {
     if (!formData.cityName || !query) {
-      console.log(
-        "Skipping fetch: cityName:",
-        formData.cityName,
-        "query:",
-        query
-      );
       setCollegeSuggestions([]);
       return;
     }
     setIsLoading(true);
     try {
-      console.log(
-        "Fetching colleges for city:",
-        formData.cityName,
-        "query:",
-        query
-      );
+      // console.log(
+      //   "Fetching colleges for city:",
+      //   formData.cityName,
+      //   "query:",
+      //   query
+      // );
       const collegeData = await GetCollegeList(
         formData.cityName.toLowerCase(),
         query.toLowerCase()
       );
-      console.log("CollegeData", collegeData);
+
       setCollegeSuggestions(collegeData || []);
     } catch (error) {
       console.error("Error fetching college suggestions:", error);
@@ -283,7 +277,7 @@ function OrgProfilePage({ user, signOut }) {
 
   const handleOtherCityChange = (e) => {
     const text = e.target.value;
-    console.log("handleOtherCityChange called with text:", text);
+
     setErrors({ ...errors, cityName: "" });
     setFormData({
       ...formData,
@@ -301,7 +295,6 @@ function OrgProfilePage({ user, signOut }) {
   };
 
   const handleSuggestionSelect = (suggestion) => {
-    console.log("Selected suggestion:", suggestion);
     setFormData({
       ...formData,
       cityName: suggestion.cityName,

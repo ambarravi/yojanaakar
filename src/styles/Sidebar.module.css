@@ -1,4 +1,4 @@
-/* Sidebar.css */
+/* Sidebar.module.css */
 :root {
   --primary-color: #1e3a8a;
   --secondary-color: #3b82f6;
@@ -22,13 +22,13 @@
   box-shadow: var(--shadow);
 }
 
-.sidebar-header {
+.header {
   text-align: center;
   margin-bottom: 2rem;
 }
 
-.logo-image {
-  height: 40px; /* Match Sidebar.js inline style */
+.logoImage {
+  height: 40px;
   object-fit: contain;
 }
 
@@ -36,7 +36,7 @@
   font-size: 1.5rem;
 }
 
-.sidebar-logo {
+.sidebarLogo {
   font-family: "Poppins", sans-serif;
   font-size: 2.25rem;
   font-weight: 700;
@@ -44,28 +44,33 @@
   margin: 0;
 }
 
-.sidebar-user {
+.user {
   font-size: 0.95rem;
   color: var(--text-color);
   margin: 0.5rem 0;
 }
 
-.sidebar hr {
+.hr {
   border: 0;
   border-top: 1px solid var(--secondary-color);
   margin: 1rem 0;
 }
 
-.sidebar-nav ul {
+.nav {
   list-style: none;
   padding: 0;
 }
 
-.sidebar-nav li {
+.navList {
+  list-style: none;
+  padding: 0;
+}
+
+.navItem {
   margin-bottom: 1rem;
 }
 
-.sidebar-nav a {
+.navLink {
   display: flex;
   align-items: center;
   gap: 0.75rem;
@@ -78,33 +83,27 @@
   transition: var(--transition);
 }
 
-.sidebar-nav a:hover,
-.sidebar-nav a:focus {
+.navLink:hover,
+.navLink:focus {
   background: rgba(255, 255, 255, 0.1);
   color: var(--secondary-color);
 }
 
-.sidebar-nav i {
-  font-size: 1.25rem;
+.icon {
+  font-size: 1rem;
   color: var(--text-color);
 }
 
-.sidebar.open {
+.open {
   transform: translateX(0);
 }
 
 @media (max-width: 768px) {
   .sidebar {
     transform: translateX(-100%);
-    width: var(--sidebar-width);
   }
 
-  .sidebar.open {
+  .open {
     transform: translateX(0);
   }
-}
-
-/* Font Consistency */
-body {
-  font-family: "Inter", sans-serif;
 }

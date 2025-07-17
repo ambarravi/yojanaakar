@@ -11,7 +11,7 @@ const mockEventDetails = {
 
 function BuyTicketPage() {
   const { eventId } = useParams();
-  //  console.log(eventId);
+
   const [eventData, setEventData] = useState(null);
   const [selectedTickets, setSelectedTickets] = useState(1);
   const [totalPrice, setTotalPrice] = useState(0);
@@ -20,7 +20,6 @@ function BuyTicketPage() {
     const eventDetails = mockEventDetails["event-" + eventId];
     if (eventDetails) {
       setEventData(eventDetails);
-      //   console.log(eventDetails)
     } else {
       console.error("Invalid eventId or event not found.");
     }
@@ -39,9 +38,6 @@ function BuyTicketPage() {
   };
 
   const handlePurchase = () => {
-    console.log(
-      `User purchased ${selectedTickets} tickets for event: ${eventId}`
-    );
     alert(
       "Purchase successful! Seats have been allocated. Your tickets have been sent to the registered email ID."
     );

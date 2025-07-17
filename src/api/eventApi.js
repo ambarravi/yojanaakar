@@ -108,7 +108,7 @@ export const GetCollegeList = (city, searchText) => {
 
       if (response.status === 200) {
         const data = await response.json();
-        console.log("CollegeData ", data);
+        //  console.log("CollegeData ", data);
         resolve(data);
       } else {
         console.error(`Error: Received status code ${response.status}`);
@@ -221,10 +221,10 @@ export const submitEvent = (eventData, organizerName) => {
         const result = await response.json(); // Assume the API returns the pre-signed URL
         console.log("Event details saved successfully!");
         if (response.status === 200) {
-          console.log(
-            "Check for  presignedUrls length",
-            result.presignedUrls.length
-          );
+          // console.log(
+          //   "Check for  presignedUrls length",
+          //   result.presignedUrls.length
+          // );
           if (result.presignedUrls && Array.isArray(result.presignedUrls)) {
             const uploadUrls = result.presignedUrls; // Array of pre-signed URLs
 
@@ -457,7 +457,6 @@ export const updateEventStatus = async (eventID, status) => {
 export const fetchBookingDetailsEventID = async (eventID) => {
   try {
     // Fetch the current session
-    console.log("Fetch Booking details started", eventID);
 
     const session = await fetchAuthSession(); // Retrieves the session object
     const jwt = session.tokens.idToken.toString();
@@ -494,8 +493,6 @@ export const fetchBookingDetailsEventID = async (eventID) => {
     const result = await response.json();
 
     if (response.status === 200) {
-      console.log("API Response fetchBookingDetailsEventID:", result);
-
       console.log("Data fecthed successfully!");
     } else {
       console.log("Error in API Response:", result);

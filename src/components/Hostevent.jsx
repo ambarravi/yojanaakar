@@ -43,7 +43,7 @@ function Hostevent({ user, signOut }) {
   const [showDropdown, setShowDropdown] = useState(false);
   const [categories, setCategories] = useState([]);
   const [cities, setCities] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false); // Changed to false to avoid initial flicker
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isSubmitDisabled, setIsSubmitDisabled] = useState(false);
@@ -51,40 +51,53 @@ function Hostevent({ user, signOut }) {
   const [modalMessage, setModalMessage] = useState({ title: "", body: "" });
   const [profileCompleted, setProfileCompleted] = useState("");
 
+  const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
+
   useEffect(() => {
     const fetchData = async () => {
       try {
         setIsLoading(true);
-        const [categoryData, cityData] = await Promise.all([
-          GetCategory(),
-          GetCityList(),
-        ]);
+        console.time("fetchData");
+        const cachedCategories = sessionStorage.getItem("categories");
+        const cachedCities = sessionStorage.getItem("cities");
+        let categoryData, cityData;
+
+        if (cachedCategories && cachedCities) {
+          categoryData = JSON.parse(cachedCategories);
+          cityData = JSON.parse(cachedCities);
+        } else {
+          [categoryData, cityData] = await Promise.all([
+            GetCategory(),
+            GetCityList(),
+          ]);
+          sessionStorage.setItem("categories", JSON.stringify(categoryData));
+          sessionStorage.setItem("cities", JSON.stringify(cityData));
+        }
+        console.timeEnd("fetchData");
+
         setCategories(categoryData);
         setCities(cityData);
 
+        console.time("fetchProfileDetails");
         const orgProfile = await fetchProfileDetails();
-        console.log("OrgProfile details ", orgProfile);
+        console.timeEnd("fetchProfileDetails");
+        //    console.log("OrgProfile details ", orgProfile);
+
         const profileCompletedStatus =
           orgProfile?.record?.OrganizerName?.S || "";
-        // const eventLimit = parseInt(
-        //   orgProfile?.record?.publishedEvent?.N || "0"
-        // );
         const eventsRemaining = parseInt(
           orgProfile?.record?.eventsRemaining?.N || "0"
         );
 
         setProfileCompleted(profileCompletedStatus);
 
-        // Check profile completion first
         if (!profileCompletedStatus) {
           setModalMessage({
             title: "Profile Incomplete",
             body: "You must complete your profile before you can host an event. Please complete all details mentioned in the profile section.",
           });
           setShowModal(true);
-        }
-        // Check event limit if profile is complete
-        else if (eventsRemaining <= 0) {
+        } else if (eventsRemaining <= 0) {
           setModalMessage({
             title: "Event Limit Reached",
             body: "We regret to inform you that the monthly event hosting limit has been reached. Please try again next month or contact support for assistance.",
@@ -103,7 +116,7 @@ function Hostevent({ user, signOut }) {
           const eventDetails = eventResponse?.record;
           const imagesArray = (eventDetails?.EventImages || []).map(
             (image) => ({
-              name: extractImageName(image),
+              name: image.substring(image.lastIndexOf("/") + 1),
               preview: image,
             })
           );
@@ -148,7 +161,7 @@ function Hostevent({ user, signOut }) {
     fetchData();
   }, [eventId, navigate]);
 
-  const extractImageName = (url) => url.substring(url.lastIndexOf("/") + 1);
+  //const extractImageName = (url) => url.substring(url.lastIndexOf("/") + 1);
 
   const handleImageUpload = (e) => {
     const files = Array.from(e.target.files);
@@ -206,7 +219,6 @@ function Hostevent({ user, signOut }) {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Check profile completion
     if (!profileCompleted) {
       setModalMessage({
         title: "Profile Incomplete",
@@ -216,9 +228,7 @@ function Hostevent({ user, signOut }) {
       return;
     }
 
-    // Check event limit
     const orgProfile = await fetchProfileDetails();
-    //const eventLimit = parseInt(orgProfile?.record?.publishedEvent?.N || "0");
     const eventsRemaining = parseInt(
       orgProfile?.record?.eventsRemaining?.N || "0"
     );
@@ -293,8 +303,8 @@ function Hostevent({ user, signOut }) {
     try {
       await submitEvent(formData, orgProfile?.record?.OrganizerName?.S || "");
       alert("Form submitted successfully!");
-      sessionStorage.setItem("fromSidebar", false);
-      navigate("/manage-events", { replace: true });
+      sessionStorage.setItem("fromSidebar", "false");
+      navigate("/manage-events");
     } catch (error) {
       console.error("Error submitting form:", error);
       alert("Failed to submit the form. Please try again.");
@@ -304,8 +314,8 @@ function Hostevent({ user, signOut }) {
   };
 
   const handleCancel = () => {
-    sessionStorage.setItem("fromSidebar", false);
-    navigate("/manage-events", { replace: true });
+    sessionStorage.setItem("fromSidebar", "false");
+    navigate("/manage-events");
   };
 
   const handleReset = () => {
@@ -330,33 +340,17 @@ function Hostevent({ user, signOut }) {
     setUploadedFiles([]);
   };
 
-  const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
-
   const handleModalClose = () => {
     setShowModal(false);
     if (modalMessage.title === "Profile Incomplete") {
-      navigate("/host-profile"); // Navigate to profile when profile is incomplete
+      navigate("/host-profile");
     } else {
-      navigate("/organizer-landing"); // Navigate to landing for event limit case
+      navigate("/organizer-landing");
     }
   };
 
-  if (isLoading) {
-    return (
-      <div className="loading-container">
-        <div className="spinner"></div>
-        <p>Loading details...</p>
-      </div>
-    );
-  }
-
   return (
     <div className="host-event-page">
-      {isSubmitting && (
-        <div className="loading-overlay">
-          <div className="spinner"></div>
-        </div>
-      )}
       <button className="sidebar-toggle" onClick={toggleSidebar}>
         ☰
       </button>
@@ -364,336 +358,351 @@ function Hostevent({ user, signOut }) {
       <main
         className={`host-event-content ${isSidebarOpen ? "sidebar-open" : ""}`}
       >
+        {isSubmitting && (
+          <div className="loading-overlay">
+            <div className="spinner"></div>
+          </div>
+        )}
         <h1 className="host-event-title">
           {eventId ? "Update Event" : "Host Event"}
         </h1>
-        {showModal ? (
-          <div className="modal-overlay">
-            <div
-              style={{
-                backgroundColor: "#ffebee",
-                padding: "20px",
-                borderRadius: "8px",
-                margin: "20px",
-                border: "1px solid #ef5350",
-                textAlign: "center",
-              }}
-            >
-              <h2 style={{ color: "#d32f2f", margin: "0 0 10px" }}>
-                {modalMessage.title}
-              </h2>
-              <p style={{ color: "#666", margin: "0 0 15px" }}>
-                {modalMessage.body}
-              </p>
-
-              <button
-                onClick={handleModalClose}
+        <div className="form-container">
+          {isLoading ? (
+            <div className="form-loading">
+              <div className="spinner"></div>
+              <p>Loading form data...</p>
+            </div>
+          ) : showModal ? (
+            <div className="modal-overlay">
+              <div
                 style={{
-                  padding: "8px 16px",
-                  backgroundColor: "#ef5350",
-                  color: "white",
-                  border: "none",
-                  borderRadius: "4px",
-                  cursor: "pointer",
+                  backgroundColor: "#ffebee",
+                  padding: "20px",
+                  borderRadius: "8px",
+                  margin: "20px",
+                  border: "1px solid #ef5350",
+                  textAlign: "center",
                 }}
               >
-                {modalMessage.title === "Profile Incomplete"
-                  ? "Go to Profile"
-                  : "Close"}
-              </button>
-            </div>
-          </div>
-        ) : (
-          <form onSubmit={handleSubmit} className="host-event-form">
-            <div className="form-group">
-              <label>Event Title</label>
-              <input
-                type="text"
-                name="eventTitle"
-                value={formData.eventTitle}
-                onChange={handleChange}
-                required
-                maxLength="100"
-              />
-            </div>
-            <div className="form-group">
-              <label>Event Details</label>
-              <input
-                type="text"
-                name="eventDetails"
-                value={formData.eventDetails}
-                onChange={handleChange}
-                required
-                maxLength="300"
-              />
-            </div>
-            {showDropdown && (
-              <div className="form-group">
-                <label>Target Audience</label>
-                <select
-                  name="eventType"
-                  value={formData.eventType}
-                  onChange={handleChange}
-                  required
-                >
-                  <option value="">Select</option>
-                  <option value="open">Open to All (Public)</option>
-                  <option value="inter">Inter-Colleges/Institutions</option>
-                  <option value="private">
-                    Private to College/Institution
-                  </option>
-                </select>
-              </div>
-            )}
-            <div className="form-row">
-              <div className="form-group">
-                <label>Date and Time</label>
-                <input
-                  type="datetime-local"
-                  name="dateTime"
-                  value={formData.dateTime}
-                  onChange={handleChange}
-                  required
-                />
-              </div>
-              <div className="form-group">
-                <label>Category</label>
-                <select
-                  name="categoryID"
-                  value={formData.categoryID}
-                  onChange={handleChange}
-                  required
-                >
-                  <option value="">Select Category</option>
-                  {categories.map((category) => (
-                    <option
-                      key={category.CategoryID}
-                      value={category.CategoryID}
-                    >
-                      {category.CategoryName}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            </div>
-            <div className="form-row">
-              <div className="form-group">
-                <label>Highlight</label>
-                <input
-                  type="text"
-                  name="highlight"
-                  value={formData.highlight}
-                  onChange={handleChange}
-                  required
-                  placeholder="e.g., 10% discount, Free Entry"
-                  maxLength="30"
-                />
-              </div>
-              <div className="form-group">
-                <label>Additional Info</label>
-                <input
-                  type="text"
-                  name="additionalInfo"
-                  value={formData.additionalInfo}
-                  onChange={handleChange}
-                  placeholder="e.g., Arrive 10 minutes early"
-                />
-              </div>
-            </div>
-            <div className="form-row">
-              <div className="form-group">
-                <label>City</label>
-                <select
-                  name="cityID"
-                  value={formData.cityID}
-                  onChange={handleChange}
-                  required
-                >
-                  <option value="">Select City</option>
-                  {cities.map((city) => (
-                    <option key={city.CityID} value={city.CityID}>
-                      {city.CityName}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <div className="form-group">
-                <label>Location</label>
-                <input
-                  type="text"
-                  name="location"
-                  value={formData.location}
-                  onChange={handleChange}
-                  required
-                  maxLength="50"
-                />
-              </div>
-            </div>
-            <div className="form-row">
-              <div className="form-group">
-                <label>Mode</label>
-                <select
-                  name="eventMode"
-                  value={formData.eventMode}
-                  onChange={handleChange}
-                  required
-                >
-                  <option value="">Select Mode</option>
-                  <option value="Online">Online</option>
-                  <option value="Offline">Offline</option>
-                </select>
-              </div>
-              <div className="form-group">
-                <label>Tags</label>
-                <input
-                  type="text"
-                  name="tags"
-                  value={formData.tags}
-                  onChange={handleChange}
-                  required
-                  maxLength="20"
-                  placeholder="Keywords for search"
-                />
-              </div>
-            </div>
-            <div className="form-group">
-              <label>What Audience Will Get</label>
-              {formData.audienceBenefits.map((benefit, index) => (
-                <input
-                  key={index}
-                  type="text"
-                  name={`audienceBenefit${index}`}
-                  value={benefit}
-                  onChange={handleChange}
-                  maxLength="50"
-                  placeholder="e.g., Certificate, Interaction"
-                  className="audience-benefit-input"
-                />
-              ))}
-            </div>
-            <div className="form-row">
-              <div className="form-group">
-                <label>Ticket Price</label>
-                <input
-                  type="number"
-                  name="ticketPrice"
-                  value={formData.ticketPrice}
-                  onChange={handleChange}
-                  required
-                  maxLength="4"
-                />
-              </div>
-              <div className="form-group">
-                <label>No of Seats</label>
-                <input
-                  type="number"
-                  name="noOfSeats"
-                  value={formData.noOfSeats}
-                  onChange={handleChange}
-                  required
-                  maxLength="4"
-                />
-              </div>
-              <div className="form-group">
-                <label>Reserve Seats</label>
-                <input
-                  type="number"
-                  name="reserveSeats"
-                  value={formData.reserveSeats}
-                  onChange={handleChange}
-                  required
-                  maxLength="4"
-                />
-              </div>
-            </div>
-            <div className="form-group image-upload-group">
-              <label>Upload Images</label>
-              <input
-                type="file"
-                accept="image/jpeg, image/png, image/gif"
-                multiple
-                onChange={handleImageUpload}
-                className="image-input"
-              />
-              <span className="upload-message">
-                Max 3 images for banner/thumbnails
-              </span>
-              {uploadedFiles.length >= 3 && (
-                <p className="error-message">
-                  Upload limit of 3 files reached.
+                <h2 style={{ color: "#d32f2f", margin: "0 0 10px" }}>
+                  {modalMessage.title}
+                </h2>
+                <p style={{ color: "#666", margin: "0 0 15px" }}>
+                  {modalMessage.body}
                 </p>
-              )}
-              {uploadedFiles.length > 0 && (
-                <div className="image-preview-table">
-                  <table>
-                    <thead>
-                      <tr>
-                        <th>#</th>
-                        <th>File Name</th>
-                        <th>Preview</th>
-                        <th>Action</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {uploadedFiles.map((file, index) => (
-                        <tr key={index}>
-                          <td>{index + 1}</td>
-                          <td>{file.name}</td>
-                          <td>
-                            <img
-                              src={file.preview}
-                              alt={file.name}
-                              className="image-preview"
-                            />
-                          </td>
-                          <td>
-                            <button
-                              type="button"
-                              onClick={() => {
-                                const newFiles = uploadedFiles.filter(
-                                  (_, i) => i !== index
-                                );
-                                setUploadedFiles(newFiles);
-                                setFormData((prev) => ({
-                                  ...prev,
-                                  images: prev.images.filter(
-                                    (_, i) => i !== index
-                                  ),
-                                }));
-                              }}
-                              className="remove-btn"
-                            >
-                              <FontAwesomeIcon icon={faTimes} />
-                            </button>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
+                <button
+                  onClick={handleModalClose}
+                  style={{
+                    padding: "8px 16px",
+                    backgroundColor: "#ef5350",
+                    color: "white",
+                    border: "none",
+                    borderRadius: "4px",
+                    cursor: "pointer",
+                  }}
+                >
+                  {modalMessage.title === "Profile Incomplete"
+                    ? "Go to Profile"
+                    : "Close"}
+                </button>
+              </div>
+            </div>
+          ) : (
+            <form onSubmit={handleSubmit} className="host-event-form">
+              <div className="form-group">
+                <label>Event Title</label>
+                <input
+                  type="text"
+                  name="eventTitle"
+                  value={formData.eventTitle}
+                  onChange={handleChange}
+                  required
+                  maxLength="100"
+                />
+              </div>
+              <div className="form-group">
+                <label>Event Details</label>
+                <input
+                  type="text"
+                  name="eventDetails"
+                  value={formData.eventDetails}
+                  onChange={handleChange}
+                  required
+                  maxLength="300"
+                />
+              </div>
+              {showDropdown && (
+                <div className="form-group">
+                  <label>Target Audience</label>
+                  <select
+                    name="eventType"
+                    value={formData.eventType}
+                    onChange={handleChange}
+                    required
+                  >
+                    <option value="">Select</option>
+                    <option value="open">Open to All (Public)</option>
+                    <option value="inter">Inter-Colleges/Institutions</option>
+                    <option value="private">
+                      Private to College/Institution
+                    </option>
+                  </select>
                 </div>
               )}
-            </div>
-            <div className="form-actions">
-              <button
-                type="submit"
-                className="submit-btn"
-                disabled={isSubmitDisabled || isSubmitting}
-              >
-                {isSubmitting ? "Submitting..." : "Submit"}
-              </button>
-              <button
-                type="button"
-                className="cancel-btn"
-                onClick={handleCancel}
-              >
-                Cancel
-              </button>
-              <button type="button" className="reset-btn" onClick={handleReset}>
-                Reset
-              </button>
-            </div>
-          </form>
-        )}
+              <div className="form-row">
+                <div className="form-group">
+                  <label>Date and Time</label>
+                  <input
+                    type="datetime-local"
+                    name="dateTime"
+                    value={formData.dateTime}
+                    onChange={handleChange}
+                    required
+                  />
+                </div>
+                <div className="form-group">
+                  <label>Category</label>
+                  <select
+                    name="categoryID"
+                    value={formData.categoryID}
+                    onChange={handleChange}
+                    required
+                  >
+                    <option value="">Select Category</option>
+                    {categories.map((category) => (
+                      <option
+                        key={category.CategoryID}
+                        value={category.CategoryID}
+                      >
+                        {category.CategoryName}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+              <div className="form-row">
+                <div className="form-group">
+                  <label>Highlight</label>
+                  <input
+                    type="text"
+                    name="highlight"
+                    value={formData.highlight}
+                    onChange={handleChange}
+                    required
+                    placeholder="e.g., 10% discount, Free Entry"
+                    maxLength="30"
+                  />
+                </div>
+                <div className="form-group">
+                  <label>Additional Info</label>
+                  <input
+                    type="text"
+                    name="additionalInfo"
+                    value={formData.additionalInfo}
+                    onChange={handleChange}
+                    placeholder="e.g., Arrive 10 minutes early"
+                  />
+                </div>
+              </div>
+              <div className="form-row">
+                <div className="form-group">
+                  <label>City</label>
+                  <select
+                    name="cityID"
+                    value={formData.cityID}
+                    onChange={handleChange}
+                    required
+                  >
+                    <option value="">Select City</option>
+                    {cities.map((city) => (
+                      <option key={city.CityID} value={city.CityID}>
+                        {city.CityName}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div className="form-group">
+                  <label>Location</label>
+                  <input
+                    type="text"
+                    name="location"
+                    value={formData.location}
+                    onChange={handleChange}
+                    required
+                    maxLength="50"
+                  />
+                </div>
+              </div>
+              <div className="form-row">
+                <div className="form-group">
+                  <label>Mode</label>
+                  <select
+                    name="eventMode"
+                    value={formData.eventMode}
+                    onChange={handleChange}
+                    required
+                  >
+                    <option value="">Select Mode</option>
+                    <option value="Online">Online</option>
+                    <option value="Offline">Offline</option>
+                  </select>
+                </div>
+                <div className="form-group">
+                  <label>Tags</label>
+                  <input
+                    type="text"
+                    name="tags"
+                    value={formData.tags}
+                    onChange={handleChange}
+                    required
+                    maxLength="20"
+                    placeholder="Keywords for search"
+                  />
+                </div>
+              </div>
+              <div className="form-group">
+                <label>What Audience Will Get</label>
+                {formData.audienceBenefits.map((benefit, index) => (
+                  <input
+                    key={index}
+                    type="text"
+                    name={`audienceBenefit${index}`}
+                    value={benefit}
+                    onChange={handleChange}
+                    maxLength="50"
+                    placeholder="e.g., Certificate, Interaction"
+                    className="audience-benefit-input"
+                  />
+                ))}
+              </div>
+              <div className="form-row">
+                <div className="form-group">
+                  <label>Ticket Price</label>
+                  <input
+                    type="number"
+                    name="ticketPrice"
+                    value={formData.ticketPrice}
+                    onChange={handleChange}
+                    required
+                    maxLength="4"
+                  />
+                </div>
+                <div className="form-group">
+                  <label>No of Seats</label>
+                  <input
+                    type="number"
+                    name="noOfSeats"
+                    value={formData.noOfSeats}
+                    onChange={handleChange}
+                    required
+                    maxLength="4"
+                  />
+                </div>
+                <div className="form-group">
+                  <label>Reserve Seats</label>
+                  <input
+                    type="number"
+                    name="reserveSeats"
+                    value={formData.reserveSeats}
+                    onChange={handleChange}
+                    required
+                    maxLength="4"
+                  />
+                </div>
+              </div>
+              <div className="form-group image-upload-group">
+                <label>Upload Images</label>
+                <input
+                  type="file"
+                  accept="image/jpeg, image/png, image/gif"
+                  multiple
+                  onChange={handleImageUpload}
+                  className="image-input"
+                />
+                <span className="upload-message">
+                  Max 3 images for banner/thumbnails
+                </span>
+                {uploadedFiles.length >= 3 && (
+                  <p className="error-message">
+                    Upload limit of 3 files reached.
+                  </p>
+                )}
+                {uploadedFiles.length > 0 && (
+                  <div className="image-preview-table">
+                    <table>
+                      <thead>
+                        <tr>
+                          <th>#</th>
+                          <th>File Name</th>
+                          <th>Preview</th>
+                          <th>Action</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {uploadedFiles.map((file, index) => (
+                          <tr key={index}>
+                            <td>{index + 1}</td>
+                            <td>{file.name}</td>
+                            <td>
+                              <img
+                                src={file.preview}
+                                alt={file.name}
+                                className="image-preview"
+                              />
+                            </td>
+                            <td>
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  const newFiles = uploadedFiles.filter(
+                                    (_, i) => i !== index
+                                  );
+                                  setUploadedFiles(newFiles);
+                                  setFormData((prev) => ({
+                                    ...prev,
+                                    images: prev.images.filter(
+                                      (_, i) => i !== index
+                                    ),
+                                  }));
+                                }}
+                                className="remove-btn"
+                              >
+                                <FontAwesomeIcon icon={faTimes} />
+                              </button>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+              </div>
+              <div className="form-actions">
+                <button
+                  type="submit"
+                  className="submit-btn"
+                  disabled={isSubmitDisabled || isSubmitting}
+                >
+                  {isSubmitting ? "Submitting..." : "Submit"}
+                </button>
+                <button
+                  type="button"
+                  className="cancel-btn"
+                  onClick={handleCancel}
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  className="reset-btn"
+                  onClick={handleReset}
+                >
+                  Reset
+                </button>
+              </div>
+            </form>
+          )}
+        </div>
       </main>
     </div>
   );
