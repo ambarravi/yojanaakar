@@ -139,9 +139,7 @@ function AdminEventDetails({ user, signOut }) {
           }
 
           setIsSubmitDisabled(
-            ["Published", "Cancelled", "Deleted"].includes(
-              eventDetails?.EventStatus
-            )
+            ["Cancelled", "Deleted"].includes(eventDetails?.EventStatus)
           );
         }
       } catch (error) {
