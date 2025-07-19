@@ -95,6 +95,7 @@ function AdminEventDetails({ user, signOut }) {
             highlight: eventDetails?.EventHighLight || "",
             eventType: eventDetails?.EventType || "",
             categoryID: eventDetails?.CategoryID || "",
+            categoryName: eventDetails?.CategoryName || "",
             cityID: eventDetails?.CityID || "",
             location: eventDetails?.EventLocation || "",
             eventMode: eventDetails?.EventMode || "",
@@ -209,12 +210,33 @@ function AdminEventDetails({ user, signOut }) {
     }
   };
 
+  // const handleChange = (e) => {
+  //   const { name, value } = e.target;
+  //   setFormData({
+  //     ...formData,
+  //     [name]: value,
+  //   });
+  // };
+
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData({
-      ...formData,
-      [name]: value,
-    });
+    if (name.startsWith("audienceBenefit")) {
+      const index = parseInt(name.replace("audienceBenefit", ""), 10);
+      const newBenefits = [...formData.audienceBenefits];
+      newBenefits[index] = value;
+      setFormData({ ...formData, audienceBenefits: newBenefits });
+    } else if (name === "categoryID") {
+      const selectedCategory = categories.find(
+        (cat) => cat.CategoryID === value
+      );
+      setFormData({
+        ...formData,
+        categoryID: value,
+        categoryName: selectedCategory?.CategoryName || "",
+      });
+    } else {
+      setFormData({ ...formData, [name]: value });
+    }
   };
 
   const handleSubmit = async (e) => {
