@@ -16,6 +16,7 @@ import "../styles/OrganizerLandingPage.css";
 import { isSameDay } from "date-fns";
 import { fetchDashboardData } from "../api/eventApi";
 import lottie from "lottie-web";
+import { FaCalendarAlt, FaTicketAlt } from "react-icons/fa";
 
 ChartJS.register(
   ArcElement,
@@ -36,6 +37,7 @@ function OrganizerLandingPage({ user, signOut }) {
   useEffect(() => {
     const loadDashboardData = async () => {
       try {
+        await new Promise((resolve) => setTimeout(resolve, 1000));
         const data = await fetchDashboardData();
         setDashboardData(data);
       } catch (error) {
@@ -91,7 +93,7 @@ function OrganizerLandingPage({ user, signOut }) {
     datasets: [
       {
         data: dashboardData?.ticketSales?.data || [],
-        backgroundColor: ["#0d9488", "#34d399"],
+        backgroundColor: ["#0d9488", "#34d399", "#10b981"],
         borderWidth: 1,
         borderColor: "#ffffff",
       },
@@ -104,7 +106,7 @@ function OrganizerLandingPage({ user, signOut }) {
       {
         label: "Attendees",
         data: dashboardData?.popularEvents?.data || [],
-        backgroundColor: ["#93C5FD", "#10B981", "#F59E0B", "#EF4444"],
+        backgroundColor: ["#0d9488", "#34d399", "#10b981", "#6ee7b7"],
         borderWidth: 1,
         borderColor: "#ffffff",
       },
@@ -120,6 +122,7 @@ function OrganizerLandingPage({ user, signOut }) {
       <button
         className="dashboard-sidebar-toggle md:hidden p-3"
         onClick={toggleSidebar}
+        aria-label={isSidebarOpen ? "Close sidebar" : "Open sidebar"}
       >
         ☰
       </button>
@@ -134,13 +137,27 @@ function OrganizerLandingPage({ user, signOut }) {
             Hi, Welcome back!
           </h1>
         </header>
+        {/* <hr className="border-gray-300 mb-6" /> */}
         <div className="dashboard-container">
-          {!dashboardData ? (
+          {/* {!dashboardData ? (
             <div className="dashboard-loading">
               <div ref={lottieContainer} className="lottie-animation"></div>
               {!animationData && (
                 <span className="loading-text">Loading dashboard...</span>
               )}
+            </div>
+          ) : ( */}
+          {!dashboardData ? (
+            <div className="dashboard-loading">
+              <div className="skeleton-card grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+                {[...Array(3)].map((_, i) => (
+                  <div
+                    key={i}
+                    className="skeleton-box bg-gray-200 animate-pulse h-24 rounded-lg"
+                  ></div>
+                ))}
+              </div>
+              <span className="loading-text">Loading dashboard...</span>
             </div>
           ) : (
             <section className="dashboard-main">
@@ -171,10 +188,148 @@ function OrganizerLandingPage({ user, signOut }) {
                 </div>
               </div>
 
-              <hr className="border-gray-300 mb-6" />
-
+              {/* <hr className="border-gray-300 mb-6" /> */}
               <div className="ticket-sales-grid grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 mb-6">
-                <div className="flex flex-col gap-4">
+                <div className="flex flex-col gap-2">
+                  <div className="dashboard-card ticket-sales bg-white p-4 sm:p-5 rounded-lg shadow-md border border-gray-200 h-full">
+                    <h3 className="text-base sm:text-lg font-semibold text-gray-600 mb-4">
+                      Total Ticket Sales
+                    </h3>
+                    <div className="chart-container w-full h-40">
+                      <Pie
+                        data={pieChartData}
+                        options={{
+                          maintainAspectRatio: false,
+                          plugins: {
+                            legend: {
+                              position: "bottom",
+                              labels: {
+                                boxWidth: 12,
+                                padding: 10,
+                                font: {
+                                  size: window.innerWidth < 640 ? 10 : 12,
+                                },
+                              },
+                            },
+                            tooltip: {
+                              enabled: true,
+                              backgroundColor: "#0d9488",
+                              titleColor: "#ffffff",
+                              bodyColor: "#ffffff",
+                            },
+                          },
+                        }}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="dashboard-card bg-white p-4 sm:p-5 rounded-lg shadow-md border border-gray-200 h-full">
+                    <h3 className="text-base sm:text-lg font-semibold text-gray-600 mb-4">
+                      Event Calendar
+                    </h3>
+                    <div className="chart-container w-full max-w-[400px] mx-auto h-40">
+                      <Calendar
+                        onChange={setCalendarDate}
+                        value={calendarDate}
+                        tileClassName={({ date }) =>
+                          dashboardData.eventDates?.some((eventDate) =>
+                            isSameDay(date, new Date(eventDate))
+                          )
+                            ? "event-date"
+                            : ""
+                        }
+                        tileContent={({ date }) => {
+                          const event = dashboardData.eventDates?.find(
+                            (eventDate) => isSameDay(date, new Date(eventDate))
+                          );
+                          return event ? (
+                            <span
+                              className="event-indicator"
+                              title="Event"
+                            ></span>
+                          ) : null;
+                        }}
+                        className="custom-calendar w-full"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex flex-col gap-2">
+                  <div className="dashboard-card bg-white p-4 sm:p-5 rounded-lg shadow-md border border-gray-200 h-full">
+                    <h3 className="text-base sm:text-lg font-semibold text-gray-600 mb-4">
+                      Popular Events
+                    </h3>
+                    <div className="chart-container w-full h-40">
+                      <Doughnut
+                        key={Date.now()}
+                        data={popularEventsData}
+                        options={{
+                          maintainAspectRatio: false,
+                          plugins: {
+                            legend: {
+                              position: "bottom",
+                              labels: {
+                                boxWidth: 12,
+                                padding: 10,
+                                font: {
+                                  size: window.innerWidth < 640 ? 10 : 12,
+                                },
+                              },
+                            },
+                            tooltip: {
+                              enabled: true,
+                              backgroundColor: "#0d9488",
+                              titleColor: "#ffffff",
+                              bodyColor: "#ffffff",
+                            },
+                          },
+                        }}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="dashboard-card bg-white p-4 sm:p-5 rounded-lg shadow-md border border-gray-200 h-full">
+                    <h3 className="text-base sm:text-lg font-semibold text-gray-600 mb-4">
+                      Upcoming Events
+                    </h3>
+                    <div className="chart-container w-full h-40 sm:h-48">
+                      <table className="dashboard-table upcoming-events w-full text-left text-sm sm:text-base">
+                        <thead className="table-header">
+                          <tr>
+                            <th scope="col" className="py-3 px-4">
+                              <FaTicketAlt className="text-icon" /> Event Title
+                            </th>
+                            <th scope="col" className="py-3 px-4">
+                              <FaCalendarAlt className="text-icon" /> Date
+                            </th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {dashboardData.upcomingEventsList
+                            ?.slice(0, 4)
+                            .map((event, index) => (
+                              <tr
+                                key={index}
+                                className={
+                                  index % 2 === 0 ? "row-even" : "row-odd"
+                                }
+                              >
+                                <td className="py-2 px-4">{event.title}</td>
+                                <td className="py-2 px-4 text-gray-600">
+                                  {event.date}
+                                </td>
+                              </tr>
+                            ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* <div className="ticket-sales-grid grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 mb-6">
+                <div className="flex flex-col gap-2">
                   <div className="dashboard-card ticket-sales bg-white p-4 sm:p-5 rounded-lg shadow-md border border-gray-200">
                     <h3 className="text-base sm:text-lg font-semibold text-gray-600 mb-4">
                       Total Ticket Sales
@@ -226,7 +381,7 @@ function OrganizerLandingPage({ user, signOut }) {
                   </div>
                 </div>
 
-                <div className="flex flex-col gap-4">
+                <div className="flex flex-col gap-2">
                   <div className="dashboard-card bg-white p-4 sm:p-5 rounded-lg shadow-md border border-gray-200">
                     <h3 className="text-base sm:text-lg font-semibold text-gray-600 mb-4">
                       Popular Events
@@ -243,6 +398,9 @@ function OrganizerLandingPage({ user, signOut }) {
                               labels: {
                                 boxWidth: 12,
                                 padding: 10,
+                              },
+                              font: {
+                                size: window.innerWidth < 640 ? 10 : 12, // Responsive font size
                               },
                             },
                           },
@@ -274,7 +432,7 @@ function OrganizerLandingPage({ user, signOut }) {
                     </table>
                   </div>
                 </div>
-              </div>
+              </div> */}
 
               <div className="dashboard-card feedback-card bg-white p-4 sm:p-5 rounded-lg shadow-md border border-gray-200 mb-6">
                 <h3 className="text-base sm:text-lg font-semibold text-gray-600 mb-4">
