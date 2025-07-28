@@ -16,13 +16,9 @@ import {
 } from "@aws-amplify/ui-react";
 import { fetchAuthSession } from "@aws-amplify/auth";
 
-// import Home from "./components/Home";
-// import Profile from "./components/Profile";
 import EventsPage from "./components/EventsPage";
 import Footer from "./components/Footer";
-// import LandingPage from "./components/LandingPage";
-// import EventDetailsPage from "./components/EventDetailsPage";
-// import BuyTicketPage from "./components/BuyTicketPage";
+
 import OrganizerLoginPage from "./components/OrganizerLoginPage.jsx";
 import OrganizerLandingPage from "./components/OrganizerLandingPage.jsx";
 import HostEvent from "./components/Hostevent.jsx";
@@ -97,69 +93,6 @@ function AuthenticatedRoutes() {
     }
     fetchAndUpdateRole();
   }, [navigate]);
-
-  // useEffect(() => {
-  //   async function fetchAndUpdateRole() {
-  //     try {
-  //       // Ensure window.location is valid before using startsWith
-  //       if (!window.location || typeof window.location.href !== "string") {
-  //         console.error("Invalid redirect URL:", window.location);
-  //         return;
-  //       }
-
-  //       console.log("Current URL:", window.location.href);
-
-  //       const session = await fetchAuthSession();
-  //       console.log("session" + JSON.stringify(session));
-  //       const idToken = session.tokens?.idToken;
-
-  //       if (!idToken) {
-  //         console.error("ID token not found. Redirecting to login.");
-  //         return;
-  //       }
-
-  //       let userRole = idToken.payload["custom:role"];
-  //       sessionStorage.setItem("userRole", userRole);
-  //       const userId = idToken.payload["sub"];
-
-  //       console.log("Fetched role from Cognito:", userRole);
-
-  //       const tempRole = sessionStorage.getItem("tempRole");
-  //       if (tempRole && tempRole !== userRole) {
-  //         console.log("Updating role for first-time login...");
-  //         await updateRole(userId, tempRole);
-  //         sessionStorage.removeItem("tempRole");
-
-  //         // Fetch updated role after update
-  //         const updatedSession = await fetchAuthSession();
-  //         userRole = updatedSession.tokens?.idToken?.payload["custom:role"];
-  //         console.log("Updated role from Cognito:", userRole);
-  //       }
-
-  //       if (!hasRedirected.current) {
-  //         hasRedirected.current = true; // Mark as redirected
-
-  //         if (userRole?.includes("admin")) {
-  //           navigate("/admin-dashboard");
-  //         } else if (userRole?.includes("organizer")) {
-  //           navigate("/organizer-landing");
-  //         } else {
-  //           console.log("No Role defined");
-  //           Alert.alert(
-  //             "You are not authorized to access. Contact Tikties admin"
-  //           );
-  //         }
-  //       }
-  //     } catch (error) {
-  //       console.error("Error fetching/updating role:", error);
-  //     } finally {
-  //       setLoading(false);
-  //     }
-  //   }
-
-  //   // Delay execution slightly to ensure window is fully loaded
-  //   setTimeout(fetchAndUpdateRole, 200);
-  // }, [navigate]);
 
   if (loading) return <div>Loading...</div>;
 

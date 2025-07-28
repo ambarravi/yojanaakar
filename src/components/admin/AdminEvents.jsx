@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Sidebar from "./AdminSidebar";
-import "../../styles/ManageEvent.css"; // Updated to use ManageEvent.css ManageEvent.css
+import "../admin/styles/NewAdminEvent.css"; //"../styles/AdminManageUsers.css";
 import { fetchAuthSession } from "@aws-amplify/auth";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
@@ -141,13 +141,22 @@ function AdminEvents({ user, signOut }) {
       effectiveAction = "UnderReview";
     }
     const role = sessionStorage.getItem("userRole");
+    // const allowedActions = {
+    //   AwaitingApproval: ["Edit", "Delete", "UnderReview", "Approve"],
+    //   UnderReview: ["Edit", "Delete", "Approve"],
+    //   Approved: ["Publish", "Delete", "Edit"],
+    //   Published: ["Edit"],
+    //   Cancelled: ["Edit"],
+    // };
+
     const allowedActions = {
       AwaitingApproval: ["Edit", "Delete", "UnderReview", "Approve"],
       UnderReview: ["Edit", "Delete", "Approve"],
       Approved: ["Publish", "Delete", "Edit"],
-      Published: ["Edit"],
+      Published: ["Edit", "Cancel"], // <-- Allow Cancel here directly
       Cancelled: ["Edit"],
     };
+
     if (role === "Admin") {
       allowedActions.Published.push("Cancel");
     }
@@ -179,24 +188,30 @@ function AdminEvents({ user, signOut }) {
   const totalPages = Math.ceil(events.length / eventsPerPage);
 
   return (
-    <div className="admin-events-page">
+    <div className="AdminEvent_manage-events-page">
       {isLoading && (
-        <div className="loading-overlay">
-          <div className="spinner"></div>
+        <div
+          className={`AdminEvent_loading-overlay ${isLoading ? "active" : ""}`}
+        >
+          <div className="AdminEvent_spinner"></div>
         </div>
       )}
-      <button className="sidebar-toggle" onClick={toggleSidebar}>
+      <button className="AdminEvent_sidebar-toggle" onClick={toggleSidebar}>
         ☰
       </button>
       <Sidebar user={user} signOut={signOut} isOpen={isSidebarOpen} />
-      <main className={`events-content ${isSidebarOpen ? "sidebar-open" : ""}`}>
-        <h2 className="events-title">Admin Manage Events</h2>
+      <main
+        className={`AdminEvent_events-content ${
+          isSidebarOpen ? "AdminEvent_sidebar-open" : ""
+        }`}
+      >
+        <h2 className="AdminEvent_events-title">Admin Manage Events</h2>
 
         {/* Events Table Section */}
-        <div className="event-details">
-          <h3 className="booking-subtitle">Event List</h3>
-          <div className="table-wrapper">
-            <table className="events-table">
+        <div className="AdminEvent_event-details">
+          <h3 className="AdminEvent_booking-subtitle">Event List</h3>
+          <div className="AdminEvent_table-wrapper">
+            <table className="AdminEvent_events-table">
               <thead>
                 <tr>
                   <th scope="col" onClick={() => handleSort("id")}>
@@ -214,11 +229,8 @@ function AdminEvents({ user, signOut }) {
                   <th scope="col" onClick={() => handleSort("EventStatus")}>
                     Status
                   </th>
-                  <th scope="col" onClick={() => handleSort("Seats")}>
-                    Seats
-                  </th>
                   <th scope="col" onClick={() => handleSort("TicketsBooked")}>
-                    Tickets Booked
+                    Tickets/Seats
                   </th>
                   <th scope="col">Actions</th>
                 </tr>
@@ -227,7 +239,7 @@ function AdminEvents({ user, signOut }) {
                 {currentEvents.length === 0 ? (
                   <tr>
                     <td
-                      colSpan="8"
+                      colSpan="7"
                       style={{ textAlign: "center", padding: "2rem" }}
                     >
                       No events found.
@@ -241,11 +253,10 @@ function AdminEvents({ user, signOut }) {
                       <td>{event.EventTitle}</td>
                       <td>{formatDateTime(event.EventDate)}</td>
                       <td>{event.Status}</td>
-                      <td>{event.Seats}</td>
-                      <td>{event.TicketsBooked}</td>
-                      <td className="action-buttons">
+                      <td>{`${event.TicketsBooked}/${event.Seats}`}</td>
+                      <td className="AdminEvent_action-buttons">
                         <button
-                          className="action-btn view-btn"
+                          className="AdminEvent_action-btn AdminEvent_view-btn"
                           title="View Booking Details"
                           onClick={() =>
                             handleViewBookingDetails(event.EventID)
@@ -255,7 +266,7 @@ function AdminEvents({ user, signOut }) {
                           <FontAwesomeIcon icon={faEye} />
                         </button>
                         <button
-                          className="action-btn approve-btn"
+                          className="AdminEvent_action-btn AdminEvent_approve-btn"
                           title="Approve Event"
                           onClick={() =>
                             handleActionButtonClick(event, "Approve")
@@ -265,7 +276,7 @@ function AdminEvents({ user, signOut }) {
                           <FontAwesomeIcon icon={faThumbsUp} />
                         </button>
                         <button
-                          className="action-btn reject-btn"
+                          className="AdminEvent_action-btn AdminEvent_reject-btn"
                           title="Reject Event"
                           onClick={() =>
                             handleActionButtonClick(event, "Reject")
@@ -275,7 +286,7 @@ function AdminEvents({ user, signOut }) {
                           <FontAwesomeIcon icon={faThumbsDown} />
                         </button>
                         <button
-                          className="action-btn edit-btn"
+                          className="AdminEvent_action-btn AdminEvent_edit-btn"
                           title="Edit Event Details"
                           onClick={() => handleActionButtonClick(event, "Edit")}
                           aria-label="Edit event"
@@ -283,7 +294,7 @@ function AdminEvents({ user, signOut }) {
                           <FontAwesomeIcon icon={faInfoCircle} />
                         </button>
                         <button
-                          className="action-btn cancel-btn"
+                          className="AdminEvent_action-btn AdminEvent_cancel-btn"
                           title="Cancel Event"
                           onClick={() =>
                             handleActionButtonClick(event, "Cancel")
@@ -293,7 +304,7 @@ function AdminEvents({ user, signOut }) {
                           <FontAwesomeIcon icon={faStopCircle} />
                         </button>
                         <button
-                          className="action-btn delete-btn"
+                          className="AdminEvent_action-btn AdminEvent_delete-btn"
                           title="Delete Event"
                           onClick={() =>
                             handleActionButtonClick(event, "Delete")
@@ -312,20 +323,20 @@ function AdminEvents({ user, signOut }) {
         </div>
 
         {/* Pagination Section */}
-        <div className="footer-buttons">
+        <div className="AdminEvent_footer-buttons">
           <button
-            className="footer-btn"
+            className="AdminEvent_footer-btn"
             onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
             disabled={currentPage === 1}
             aria-label="Previous page"
           >
             <FontAwesomeIcon icon={faArrowLeft} /> Previous
           </button>
-          <span className="pagination-info">
+          <span className="AdminEvent_pagination-info">
             Page {currentPage} of {totalPages}
           </span>
           <button
-            className="footer-btn"
+            className="AdminEvent_footer-btn"
             onClick={() =>
               setCurrentPage((prev) => Math.min(prev + 1, totalPages))
             }
