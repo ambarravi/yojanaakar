@@ -11,6 +11,7 @@ import {
   faPaperPlane,
   faStopCircle,
   faEye,
+  faSync,
 } from "@fortawesome/free-solid-svg-icons";
 import { fetchEventDetailsByOrgID, updateEventStatus } from "../api/eventApi";
 
@@ -29,6 +30,7 @@ function ManageEvents({ user, signOut }) {
     setIsLoading(true);
     try {
       const result = await fetchEventDetailsByOrgID();
+      console.log("API Response:", result.items); // Debug API data
       setEvents(result.items);
       setIsLoading(false);
     } catch (error) {
@@ -56,27 +58,22 @@ function ManageEvents({ user, signOut }) {
       AwaitingApproval: ["Edit", "Delete", "UnderReview"],
       UnderReview: ["Edit", "Delete", "Approve"],
       Approved: ["Publish", "Delete", "Edit"],
-      Published: ["Edit"],
+      Published: ["Edit", "View"],
       Cancelled: ["Edit"],
     };
-    if (!allowedActions[status]?.includes(action)) {
-      alert(`Action ${action} is not allowed in status: ${status}`);
-      return false;
-    }
-    if (action === "Edit") {
-      if (status === "Approved") {
-        alert("Event is Approved. Edits will require re-approval.");
-        return true;
-      } else if (status === "Published" || status === "Cancelled") {
-        alert(`Event is ${status}. You can only view details.`);
-        return true;
-      }
-    }
-    return true;
+    return allowedActions[status]?.includes(action) || false;
   };
 
   const formatDateTime = (dateTimeString) => {
+    if (!dateTimeString || typeof dateTimeString !== "string") {
+      console.warn("Invalid or missing dateTimeString:", dateTimeString);
+      return "N/A";
+    }
     const date = new Date(dateTimeString);
+    if (isNaN(date.getTime())) {
+      console.warn("Invalid date format:", dateTimeString);
+      return "N/A";
+    }
     return new Intl.DateTimeFormat("en-US", {
       weekday: "long",
       year: "numeric",
@@ -89,7 +86,22 @@ function ManageEvents({ user, signOut }) {
   };
 
   const handleActionButtonClick = async (event, action) => {
-    if (!validateEventAction(event.EventStatus, action)) return;
+    if (!validateEventAction(event.EventStatus, action)) {
+      alert(`Action ${action} is not allowed in status: ${event.EventStatus}`);
+      return;
+    }
+
+    if (action === "Edit") {
+      if (event.EventStatus === "Approved") {
+        alert("Event is Approved. Edits will require re-approval.");
+      } else if (
+        event.EventStatus === "Published" ||
+        event.EventStatus === "Cancelled"
+      ) {
+        alert(`Event is ${event.EventStatus}. You can only view details.`);
+      }
+    }
+
     const userConfirmed = window.confirm(
       `Are you sure you want to ${action} this event?`
     );
@@ -131,7 +143,11 @@ function ManageEvents({ user, signOut }) {
     }
   };
 
-  const handleViewBookingDetails = (eventId) => {
+  const handleViewBookingDetails = (eventId, eventStatus) => {
+    if (!validateEventAction(eventStatus, "View")) {
+      alert("Viewing booking details is only allowed for Published events.");
+      return;
+    }
     navigate(`/showBookingDetails/${eventId}`);
   };
 
@@ -174,7 +190,15 @@ function ManageEvents({ user, signOut }) {
           className="event-details"
           style={{ padding: isMobile ? "0.5rem" : "0.75rem" }}
         >
-          <h3 className="booking-subtitle">Event List</h3>
+          <button
+            className="refresh-btn"
+            onClick={fetchEvents}
+            title="Refresh Events"
+            aria-label="Refresh events"
+          >
+            <FontAwesomeIcon icon={faSync} style={{ marginRight: "0.5rem" }} />
+            Refresh
+          </button>
           <div
             className="table-wrapper"
             style={{ maxWidth: "100%", overflowX: "auto" }}
@@ -265,7 +289,7 @@ function ManageEvents({ user, signOut }) {
                   <th
                     scope="col"
                     style={{
-                      width: isMobile ? "20%" : "20%",
+                      width: isMobile ? "20%" : "25%",
                       padding: isMobile ? "0.3rem" : "0.75rem",
                     }}
                   >
@@ -324,31 +348,29 @@ function ManageEvents({ user, signOut }) {
                         className="action-buttons"
                         style={{
                           display: "flex",
-                          gap: "0.2rem !important",
                           justifyContent: "center",
-                          flexWrap: "nowrap !important",
-                          minWidth: "auto !important",
-                          overflow: "visible !important",
-                          padding: isMobile ? "0.3rem" : "0.75rem",
+                          flexWrap: isMobile ? "wrap" : "nowrap",
+                          padding: isMobile ? "0.5rem" : "0.75rem",
                         }}
                       >
                         <button
                           className="action-btn view-btn"
                           title="View Booking Details"
                           onClick={() =>
-                            handleViewBookingDetails(event.EventID)
+                            handleViewBookingDetails(
+                              event.EventID,
+                              event.EventStatus
+                            )
                           }
                           aria-label="View booking details"
-                          style={{
-                            width: isMobile ? "0.9rem" : "1rem",
-                            height: isMobile ? "0.9rem" : "1rem",
-                            padding: "0",
-                          }}
+                          disabled={
+                            !validateEventAction(event.EventStatus, "View")
+                          }
+                          aria-disabled={
+                            !validateEventAction(event.EventStatus, "View")
+                          }
                         >
-                          <FontAwesomeIcon
-                            icon={faEye}
-                            style={{ fontSize: isMobile ? "0.6rem" : "0.7rem" }}
-                          />
+                          <FontAwesomeIcon icon={faEye} />
                         </button>
                         <button
                           className="action-btn publish-btn"
@@ -357,32 +379,28 @@ function ManageEvents({ user, signOut }) {
                             handleActionButtonClick(event, "Publish")
                           }
                           aria-label="Publish event"
-                          style={{
-                            width: isMobile ? "0.9rem" : "1rem",
-                            height: isMobile ? "0.9rem" : "1rem",
-                            padding: "0",
-                          }}
+                          disabled={
+                            !validateEventAction(event.EventStatus, "Publish")
+                          }
+                          aria-disabled={
+                            !validateEventAction(event.EventStatus, "Publish")
+                          }
                         >
-                          <FontAwesomeIcon
-                            icon={faPaperPlane}
-                            style={{ fontSize: isMobile ? "0.6rem" : "0.7rem" }}
-                          />
+                          <FontAwesomeIcon icon={faPaperPlane} />
                         </button>
                         <button
                           className="action-btn edit-btn"
                           title="Edit Event Details"
                           onClick={() => handleActionButtonClick(event, "Edit")}
                           aria-label="Edit event"
-                          style={{
-                            width: isMobile ? "0.9rem" : "1rem",
-                            height: isMobile ? "0.9rem" : "1rem",
-                            padding: "0",
-                          }}
+                          disabled={
+                            !validateEventAction(event.EventStatus, "Edit")
+                          }
+                          aria-disabled={
+                            !validateEventAction(event.EventStatus, "Edit")
+                          }
                         >
-                          <FontAwesomeIcon
-                            icon={faEdit}
-                            style={{ fontSize: isMobile ? "0.6rem" : "0.7rem" }}
-                          />
+                          <FontAwesomeIcon icon={faEdit} />
                         </button>
                         <button
                           className="action-btn cancel-btn"
@@ -391,16 +409,14 @@ function ManageEvents({ user, signOut }) {
                             handleActionButtonClick(event, "Cancel")
                           }
                           aria-label="Cancel event"
-                          style={{
-                            width: isMobile ? "0.9rem" : "1rem",
-                            height: isMobile ? "0.9rem" : "1rem",
-                            padding: "0",
-                          }}
+                          disabled={
+                            !validateEventAction(event.EventStatus, "Cancel")
+                          }
+                          aria-disabled={
+                            !validateEventAction(event.EventStatus, "Cancel")
+                          }
                         >
-                          <FontAwesomeIcon
-                            icon={faStopCircle}
-                            style={{ fontSize: isMobile ? "0.6rem" : "0.7rem" }}
-                          />
+                          <FontAwesomeIcon icon={faStopCircle} />
                         </button>
                         <button
                           className="action-btn delete-btn"
@@ -409,16 +425,14 @@ function ManageEvents({ user, signOut }) {
                             handleActionButtonClick(event, "Delete")
                           }
                           aria-label="Delete event"
-                          style={{
-                            width: isMobile ? "0.9rem" : "1rem",
-                            height: isMobile ? "0.9rem" : "1rem",
-                            padding: "0",
-                          }}
+                          disabled={
+                            !validateEventAction(event.EventStatus, "Delete")
+                          }
+                          aria-disabled={
+                            !validateEventAction(event.EventStatus, "Delete")
+                          }
                         >
-                          <FontAwesomeIcon
-                            icon={faTrash}
-                            style={{ fontSize: isMobile ? "0.6rem" : "0.7rem" }}
-                          />
+                          <FontAwesomeIcon icon={faTrash} />
                         </button>
                       </td>
                     </tr>

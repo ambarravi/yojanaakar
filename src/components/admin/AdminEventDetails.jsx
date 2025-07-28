@@ -102,7 +102,7 @@ function AdminEventDetails({ user, signOut }) {
             eventDetails: eventDetails?.EventDetails || "",
             ticketPrice: eventDetails?.Price || "",
             noOfSeats: eventDetails?.Seats || "",
-            reserveSeats: eventDetails?.ReservedSeats || "",
+            reserveSeats: eventDetails?.ReservedSeats || "0",
             additionalInfo: eventDetails?.AdditionalInfo || "",
             tags: eventDetails?.Tags || "",
             audienceBenefits: eventDetails?.AudienceBenefits || "",

@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
+import { debounce } from "lodash";
 import Sidebar from "./Sidebar";
 import {
   GetCityList,
@@ -38,18 +39,18 @@ function Hostevent({ user, signOut }) {
     audienceBenefits: ["", "", ""],
     images: [],
   });
-
   const [uploadedFiles, setUploadedFiles] = useState([]);
   const [showDropdown, setShowDropdown] = useState(false);
   const [categories, setCategories] = useState([]);
   const [cities, setCities] = useState([]);
-  const [isLoading, setIsLoading] = useState(false); // Changed to false to avoid initial flicker
+  const [isLoading, setIsLoading] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isSubmitDisabled, setIsSubmitDisabled] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const [modalMessage, setModalMessage] = useState({ title: "", body: "" });
-  const [profileCompleted, setProfileCompleted] = useState("");
+  const [organizerName, setOrganizerName] = useState(""); // New state for OrganizerName
+  const [eventsRemaining, setEventsRemaining] = useState(0);
 
   const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
 
@@ -81,23 +82,22 @@ function Hostevent({ user, signOut }) {
         console.time("fetchProfileDetails");
         const orgProfile = await fetchProfileDetails();
         console.timeEnd("fetchProfileDetails");
-        //    console.log("OrgProfile details ", orgProfile);
 
-        const profileCompletedStatus =
-          orgProfile?.record?.OrganizerName?.S || "";
-        const eventsRemaining = parseInt(
+        const organizerNameValue = orgProfile?.record?.OrganizerName?.S || "";
+        const remainingEvents = parseInt(
           orgProfile?.record?.eventsRemaining?.N || "0"
         );
 
-        setProfileCompleted(profileCompletedStatus);
+        setOrganizerName(organizerNameValue); // Set organizerName
+        setEventsRemaining(remainingEvents);
 
-        if (!profileCompletedStatus) {
+        if (!organizerNameValue) {
           setModalMessage({
             title: "Profile Incomplete",
             body: "You must complete your profile before you can host an event. Please complete all details mentioned in the profile section.",
           });
           setShowModal(true);
-        } else if (eventsRemaining <= 0) {
+        } else if (remainingEvents <= 0) {
           setModalMessage({
             title: "Event Limit Reached",
             body: "We regret to inform you that the monthly event hosting limit has been reached. Please try again next month or contact support for assistance.",
@@ -161,8 +161,6 @@ function Hostevent({ user, signOut }) {
     fetchData();
   }, [eventId, navigate]);
 
-  //const extractImageName = (url) => url.substring(url.lastIndexOf("/") + 1);
-
   const handleImageUpload = (e) => {
     const files = Array.from(e.target.files);
     const maxSizeInBytes = 5 * 1024 * 1024; // 5MB
@@ -216,102 +214,85 @@ function Hostevent({ user, signOut }) {
     }
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  const handleSubmit = useCallback(
+    async (e) => {
+      e.preventDefault();
+      setIsSubmitting(true);
 
-    if (!profileCompleted) {
-      setModalMessage({
-        title: "Profile Incomplete",
-        body: "You must complete your profile before you can host an event. Please complete all details mentioned in the profile section.",
-      });
-      setShowModal(true);
-      return;
-    }
+      await new Promise((resolve) => setTimeout(resolve, 0)); // Ensure UI updates
 
-    const orgProfile = await fetchProfileDetails();
-    const eventsRemaining = parseInt(
-      orgProfile?.record?.eventsRemaining?.N || "0"
-    );
+      const errors = [];
+      if (!organizerName) {
+        errors.push(
+          "You must complete your profile before you can host an event."
+        );
+      }
+      if (eventsRemaining <= 0) {
+        errors.push(
+          "Monthly event hosting limit reached. Please try again next month."
+        );
+      }
+      if (formData.eventTitle.length > 100) {
+        errors.push("Event Title should not exceed 100 characters.");
+      }
+      if (formData.eventDetails.length > 300) {
+        errors.push("Event Details should not exceed 300 characters.");
+      }
+      if (!formData.eventType && showDropdown) {
+        errors.push("Please select the target audience.");
+      }
+      if (new Date(formData.dateTime) <= new Date()) {
+        errors.push("Date and Time must be in the future.");
+      }
+      if (!formData.categoryID) {
+        errors.push("Please select a category.");
+      }
+      if (!formData.highlight) {
+        errors.push("Please provide a highlight.");
+      }
+      if (!formData.cityID) {
+        errors.push("Please select a city.");
+      }
+      if (!formData.location) {
+        errors.push("Please provide a location.");
+      }
+      if (parseFloat(formData.ticketPrice) < 0) {
+        errors.push("Ticket Price should be non-negative.");
+      }
+      if (parseInt(formData.noOfSeats) < 25) {
+        errors.push("No of Seats should be at least 25.");
+      }
+      if (parseFloat(formData.reserveSeats) < 0) {
+        errors.push("Reserve Seats should be non-negative.");
+      }
 
-    if (eventsRemaining <= 0) {
-      setModalMessage({
-        title: "Event Limit Reached",
-        body: "We regret to inform you that the monthly event hosting limit has been reached. Please try again next month or contact support for assistance.",
-      });
-      setShowModal(true);
-      return;
-    }
+      if (errors.length > 0) {
+        alert(errors.join("\n"));
+        setIsSubmitting(false);
+        return;
+      }
 
-    setIsSubmitting(true);
+      try {
+        console.time("submitEvent");
+        await submitEvent(formData, organizerName); // Use organizerName
+        console.timeEnd("submitEvent");
+        alert("Form submitted successfully!");
+        sessionStorage.setItem("fromSidebar", "false");
+        navigate("/manage-events");
+      } catch (error) {
+        console.error("Error submitting form:", error);
+        alert("Failed to submit the form. Please try again.");
+      } finally {
+        setIsSubmitting(false);
+      }
+    },
+    [formData, organizerName, eventsRemaining, navigate, showDropdown]
+  );
 
-    if (formData.eventTitle.length > 100) {
-      alert("Event Title should not exceed 100 characters.");
-      setIsSubmitting(false);
-      return;
-    }
-    if (formData.eventDetails.length > 300) {
-      alert("Event Details should not exceed 300 characters.");
-      setIsSubmitting(false);
-      return;
-    }
-    if (!formData.eventType && showDropdown) {
-      alert("Please select the target audience.");
-      setIsSubmitting(false);
-      return;
-    }
-    if (new Date(formData.dateTime) <= new Date()) {
-      alert("Date and Time must be in the future.");
-      setIsSubmitting(false);
-      return;
-    }
-    if (!formData.categoryID) {
-      alert("Please select a category.");
-      setIsSubmitting(false);
-      return;
-    }
-    if (!formData.highlight) {
-      alert("Please provide a highlight.");
-      setIsSubmitting(false);
-      return;
-    }
-    if (!formData.cityID) {
-      alert("Please select a city.");
-      setIsSubmitting(false);
-      return;
-    }
-    if (!formData.location) {
-      alert("Please provide a location.");
-      setIsSubmitting(false);
-      return;
-    }
-    if (parseFloat(formData.ticketPrice) < 0) {
-      alert("Ticket Price should be non-negative.");
-      setIsSubmitting(false);
-      return;
-    }
-    if (parseInt(formData.noOfSeats) < 25) {
-      alert("No of Seats should be at least 25.");
-      setIsSubmitting(false);
-      return;
-    }
-    if (parseFloat(formData.reserveSeats) < 0) {
-      alert("Reserve Seats should be non-negative.");
-      setIsSubmitting(false);
-      return;
-    }
-
-    try {
-      await submitEvent(formData, orgProfile?.record?.OrganizerName?.S || "");
-      alert("Form submitted successfully!");
-      sessionStorage.setItem("fromSidebar", "false");
-      navigate("/manage-events");
-    } catch (error) {
-      console.error("Error submitting form:", error);
-      alert("Failed to submit the form. Please try again.");
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
+  const debouncedSubmit = debounce(handleSubmit, 300, {
+    leading: true,
+    trailing: false,
+  });
 
   const handleCancel = () => {
     sessionStorage.setItem("fromSidebar", "false");
@@ -408,7 +389,7 @@ function Hostevent({ user, signOut }) {
               </div>
             </div>
           ) : (
-            <form onSubmit={handleSubmit} className="host-event-form">
+            <form onSubmit={debouncedSubmit} className="host-event-form">
               <div className="form-group">
                 <label>Event Title</label>
                 <input
