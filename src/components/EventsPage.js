@@ -2,7 +2,6 @@ import React from "react";
 import { useNavigate } from "react-router-dom";
 import { View } from "@aws-amplify/ui-react";
 import "../styles/Events.css";
-//import { Link } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faDownload,
@@ -13,7 +12,7 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 
 // Import images explicitly from src/assets/images/
-import heroImage from "../assets/images/Tikto_BG.png";
+import heroImage from "../assets/images/Tikto_BG_Updated.png";
 import logoImage from "../assets/images/tikties_logo.png";
 // Import app screenshot images
 import appScreenshot1 from "../assets/images/Phone_frame_home.png";
@@ -29,19 +28,6 @@ function EventsPage() {
     sessionStorage.setItem("tempRole", "organizer");
     localStorage.setItem("local_tempRole", "organizer");
     navigate("/organizer-landing");
-
-    // //  sessionStorage.setItem("tempRole", "organizer");
-    // //  localStorage.setItem("local_tempRole", "organizer");
-    // const domain = process.env.REACT_APP_COGNITO_OAUTH_DOMAIN;
-    // const clientId = process.env.REACT_APP_POOL_CLIENT_ID;
-    // const redirectUri = process.env.REACT_APP_COGNITO_REDIRECT_SIGN_IN;
-
-    // const loginUrl = `https://${domain}/login?client_id=${clientId}&response_type=code&scope=email+openid+profile&redirect_uri=${redirectUri}`;
-    // // const loginUrl = `https://${domain}/oauth2/authorize?identity_provider=Google&response_type=code&client_id=${clientId}&redirect_uri=${encodeURIComponent(
-    // //   redirectUri
-    // // )}&scope=email+openid+profile`;
-
-    // window.location.href = loginUrl;
   };
 
   return (
@@ -54,7 +40,7 @@ function EventsPage() {
                 src={logoImage}
                 alt="Logo"
                 className="logo-image"
-                style={{ height: "40px", objectFit: "contain" }}
+                style={{ height: "48px", objectFit: "contain" }}
               />
             </div>
             <nav className="nav-links">
@@ -67,17 +53,9 @@ function EventsPage() {
               <a href="#contact-us" className="nav-link">
                 <FontAwesomeIcon icon={faEnvelope} /> Contact Us
               </a>
-              {/* <Link
-                to="/organizer-landing"
-                onClick={handleOrganizerSignIn}
-                className="nav-link organizer-signin"
-              >
-                <FontAwesomeIcon icon={faCrown} /> Organizer Sign In
-              </Link> */}
-
               <button
                 onClick={handleOrganizerSignIn}
-                className="nav-link organizer-signin"
+                className="nav-link organizer-signin primary-button"
               >
                 <FontAwesomeIcon icon={faCrown} /> Organizer Sign In
               </button>
@@ -88,7 +66,9 @@ function EventsPage() {
 
       <main className="main-content">
         <section className="hero-section">
-          <img src={heroImage} alt="Hero" className="hero-image" />
+          <div className="hero-overlay">
+            <img src={heroImage} alt="Hero" className="hero-image" />
+          </div>
         </section>
 
         <section id="how-it-works" className="how-it-works-section">
@@ -99,17 +79,11 @@ function EventsPage() {
               explore, register, and engage with events personalized for you.
             </p>
             <div className="cards-container">
-              <div
-                className="card"
-                style={{ backgroundColor: "#e3f2fd", color: "#1e3a8a" }}
-              >
+              <div className="card">
                 <h3>
-                  <span style={{ color: "#F97316", fontWeight: "bold" }}>
-                    Discover
-                  </span>{" "}
-                  Events That Matter
+                  <span className="highlight-text">Discover</span> Events That
+                  Matter
                 </h3>
-
                 <p>
                   Explore events curated just for you with the Tikties mobile
                   app. Whether you're a student or a working professional, find
@@ -117,15 +91,9 @@ function EventsPage() {
                   interests — all in one place!
                 </p>
               </div>
-              <div
-                className="card"
-                style={{ backgroundColor: "#e3f2fd", color: "#1e3a8a" }}
-              >
+              <div className="card">
                 <h3>
-                  <span style={{ color: "#F97316", fontWeight: "bold" }}>
-                    One-Tap
-                  </span>{" "}
-                  Event Access
+                  <span className="highlight-text">One-Tap</span> Event Access
                 </h3>
                 <p>
                   Sign up for events in one tap and start building connections
@@ -134,19 +102,11 @@ function EventsPage() {
                   announcements and event news!
                 </p>
               </div>
-              <div
-                className="card"
-                style={{ backgroundColor: "#e3f2fd", color: "#1e3a8a" }}
-              >
+              <div className="card">
                 <h3>
-                  {" "}
-                  Experience{" "}
-                  <span style={{ color: "#F97316", fontWeight: "bold" }}>
-                    Engage
-                  </span>{" "}
+                  Experience <span className="highlight-text">Engage</span>{" "}
                   Evolve
                 </h3>
-
                 <p>
                   Attend events seamlessly, participate in live discussions, and
                   provide valuable feedback after the session. Help shape future
@@ -177,7 +137,6 @@ function EventsPage() {
                 />
                 <p>Event Discovery</p>
               </div>
-
               <div className="app-card">
                 <img
                   src={appScreenshot2}
@@ -186,9 +145,8 @@ function EventsPage() {
                   width="280"
                   height="500"
                 />
-                <p>Event Details </p>
+                <p>Event Details</p>
               </div>
-
               <div className="app-card">
                 <img
                   src={appScreenshot3}
@@ -200,7 +158,6 @@ function EventsPage() {
                 <p>Ticket (QR Code)</p>
               </div>
             </div>
-
             <div className="cards-container">
               <div className="app-card">
                 <img
@@ -212,7 +169,6 @@ function EventsPage() {
                 />
                 <p>Download / Share Ticket and Events</p>
               </div>
-
               <div className="app-card">
                 <img
                   src={appScreenshot5}
@@ -221,7 +177,7 @@ function EventsPage() {
                   width="280"
                   height="500"
                 />
-                <p>Review and Feedback </p>
+                <p>Review and Feedback</p>
               </div>
             </div>
           </div>
@@ -238,18 +194,25 @@ function EventsPage() {
               effortlessly.
             </p>
             <p className="section-description">
-              As part of our launch, we’re offering a **Free Plan** for event
-              hosting with certain limits. Take advantage of this limited-time
-              offer to showcase your event to a wide audience at no cost!
+              As part of our launch, we’re offering a <strong>Free Plan</strong>{" "}
+              for event hosting with certain limits. Take advantage of this
+              limited-time offer to showcase your event to a wide audience at no
+              cost!
             </p>
             <div className="contact-info">
               <p>
                 <FontAwesomeIcon icon={faMobile} /> Mobile: +91-9860719197
               </p>
               <p>
-                <FontAwesomeIcon icon={faEnvelope} /> Email:support@tikties.com
+                <FontAwesomeIcon icon={faEnvelope} /> Email: support@tikties.com
               </p>
             </div>
+            <button
+              onClick={handleOrganizerSignIn}
+              className="primary-button cta-button"
+            >
+              Get Started as an Organizer
+            </button>
           </div>
         </section>
       </main>

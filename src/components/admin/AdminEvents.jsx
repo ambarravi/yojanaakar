@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Sidebar from "./AdminSidebar";
-import "../admin/styles/NewAdminEvent.css"; //"../styles/AdminManageUsers.css";
+import "../admin/styles/NewAdminEvent.css";
 import { fetchAuthSession } from "@aws-amplify/auth";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
@@ -13,6 +13,7 @@ import {
   faThumbsUp,
   faThumbsDown,
   faEye,
+  faSyncAlt, // Added refresh icon
 } from "@fortawesome/free-solid-svg-icons";
 import { fetchAllEventDetails } from "../../api/adminApi";
 import { updateEventStatus } from "../../api/eventApi";
@@ -141,19 +142,11 @@ function AdminEvents({ user, signOut }) {
       effectiveAction = "UnderReview";
     }
     const role = sessionStorage.getItem("userRole");
-    // const allowedActions = {
-    //   AwaitingApproval: ["Edit", "Delete", "UnderReview", "Approve"],
-    //   UnderReview: ["Edit", "Delete", "Approve"],
-    //   Approved: ["Publish", "Delete", "Edit"],
-    //   Published: ["Edit"],
-    //   Cancelled: ["Edit"],
-    // };
-
     const allowedActions = {
       AwaitingApproval: ["Edit", "Delete", "UnderReview", "Approve"],
       UnderReview: ["Edit", "Delete", "Approve"],
       Approved: ["Publish", "Delete", "Edit"],
-      Published: ["Edit", "Cancel"], // <-- Allow Cancel here directly
+      Published: ["Edit", "Cancel"],
       Cancelled: ["Edit"],
     };
 
@@ -209,7 +202,14 @@ function AdminEvents({ user, signOut }) {
 
         {/* Events Table Section */}
         <div className="AdminEvent_event-details">
-          <h3 className="AdminEvent_booking-subtitle">Event List</h3>
+          <button
+            className="AdminEvent_refresh-btn"
+            onClick={fetchEvents}
+            title="Refresh Event List"
+            aria-label="Refresh event list"
+          >
+            <FontAwesomeIcon icon={faSyncAlt} /> Refresh Events
+          </button>
           <div className="AdminEvent_table-wrapper">
             <table className="AdminEvent_events-table">
               <thead>

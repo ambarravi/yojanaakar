@@ -16,14 +16,14 @@ body {
 .container {
   max-width: 1280px;
   margin: 0 auto;
-  padding: 0 1.5rem;
+  padding: 0 1rem;
   width: 100%;
 }
 
 /* Header */
 .header {
   background: #ffffff;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05), 0 1px 3px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 mules4px 12px rgba(0, 0, 0, 0.08);
   padding: 1rem 0;
   position: sticky;
   top: 0;
@@ -46,17 +46,18 @@ body {
 .nav-links {
   display: flex;
   gap: 2rem;
+  align-items: center;
 }
 
 .nav-link {
   color: #1e3a8a;
   text-decoration: none;
-  font-weight: 500;
+  font-weight: 600;
   font-size: 1rem;
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  transition: all 0.3s ease;
+  transition: color 0.3s ease;
 }
 
 .nav-link:hover {
@@ -64,18 +65,57 @@ body {
 }
 
 .nav-link.organizer-signin {
-  color: #f97316;
+  background: linear-gradient(90deg, #f97316, #fb923c);
+  color: #ffffff;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
   font-weight: 600;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.nav-link.organizer-signin:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(249, 115, 22, 0.3);
+}
+
+/* Primary Button */
+.primary-button {
+  background: linear-gradient(90deg, #f97316, #fb923c);
+  color: #ffffff;
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  touch-action: manipulation;
+}
+
+.primary-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(249, 115, 22, 0.3);
+}
+
+.cta-button {
+  display: block;
+  margin: 1.5rem auto 0;
+  max-width: 280px;
 }
 
 /* Hero Section */
 .hero-section {
   position: relative;
-  height: 400px;
-  margin: 2rem 0;
+  height: 300px;
+  margin: 1rem 0 0;
   border-radius: 12px;
   overflow: hidden;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05), 0 1px 3px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.hero-overlay {
+  position: relative;
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0.15), rgba(0, 0, 0, 0.05));
 }
 
 .hero-image {
@@ -86,8 +126,8 @@ body {
 
 /* How It Works Section */
 .how-it-works-section {
-  padding: 4rem 0;
-  background-color: #f5f5f5;
+  padding: 3rem 0;
+  background-color: #f8fafc;
 }
 
 .section-title {
@@ -95,14 +135,18 @@ body {
   font-weight: 700;
   color: #1e3a8a;
   text-align: center;
-  margin-bottom: 1rem;
+  margin-bottom: 1.25rem;
+  font-family: "Poppins", sans-serif;
 }
 
 .section-description {
   font-size: 1.1rem;
-  color: #666;
+  color: #4b5563;
   text-align: center;
   margin-bottom: 2rem;
+  max-width: 700px;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .cards-container {
@@ -117,92 +161,106 @@ body {
   border-radius: 12px;
   padding: 2rem;
   width: 300px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05), 0 1px 3px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
   text-align: center;
-  transition: transform 0.3s ease;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
 .card:hover {
-  transform: translateY(-5px);
+  transform: translateY(-8px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
 }
 
 .card h3 {
   font-size: 1.5rem;
   margin-bottom: 1rem;
   color: #1e3a8a;
+  font-family: "Poppins", sans-serif;
 }
 
 .card p {
   font-size: 1rem;
-  color: #666;
+  color: #4b5563;
+}
+
+.highlight-text {
+  color: #f97316;
+  font-weight: 700;
+}
+
+/* Download App Section */
+.download-app-section {
+  padding: 3rem 0;
+  background-color: #f9fafb;
+  text-align: center;
+}
+
+.app-card {
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
+  padding: 0.75rem; /* Reduced padding to minimize gap */
+  width: 280px;
+  text-align: center;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.app-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+}
+
+.app-screenshot {
+  width: 100% !important;
+  height: 450px !important; /* Adjusted height to better match image aspect ratio */
+  max-width: 100% !important;
+  object-fit: cover !important; /* Reverted to cover to fill card */
+  border-radius: 8px;
+  display: block !important;
+  margin-bottom: 0.5rem; /* Reduced margin for tighter fit */
+}
+
+.app-card p {
+  margin: 0;
+  color: #1e3a8a;
+  font-size: 1rem;
+  font-weight: 500;
 }
 
 /* Business Listing Section */
 .business-listing-section {
-  padding: 4rem 0;
+  padding: 3rem 0;
   background-color: #ffffff;
-  text-align: center; /* Ensure centering of child elements */
+  text-align: center;
 }
 
-.business-listing-section .section-title {
-  color: #1e3a8a;
-}
-
-.business-listing-section .section-description {
-  color: #666;
-  margin-bottom: 2rem;
-}
-
-/* Contact Info (Visiting Card Style) */
 .contact-info {
-  display: inline-block; /* Ensures centering like a block */
-  margin: 20px auto 0; /* Centers and adds top margin */
-  font-size: 1.1em;
-  color: #333;
-  background: #ffffff; /* White background */
-  border: 2px solid #007bff; /* Blue border */
-  border-radius: 10px; /* Rounded corners */
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Subtle shadow */
-  padding: 20px; /* Padding inside */
-  max-width: 300px; /* Card width */
-  width: 100%; /* Full width up to max-width */
+  display: inline-block;
+  margin: 1.5rem auto 0;
+  font-size: 1.1rem;
+  color: #1e3a8a;
+  background: #f9fafb;
+  border: 2px solid #e5e7eb;
+  border-radius: 12px;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
+  padding: 1.25rem;
+  max-width: 300px;
+  width: 100%;
 }
 
 .contact-info p {
-  margin: 10px 0; /* Space between lines */
-  display: flex; /* Align icon and text */
-  align-items: center; /* Vertically center */
-  justify-content: center; /* Horizontally center within p */
-  gap: 10px; /* Space between icon and text */
-  font-weight: 500; /* Bolder text */
-  color: #007bff; /* Blue text */
+  margin: 0.5rem 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  font-weight: 500;
+  color: #1e3a8a;
 }
 
 .contact-info svg {
-  color: #007bff; /* Blue icons */
-  font-size: 1.2em; /* Larger icons */
-}
-
-/* Button */
-.custom-button {
-  display: inline-block;
-  padding: 0.75rem 1.5rem;
-  background: #3b82f6;
-  color: #ffffff;
-  font-weight: 500;
-  border-radius: 8px;
-  border: none;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  text-decoration: none;
-  text-align: center;
-  display: block;
-  margin: 20px auto 0; /* Centers button below contact info */
-}
-
-.custom-button:hover {
-  background: #1e3a8a;
-  transform: translateY(-2px);
+  color: #f97316;
+  font-size: 1.3rem;
 }
 
 /* Footer */
@@ -215,83 +273,38 @@ body {
 }
 
 .footer-text {
-  font-size: 0.875rem;
+  font-size: 0.9rem;
   color: #6b7280;
-}
-
-/* Download App Section (Keeping existing styles) */
-.download-app-section {
-  padding: 60px 0;
-  background-color: #f9f9f9;
-  text-align: center;
-}
-
-.app-screenshots-container {
-  display: flex;
-  justify-content: center;
-  gap: 20px;
-  margin: 30px 0;
-  flex-wrap: wrap;
-}
-
-.app-card {
-  background: white;
-  border-radius: 8px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  padding: 15px;
-  width: 300px;
-  text-align: center;
-  overflow: hidden;
-  position: relative;
-}
-
-.app-screenshot {
-  width: 100% !important;
-  height: 500px !important;
-  max-width: 100% !important;
-  object-fit: cover !important;
-  border-radius: 4px;
-  display: block !important;
-  margin-bottom: 10px;
-}
-
-.app-card p {
-  margin: 0;
-  color: #333;
-  font-size: 1em;
+  font-weight: 500;
 }
 
 /* Responsive Design */
 @media (max-width: 1024px) {
   .app-card {
-    width: 250px;
+    width: 240px;
   }
 
   .app-screenshot {
-    height: 416px !important;
-  }
-
-  .app-screenshots-container {
-    gap: 15px;
+    height: 380px !important; /* Adjusted for smaller screens */
   }
 
   .contact-info {
-    max-width: 250px;
-    padding: 15px;
+    max-width: 260px;
+    padding: 1rem;
   }
 
   .contact-info p {
-    font-size: 1em;
+    font-size: 1rem;
   }
 
   .contact-info svg {
-    font-size: 1.1em;
+    font-size: 1.2rem;
   }
 }
 
 @media (max-width: 768px) {
   .nav-links {
-    gap: 1rem;
+    gap: 1.25rem;
     flex-wrap: wrap;
     justify-content: center;
   }
@@ -300,12 +313,20 @@ body {
     font-size: 0.9rem;
   }
 
+  .nav-link.organizer-signin {
+    padding: 0.6rem 1.25rem;
+  }
+
   .hero-section {
-    height: 300px;
+    height: 250px;
   }
 
   .section-title {
     font-size: 2rem;
+  }
+
+  .section-description {
+    font-size: 1rem;
   }
 
   .cards-container {
@@ -315,28 +336,34 @@ body {
 
   .card {
     width: 100%;
-    max-width: 300px;
+    max-width: 320px;
   }
 
   .app-card {
     width: 220px;
+    padding: 0.5rem; /* Further reduced padding */
   }
 
   .app-screenshot {
-    height: 366px !important;
+    height: 340px !important;
   }
 
   .contact-info {
-    max-width: 220px;
-    padding: 15px;
+    max-width: 240px;
+    padding: 0.75rem;
   }
 
   .contact-info p {
-    font-size: 0.9em;
+    font-size: 0.9rem;
   }
 
   .contact-info svg {
-    font-size: 1em;
+    font-size: 1.1rem;
+  }
+
+  .primary-button.cta-button {
+    padding: 0.6rem 1.25rem;
+    max-width: 240px;
   }
 }
 
@@ -351,12 +378,23 @@ body {
   }
 
   .nav-links {
-    flex-wrap: wrap;
-    justify-content: center;
+    gap: 0.75rem;
+  }
+
+  .nav-link {
+    font-size: 0.85rem;
+  }
+
+  .nav-link.organizer-signin {
+    padding: 0.5rem 1rem;
   }
 
   .container {
-    padding: 0 1rem;
+    padding: 0 0.75rem;
+  }
+
+  .hero-section {
+    height: 200px;
   }
 
   .section-title {
@@ -364,48 +402,50 @@ body {
   }
 
   .section-description {
-    font-size: 1rem;
+    font-size: 0.9rem;
   }
 
   .app-card {
     width: 100%;
+    max-width: 260px;
+    padding: 0.5rem;
   }
 
   .app-screenshot {
     height: 300px !important;
   }
 
-  .app-screenshots-container {
-    gap: 10px;
-    justify-content: center;
-  }
-
   .contact-info {
-    max-width: 180px;
-    padding: 10px;
+    max-width: 200px;
+    padding: 0.5rem;
   }
 
   .contact-info p {
-    font-size: 0.8em;
-    margin: 8px 0;
+    font-size: 0.85rem;
+    margin: 0.4rem 0;
   }
 
   .contact-info svg {
-    font-size: 0.9em;
+    font-size: 1rem;
   }
+
   .logo-image {
-    height: 20px;
-    object-fit: contain;
+    height: 32px;
   }
 
-  html {
-    scroll-behavior: smooth; /* Enables smooth scrolling to anchor links */
+  .primary-button.cta-button {
+    padding: 0.5rem 1rem;
+    font-size: 0.9rem;
+    max-width: 200px;
   }
+}
 
-  /* Optional: Style for active/focused links */
-  .nav-link:focus,
-  .nav-link:active {
-    outline: none;
-    color: #1e3a8a;
-  }
+html {
+  scroll-behavior: smooth;
+}
+
+.nav-link:focus,
+.nav-link:active {
+  outline: none;
+  color: #1e3a8a;
 }
