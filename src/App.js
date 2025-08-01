@@ -57,6 +57,7 @@ function AuthenticatedRoutes() {
       }
       try {
         const session = await fetchAuthSession();
+        console.log(JSON.stringify(session));
         const idToken = session.tokens?.idToken;
         if (!idToken) {
           console.error("ID token not found. Redirecting to login.");

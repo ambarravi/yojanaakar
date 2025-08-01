@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from "react";
-import { useNavigate } from "react-router-dom"; // Added for navigation
+import { useNavigate } from "react-router-dom";
 import Sidebar from "./Sidebar";
 import { submitProfile, fetchProfileDetails } from "../api/organizerApi";
 import "../styles/OrgProfilePage.css";
@@ -7,6 +7,7 @@ import { GetCollegeList } from "../api/eventApi";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faImage } from "@fortawesome/free-solid-svg-icons";
 import citiesData from "../data/cities.json";
+import { fetchAuthSession } from "@aws-amplify/auth";
 
 // Popup Component
 const Popup = ({ message, onClose }) => (
@@ -21,7 +22,7 @@ const Popup = ({ message, onClose }) => (
       display: "flex",
       justifyContent: "center",
       alignItems: "center",
-      zIndex: 1300, // Above sidebar (1100) and suggestions (1000)
+      zIndex: 1300,
     }}
   >
     <div
@@ -95,9 +96,8 @@ function OrgProfilePage({ user, signOut }) {
   const [isLoading, setIsLoading] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isCitySelected, setIsCitySelected] = useState(false);
-  const [showPopup, setShowPopup] = useState(false); // Added for popup
+  const [showPopup, setShowPopup] = useState(false);
 
-  // Navigation
   const navigate = useNavigate();
 
   const isMobile = window.innerWidth <= 767;
@@ -134,6 +134,9 @@ function OrgProfilePage({ user, signOut }) {
     const loadProfile = async () => {
       setIsLoading(true);
       try {
+        const session = await fetchAuthSession();
+        const email = session.tokens.idToken.payload.email;
+
         const profile = await fetchProfileDetails();
         if (profile && profile.record) {
           const record = profile.record;
@@ -150,7 +153,7 @@ function OrgProfilePage({ user, signOut }) {
           setFormData({
             name: record.OrganizerName?.S || "",
             contactPerson: record.contactPerson?.S || "",
-            contactEmail: record.contactEmail?.S || "",
+            contactEmail: record.contactEmail?.S || email,
             contactNumber: record.contactNumber?.S || "",
             alternateNumber: record.alternateNumber?.S || "",
             aboutOrganization: record.aboutOrganization?.S || "",
@@ -172,6 +175,12 @@ function OrgProfilePage({ user, signOut }) {
             setIsOtherCity(true);
             setIsCitySelected(!!record.cityName?.S);
           }
+        } else {
+          // New profile, set email from session
+          setFormData((prev) => ({
+            ...prev,
+            contactEmail: email,
+          }));
         }
       } catch (error) {
         setErrors({
@@ -185,8 +194,6 @@ function OrgProfilePage({ user, signOut }) {
   }, [majorCities]);
 
   const fetchCitySuggestions = (query) => {
-    //  console.log("fetchCitySuggestions called with query:", query);
-    //   console.log("citiesData:", citiesData);
     if (query.length > 2) {
       const filteredCities = citiesData
         .filter(
@@ -202,7 +209,6 @@ function OrgProfilePage({ user, signOut }) {
           latitude: city.latitude.toString(),
           longitude: city.longitude.toString(),
         }));
-      //   console.log("Filtered cities:", filteredCities);
       setCitySuggestions(filteredCities);
     } else {
       setCitySuggestions([]);
@@ -216,12 +222,6 @@ function OrgProfilePage({ user, signOut }) {
     }
     setIsLoading(true);
     try {
-      // console.log(
-      //   "Fetching colleges for city:",
-      //   formData.cityName,
-      //   "query:",
-      //   query
-      // );
       const collegeData = await GetCollegeList(
         formData.cityName.toLowerCase(),
         query.toLowerCase()
@@ -337,6 +337,8 @@ function OrgProfilePage({ user, signOut }) {
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
+    // Prevent changes to contactEmail
+    if (name === "contactEmail") return;
     setErrors({ ...errors, [name]: "" });
     setFormData({
       ...formData,
@@ -438,7 +440,7 @@ function OrgProfilePage({ user, signOut }) {
 
     try {
       await submitProfile(formDataToSubmit, formData.logo);
-      setShowPopup(true); // Show popup on success
+      setShowPopup(true);
     } catch (error) {
       setErrors({ general: "Error updating profile: " + error.message });
     } finally {
@@ -448,7 +450,7 @@ function OrgProfilePage({ user, signOut }) {
 
   const handlePopupClose = () => {
     setShowPopup(false);
-    navigate("/organizer-landing"); // Navigate to dashboard
+    navigate("/organizer-landing");
   };
 
   const toggleSidebar = () => {
@@ -689,13 +691,15 @@ function OrgProfilePage({ user, signOut }) {
                 name="contactEmail"
                 maxLength="30"
                 value={formData.contactEmail}
-                onChange={handleChange}
+                readOnly
                 required
                 className={errors.contactEmail ? "error" : ""}
                 style={{
                   maxWidth: "100%",
                   boxSizing: "border-box",
                   fontSize: isSmallScreen ? "0.75rem" : "0.875rem",
+                  backgroundColor: "#f3f4f6",
+                  cursor: "not-allowed",
                 }}
               />
               {errors.contactEmail && (

@@ -59,6 +59,7 @@ function Hostevent({ user, signOut }) {
       try {
         setIsLoading(true);
         console.time("fetchData");
+
         const cachedCategories = sessionStorage.getItem("categories");
         const cachedCities = sessionStorage.getItem("cities");
         let categoryData, cityData;
