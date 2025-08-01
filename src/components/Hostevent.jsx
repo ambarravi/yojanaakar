@@ -259,11 +259,13 @@ function Hostevent({ user, signOut }) {
       if (parseFloat(formData.ticketPrice) < 0) {
         errors.push("Ticket Price should be non-negative.");
       }
-     if (parseInt(formData.noOfSeats) < 25) {
-  errors.push("No of Seats should be at least 25.");
-} else if (parseInt(formData.noOfSeats) > 100) {
-  errors.push("Free Tier does not allow more than 100 seats. Please contact admin at support@tikties.com.");
-}
+      if (parseInt(formData.noOfSeats) < 25) {
+        errors.push("No of Seats should be at least 25.");
+      } else if (parseInt(formData.noOfSeats) > 100) {
+        errors.push(
+          "Free Tier does not allow more than 100 seats. Please contact admin at support@tikties.com."
+        );
+      }
       if (parseFloat(formData.reserveSeats) < 0) {
         errors.push("Reserve Seats should be non-negative.");
       }
