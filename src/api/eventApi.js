@@ -426,6 +426,8 @@ export const updateEventStatus = async (eventID, status) => {
   const session = await fetchAuthSession(); // Retrieves the session object
   const jwt = session.tokens.idToken.toString();
   const idTokenPayload = session.tokens.idToken.payload;
+  console.log("idTokenPayload");
+  console.log(JSON.stringify(idTokenPayload));
   // Option 1: If role is stored as a custom attribute in Cognito User Pool
   const userRole = idTokenPayload["custom:role"];
 
