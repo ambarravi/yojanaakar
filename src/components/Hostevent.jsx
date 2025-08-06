@@ -136,8 +136,8 @@ function Hostevent({ user, signOut }) {
             eventMode: eventDetails?.EventMode || "",
             eventDetails: eventDetails?.EventDetails || "",
             ticketPrice: eventDetails?.Price || "",
-            noOfSeats: eventDetails?.Seats || "",
-            reserveSeats: eventDetails?.ReservedSeats || "",
+            noOfSeats: eventDetails?.Seats || "0",
+            reserveSeats: eventDetails?.ReservedSeats || "0",
             additionalInfo: eventDetails?.AdditionalInfo || "",
             tags: eventDetails?.Tags || "",
             audienceBenefits: eventDetails?.AudienceBenefits || ["", "", ""],
@@ -192,6 +192,7 @@ function Hostevent({ user, signOut }) {
       ...prev,
       images: [...prev.images, ...validFiles],
     }));
+    e.target.value = null;
   };
 
   const handleChange = (e) => {

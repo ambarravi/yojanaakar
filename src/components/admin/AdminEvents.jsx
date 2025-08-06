@@ -117,7 +117,11 @@ function AdminEvents({ user, signOut }) {
     }
     setIsLoading(true);
     try {
-      const response = await updateEventStatus(event.EventID, newStatus);
+      const response = await updateEventStatus(
+        event.EventID,
+        newStatus,
+        "admin"
+      );
       if (response.statusCode === 200) {
         alert(`Event status updated to: ${newStatus}`);
         fetchEvents();

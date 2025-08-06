@@ -234,7 +234,7 @@ const TermsAndConditions = () => {
         <li>You may update or delete your profile from app settings.</li>
         <li>
           To permanently delete your account, email:{" "}
-          <a href="mailto:support@tikties.in">support@tikties.in</a>
+          <a href="mailto:support@tikties.com">support@tikties.com</a>
         </li>
       </ul>
 

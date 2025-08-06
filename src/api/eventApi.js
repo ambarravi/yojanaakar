@@ -420,7 +420,7 @@ export const fetchEventDetailsByEventID = async (eventID) => {
   }
 };
 
-export const updateEventStatus = async (eventID, status) => {
+export const updateEventStatus = async (eventID, status, role) => {
   // return "Event updated";
 
   const session = await fetchAuthSession(); // Retrieves the session object
@@ -430,6 +430,9 @@ export const updateEventStatus = async (eventID, status) => {
   console.log(JSON.stringify(idTokenPayload));
   // Option 1: If role is stored as a custom attribute in Cognito User Pool
   const userRole = idTokenPayload["custom:role"];
+  if (!userRole) {
+    userRole = role;
+  }
 
   const apiUrl =
     process.env.REACT_APP_API_BASE_URL +
