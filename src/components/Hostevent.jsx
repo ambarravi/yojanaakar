@@ -146,7 +146,7 @@ function Hostevent({ user, signOut }) {
 
           setUploadedFiles(imagesArray);
           setIsSubmitDisabled(
-            ["Published", "Cancelled", "Deleted"].includes(
+            ["Published", "Cancelled", "Deleted", "Approved"].includes(
               eventDetails?.EventStatus
             )
           );
