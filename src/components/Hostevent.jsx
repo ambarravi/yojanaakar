@@ -53,7 +53,7 @@ function Hostevent({ user, signOut }) {
   const [showModal, setShowModal] = useState(false);
   const [modalMessage, setModalMessage] = useState({ title: "", body: "" });
   const [organizerName, setOrganizerName] = useState("");
-  const [eventsRemaining, setEventsRemaining] = useState(0);
+  const [organizerId, setOrganizerId] = useState("");
 
   const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
 
@@ -61,7 +61,6 @@ function Hostevent({ user, signOut }) {
     const fetchData = async () => {
       try {
         setIsLoading(true);
-        console.time("fetchData");
 
         const cachedCategories = sessionStorage.getItem("categories");
         const cachedCities = sessionStorage.getItem("cities");
@@ -78,22 +77,16 @@ function Hostevent({ user, signOut }) {
           sessionStorage.setItem("categories", JSON.stringify(categoryData));
           sessionStorage.setItem("cities", JSON.stringify(cityData));
         }
-        console.timeEnd("fetchData");
 
         setCategories(categoryData);
         setCities(cityData);
 
-        console.time("fetchProfileDetails");
         const orgProfile = await fetchProfileDetails();
-        console.timeEnd("fetchProfileDetails");
-
         const organizerNameValue = orgProfile?.record?.OrganizerName?.S || "";
-        const remainingEvents = parseInt(
-          orgProfile?.record?.eventsRemaining?.N || "0"
-        );
+        const organizerIdValue = orgProfile?.record?.OrganizerID?.S || "";
 
         setOrganizerName(organizerNameValue);
-        setEventsRemaining(remainingEvents);
+        setOrganizerId(organizerIdValue);
 
         if (!organizerNameValue) {
           setModalMessage({
@@ -101,7 +94,9 @@ function Hostevent({ user, signOut }) {
             body: "You must complete your profile before you can host an event. Please complete all details mentioned in the profile section.",
           });
           setShowModal(true);
-        } else if (remainingEvents <= 0) {
+        } else if (
+          parseInt(orgProfile?.record?.eventsRemaining?.N || "0") <= 0
+        ) {
           setModalMessage({
             title: "Event Limit Reached",
             body: "We regret to inform you that the monthly event hosting limit has been reached. Please try again next month or contact support for assistance.",
@@ -122,7 +117,7 @@ function Hostevent({ user, signOut }) {
             (image) => ({
               name: image.substring(image.lastIndexOf("/") + 1),
               preview: image,
-              url: image, // Store URL for oldImages
+              url: image,
             })
           );
 
@@ -139,14 +134,14 @@ function Hostevent({ user, signOut }) {
             location: eventDetails?.EventLocation || "",
             eventMode: eventDetails?.EventMode || "",
             eventDetails: eventDetails?.EventDetails || "",
-            ticketPrice: eventDetails?.Price || "",
+            ticketPrice: eventDetails?.Price || "0",
             noOfSeats: eventDetails?.Seats || "0",
             reserveSeats: eventDetails?.ReservedSeats || "0",
             additionalInfo: eventDetails?.AdditionalInfo || "",
             tags: eventDetails?.Tags || "",
             audienceBenefits: eventDetails?.AudienceBenefits || ["", "", ""],
             images: [],
-            oldImages: imagesArray.map((img) => ({ url: img.url })), // Populate oldImages
+            oldImages: imagesArray.map((img) => ({ url: img.url })),
           });
 
           setUploadedFiles(imagesArray);
@@ -190,7 +185,7 @@ function Hostevent({ user, signOut }) {
     const filePreviews = validFiles.map((file) => ({
       name: file.name,
       preview: URL.createObjectURL(file),
-      status: "new", // Mark as new for backend
+      status: "new",
     }));
 
     setUploadedFiles((prev) => [...prev, ...filePreviews]);
@@ -206,7 +201,6 @@ function Hostevent({ user, signOut }) {
     setUploadedFiles((prev) => prev.filter((_, i) => i !== index));
     setFormData((prev) => {
       if (fileToRemove.url) {
-        // Existing image (from S3)
         return {
           ...prev,
           oldImages: prev.oldImages.filter(
@@ -214,7 +208,6 @@ function Hostevent({ user, signOut }) {
           ),
         };
       } else {
-        // New image
         return {
           ...prev,
           images: prev.images.filter(
@@ -259,9 +252,9 @@ function Hostevent({ user, signOut }) {
           "You must complete your profile before you can host an event."
         );
       }
-      if (eventsRemaining <= 0) {
+      if (!organizerId) {
         errors.push(
-          "Monthly event hosting limit reached. Please try again next month."
+          "Organizer ID is missing. Please ensure you are logged in."
         );
       }
       if (formData.eventTitle.length > 100) {
@@ -298,8 +291,15 @@ function Hostevent({ user, signOut }) {
           "Free Tier does not allow more than 100 seats. Please contact admin at support@tikties.com."
         );
       }
-      if (parseFloat(formData.reserveSeats) < 0) {
+      if (parseInt(formData.reserveSeats) < 0) {
         errors.push("Reserve Seats should be non-negative.");
+      }
+      if (
+        !isNaN(parseInt(formData.reserveSeats)) &&
+        !isNaN(parseInt(formData.noOfSeats)) &&
+        parseInt(formData.reserveSeats) > parseInt(formData.noOfSeats)
+      ) {
+        errors.push("Reserve Seats should not exceed Number of Seats.");
       }
 
       if (errors.length > 0) {
@@ -309,11 +309,10 @@ function Hostevent({ user, signOut }) {
       }
 
       try {
-        console.time("submitEvent");
         const payload = {
           EventID: formData.eventId,
           readableEventID: formData.readableEventID,
-          OrgID: user.sub, // Assuming user.sub contains OrgID
+          OrgID: organizerId,
           eventTitle: formData.eventTitle,
           dateTime: formData.dateTime,
           highlight: formData.highlight,
@@ -331,28 +330,28 @@ function Hostevent({ user, signOut }) {
           OrganizerName: organizerName,
           tags: formData.tags,
           audienceBenefits: formData.audienceBenefits,
+          images: formData.images, // Actual File objects for upload
+          oldImages: formData.oldImages,
           newImages: formData.images.map((file) => ({
             name: file.name,
             type: file.type,
             status: "new",
           })),
-          oldImages: formData.oldImages, // Include existing images
-          eventImages: [], // Empty as per backend expectation
+          eventImages: [],
         };
 
         await submitEvent(payload, organizerName);
-        console.timeEnd("submitEvent");
         alert("Form submitted successfully!");
         sessionStorage.setItem("fromSidebar", "false");
         navigate("/manage-events");
       } catch (error) {
         console.error("Error submitting form:", error);
-        alert("Failed to submit the form. Please try again.");
+        alert(error.message || "Failed to submit the form. Please try again.");
       } finally {
         setIsSubmitting(false);
       }
     },
-    [formData, organizerName, eventsRemaining, navigate, showDropdown, user]
+    [formData, organizerName, organizerId, navigate, showDropdown]
   );
 
   const debouncedSubmit = debounce(handleSubmit, 300, {

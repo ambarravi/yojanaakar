@@ -130,45 +130,20 @@ export const submitEvent = (eventData, organizerName) => {
       const jwt = session.tokens.idToken.toString();
       const username = session.tokens.idToken.payload["cognito:username"];
 
-      const oldImageArray = [];
-      const newImageArray = [];
-      // Change to an array to store multiple image details
-      if (Array.isArray(eventData.images)) {
-        eventData.images.forEach((file) => {
-          if (!file.preview) {
-            newImageArray.push({
-              name: file.name,
-              size: file.size,
-              type: file.type,
-              status: "new",
-              url: "",
-            });
-            // console.log(
-            //   `File Name: ${file.name}, Size: ${file.size}, Type: ${file.type}`
-            // );
-          } else {
-            oldImageArray.push({
-              name: file.name,
-              size: "",
-              type: "",
-              status: "old",
-              url: file.preview,
-            });
-          }
-        });
-        console.log("Image details stored New Images:", newImageArray); // Log the resulting array
-        console.log("Image details stored Old Images:", oldImageArray); // Log the resulting array
-      } else {
-        console.error("eventImages is not an array");
-      }
+      // Use newImages and oldImages directly from eventData
+      const newImages = Array.isArray(eventData.newImages)
+        ? eventData.newImages
+        : [];
+      const oldImages = Array.isArray(eventData.oldImages)
+        ? eventData.oldImages
+        : [];
+      const originalImagesFiles = Array.isArray(eventData.images)
+        ? eventData.images
+        : [];
 
-      const originalImagesFiles = eventData.images.filter(
-        (image) => !image.preview
-      );
-
-      // Prepare the eventData for submission by mapping to API payload format
+      // Prepare the eventData for submission
       const eventPayload = {
-        EventID: eventData.eventId || "",
+        EventID: eventData.EventID || "",
         OrgID: username,
         eventTitle: eventData.eventTitle,
         dateTime: eventData.dateTime,
@@ -177,7 +152,7 @@ export const submitEvent = (eventData, organizerName) => {
         categoryID: eventData.categoryID,
         categoryName: eventData.categoryName,
         cityID: eventData.cityID,
-        eventLocation: eventData.location,
+        eventLocation: eventData.eventLocation,
         eventMode: eventData.eventMode,
         eventDetails: eventData.eventDetails,
         ticketPrice: eventData.ticketPrice,
@@ -187,13 +162,11 @@ export const submitEvent = (eventData, organizerName) => {
         OrganizerName: organizerName,
         tags: eventData.tags,
         audienceBenefits: eventData.audienceBenefits,
-        eventImages: eventData.images,
+        eventImages: [], // Empty as per backend expectation
         readableEventID: eventData.readableEventID,
-        oldImages: oldImageArray,
-        newImages: newImageArray,
+        oldImages: oldImages,
+        newImages: newImages,
       };
-
-      console.log(eventPayload);
 
       // API base URL and stage environment variable
       const baseUrl = process.env.REACT_APP_API_BASE_URL;
@@ -206,7 +179,7 @@ export const submitEvent = (eventData, organizerName) => {
       const response = await fetch(url, {
         method: "POST",
         headers: {
-          Authorization: `Bearer ${jwt}`, // Include the token if needed
+          Authorization: `Bearer ${jwt}`,
           "Content-Type": "application/json",
         },
         body: JSON.stringify(eventPayload),
@@ -214,55 +187,43 @@ export const submitEvent = (eventData, organizerName) => {
 
       // Check if the response is OK
       if (!response.ok) {
-        // Reject the promise if there's an error with the API request
         const errorData = await response.json();
-        reject(errorData); // Reject with error details
+        reject(errorData);
       } else {
-        const result = await response.json(); // Assume the API returns the pre-signed URL
-        console.log("Event details saved successfully!");
-        if (response.status === 200) {
-          // console.log(
-          //   "Check for  presignedUrls length",
-          //   result.presignedUrls.length
-          // );
-          if (result.presignedUrls && Array.isArray(result.presignedUrls)) {
-            const uploadUrls = result.presignedUrls; // Array of pre-signed URLs
+        const result = await response.json();
+        if (result.presignedUrls && Array.isArray(result.presignedUrls)) {
+          if (result.presignedUrls.length !== originalImagesFiles.length) {
+            throw new Error(
+              "Number of pre-signed URLs does not match the number of images."
+            );
+          }
 
-            if (uploadUrls.length !== originalImagesFiles.length) {
-              throw new Error(
-                "Number of pre-signed URLs does not match the number of images."
-              );
-            }
-
-            // Loop through each pre-signed URL and upload the corresponding image
-
-            try {
-              const uploadPromises = uploadUrls.map((uploadUrl, index) => {
+          try {
+            const uploadPromises = result.presignedUrls.map(
+              (uploadUrl, index) => {
                 return fetch(uploadUrl, {
                   method: "PUT",
                   headers: {
                     "Content-Type":
-                      originalImagesFiles[index].type ||
+                      originalImagesFiles[index]?.type ||
                       "application/octet-stream",
                   },
                   body: originalImagesFiles[index],
                 });
-              });
+              }
+            );
 
-              await Promise.all(uploadPromises);
-              console.log("All images uploaded successfully!");
-            } catch (error) {
-              console.error("Error uploading images:", error);
-            }
-          } else {
-            console.log("Error in API Response:", result);
+            await Promise.all(uploadPromises);
+          } catch (error) {
+            console.error("Error uploading images:", error);
+            reject({ message: "Error uploading images. Please try again." });
+            return;
           }
         }
 
         resolve(result);
       }
     } catch (error) {
-      // Catch any other errors and reject the promise
       console.error("Error submitting event:", error);
       reject({ message: "Error submitting event. Please try again." });
     }
