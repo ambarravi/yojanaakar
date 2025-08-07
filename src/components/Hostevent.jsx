@@ -21,6 +21,8 @@ function Hostevent({ user, signOut }) {
   const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
+    eventId: "",
+    readableEventID: "",
     eventTitle: "",
     dateTime: "",
     highlight: "",
@@ -37,7 +39,8 @@ function Hostevent({ user, signOut }) {
     additionalInfo: "",
     tags: "",
     audienceBenefits: ["", "", ""],
-    images: [],
+    images: [], // New images to upload
+    oldImages: [], // Existing image URLs to retain
   });
   const [uploadedFiles, setUploadedFiles] = useState([]);
   const [showDropdown, setShowDropdown] = useState(false);
@@ -49,7 +52,7 @@ function Hostevent({ user, signOut }) {
   const [isSubmitDisabled, setIsSubmitDisabled] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const [modalMessage, setModalMessage] = useState({ title: "", body: "" });
-  const [organizerName, setOrganizerName] = useState(""); // New state for OrganizerName
+  const [organizerName, setOrganizerName] = useState("");
   const [eventsRemaining, setEventsRemaining] = useState(0);
 
   const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
@@ -89,7 +92,7 @@ function Hostevent({ user, signOut }) {
           orgProfile?.record?.eventsRemaining?.N || "0"
         );
 
-        setOrganizerName(organizerNameValue); // Set organizerName
+        setOrganizerName(organizerNameValue);
         setEventsRemaining(remainingEvents);
 
         if (!organizerNameValue) {
@@ -119,6 +122,7 @@ function Hostevent({ user, signOut }) {
             (image) => ({
               name: image.substring(image.lastIndexOf("/") + 1),
               preview: image,
+              url: image, // Store URL for oldImages
             })
           );
 
@@ -142,6 +146,7 @@ function Hostevent({ user, signOut }) {
             tags: eventDetails?.Tags || "",
             audienceBenefits: eventDetails?.AudienceBenefits || ["", "", ""],
             images: [],
+            oldImages: imagesArray.map((img) => ({ url: img.url })), // Populate oldImages
           });
 
           setUploadedFiles(imagesArray);
@@ -185,6 +190,7 @@ function Hostevent({ user, signOut }) {
     const filePreviews = validFiles.map((file) => ({
       name: file.name,
       preview: URL.createObjectURL(file),
+      status: "new", // Mark as new for backend
     }));
 
     setUploadedFiles((prev) => [...prev, ...filePreviews]);
@@ -193,6 +199,30 @@ function Hostevent({ user, signOut }) {
       images: [...prev.images, ...validFiles],
     }));
     e.target.value = null;
+  };
+
+  const handleImageRemove = (index) => {
+    const fileToRemove = uploadedFiles[index];
+    setUploadedFiles((prev) => prev.filter((_, i) => i !== index));
+    setFormData((prev) => {
+      if (fileToRemove.url) {
+        // Existing image (from S3)
+        return {
+          ...prev,
+          oldImages: prev.oldImages.filter(
+            (img) => img.url !== fileToRemove.url
+          ),
+        };
+      } else {
+        // New image
+        return {
+          ...prev,
+          images: prev.images.filter(
+            (_, i) => i !== index - prev.oldImages.length
+          ),
+        };
+      }
+    });
   };
 
   const handleChange = (e) => {
@@ -280,7 +310,37 @@ function Hostevent({ user, signOut }) {
 
       try {
         console.time("submitEvent");
-        await submitEvent(formData, organizerName); // Use organizerName
+        const payload = {
+          EventID: formData.eventId,
+          readableEventID: formData.readableEventID,
+          OrgID: user.sub, // Assuming user.sub contains OrgID
+          eventTitle: formData.eventTitle,
+          dateTime: formData.dateTime,
+          highlight: formData.highlight,
+          eventType: formData.eventType,
+          categoryID: formData.categoryID,
+          categoryName: formData.categoryName,
+          cityID: formData.cityID,
+          eventLocation: formData.location,
+          eventMode: formData.eventMode,
+          eventDetails: formData.eventDetails,
+          ticketPrice: formData.ticketPrice,
+          noOfSeats: formData.noOfSeats,
+          reserveSeats: formData.reserveSeats,
+          additionalInfo: formData.additionalInfo,
+          OrganizerName: organizerName,
+          tags: formData.tags,
+          audienceBenefits: formData.audienceBenefits,
+          newImages: formData.images.map((file) => ({
+            name: file.name,
+            type: file.type,
+            status: "new",
+          })),
+          oldImages: formData.oldImages, // Include existing images
+          eventImages: [], // Empty as per backend expectation
+        };
+
+        await submitEvent(payload, organizerName);
         console.timeEnd("submitEvent");
         alert("Form submitted successfully!");
         sessionStorage.setItem("fromSidebar", "false");
@@ -292,7 +352,7 @@ function Hostevent({ user, signOut }) {
         setIsSubmitting(false);
       }
     },
-    [formData, organizerName, eventsRemaining, navigate, showDropdown]
+    [formData, organizerName, eventsRemaining, navigate, showDropdown, user]
   );
 
   const debouncedSubmit = debounce(handleSubmit, 300, {
@@ -307,11 +367,14 @@ function Hostevent({ user, signOut }) {
 
   const handleReset = () => {
     setFormData({
+      eventId: "",
+      readableEventID: "",
       eventTitle: "",
       dateTime: "",
       highlight: "",
       eventType: "",
       categoryID: "",
+      categoryName: "",
       cityID: "",
       location: "",
       eventMode: "",
@@ -323,6 +386,7 @@ function Hostevent({ user, signOut }) {
       tags: "",
       audienceBenefits: ["", "", ""],
       images: [],
+      oldImages: [],
     });
     setUploadedFiles([]);
   };
@@ -640,18 +704,7 @@ function Hostevent({ user, signOut }) {
                             <td>
                               <button
                                 type="button"
-                                onClick={() => {
-                                  const newFiles = uploadedFiles.filter(
-                                    (_, i) => i !== index
-                                  );
-                                  setUploadedFiles(newFiles);
-                                  setFormData((prev) => ({
-                                    ...prev,
-                                    images: prev.images.filter(
-                                      (_, i) => i !== index
-                                    ),
-                                  }));
-                                }}
+                                onClick={() => handleImageRemove(index)}
                                 className="remove-btn"
                               >
                                 <FontAwesomeIcon icon={faTimes} />
