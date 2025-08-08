@@ -41,6 +41,7 @@ function Hostevent({ user, signOut }) {
     audienceBenefits: ["", "", ""],
     images: [], // New images to upload
     oldImages: [], // Existing image URLs to retain
+    newImages: [], // Added to fix TypeError
   });
   const [uploadedFiles, setUploadedFiles] = useState([]);
   const [showDropdown, setShowDropdown] = useState(false);
@@ -148,6 +149,7 @@ function Hostevent({ user, signOut }) {
               : ["", "", ""],
             images: [],
             oldImages: imagesArray.map((img) => ({ url: img.url })),
+            newImages: [],
           });
 
           setUploadedFiles(imagesArray);
@@ -198,14 +200,6 @@ function Hostevent({ user, signOut }) {
     setFormData((prev) => ({
       ...prev,
       images: [...prev.images, ...validFiles],
-      newImages: [
-        ...prev.newImages,
-        ...validFiles.map((file) => ({
-          name: file.name,
-          type: file.type,
-          status: "new",
-        })),
-      ],
     }));
     e.target.value = null;
   };
@@ -222,11 +216,14 @@ function Hostevent({ user, signOut }) {
           ),
         };
       } else {
-        const newImagesIndex = index - prev.oldImages.length;
         return {
           ...prev,
-          images: prev.images.filter((_, i) => i !== newImagesIndex),
-          newImages: prev.newImages.filter((_, i) => i !== newImagesIndex),
+          images: prev.images.filter(
+            (_, i) => i !== index - prev.oldImages.length
+          ),
+          newImages: prev.newImages.filter(
+            (_, i) => i !== index - prev.oldImages.length
+          ),
         };
       }
     });
@@ -401,6 +398,7 @@ function Hostevent({ user, signOut }) {
       audienceBenefits: ["", "", ""],
       images: [],
       oldImages: [],
+      newImages: [],
     });
     setUploadedFiles([]);
   };
