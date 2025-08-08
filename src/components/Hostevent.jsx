@@ -139,7 +139,13 @@ function Hostevent({ user, signOut }) {
             reserveSeats: eventDetails?.ReservedSeats || "0",
             additionalInfo: eventDetails?.AdditionalInfo || "",
             tags: eventDetails?.Tags || "",
-            audienceBenefits: eventDetails?.AudienceBenefits || ["", "", ""],
+            audienceBenefits: Array.isArray(eventDetails?.AudienceBenefits)
+              ? [
+                  eventDetails.AudienceBenefits[0] || "",
+                  eventDetails.AudienceBenefits[1] || "",
+                  eventDetails.AudienceBenefits[2] || "",
+                ]
+              : ["", "", ""],
             images: [],
             oldImages: imagesArray.map((img) => ({ url: img.url })),
           });
@@ -192,6 +198,14 @@ function Hostevent({ user, signOut }) {
     setFormData((prev) => ({
       ...prev,
       images: [...prev.images, ...validFiles],
+      newImages: [
+        ...prev.newImages,
+        ...validFiles.map((file) => ({
+          name: file.name,
+          type: file.type,
+          status: "new",
+        })),
+      ],
     }));
     e.target.value = null;
   };
@@ -208,11 +222,11 @@ function Hostevent({ user, signOut }) {
           ),
         };
       } else {
+        const newImagesIndex = index - prev.oldImages.length;
         return {
           ...prev,
-          images: prev.images.filter(
-            (_, i) => i !== index - prev.oldImages.length
-          ),
+          images: prev.images.filter((_, i) => i !== newImagesIndex),
+          newImages: prev.newImages.filter((_, i) => i !== newImagesIndex),
         };
       }
     });
