@@ -124,6 +124,7 @@ export const GetCollegeList = (city, searchText) => {
 };
 
 export const submitEvent = (eventData, organizerName) => {
+  console.log(JSON.stringify(eventData));
   return new Promise(async (resolve, reject) => {
     try {
       const session = await fetchAuthSession(); // Retrieves the session object
@@ -152,7 +153,7 @@ export const submitEvent = (eventData, organizerName) => {
         categoryID: eventData.categoryID,
         categoryName: eventData.categoryName,
         cityID: eventData.cityID,
-        eventLocation: eventData.eventLocation,
+        location: eventData.location,
         eventMode: eventData.eventMode,
         eventDetails: eventData.eventDetails,
         ticketPrice: eventData.ticketPrice,

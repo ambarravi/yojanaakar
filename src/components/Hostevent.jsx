@@ -320,7 +320,7 @@ function Hostevent({ user, signOut }) {
           categoryID: formData.categoryID,
           categoryName: formData.categoryName,
           cityID: formData.cityID,
-          eventLocation: formData.location,
+          location: formData.location,
           eventMode: formData.eventMode,
           eventDetails: formData.eventDetails,
           ticketPrice: formData.ticketPrice,
@@ -340,6 +340,7 @@ function Hostevent({ user, signOut }) {
           eventImages: [],
         };
 
+        console.log("Payload", payload);
         await submitEvent(payload, organizerName);
         alert("Form submitted successfully!");
         sessionStorage.setItem("fromSidebar", "false");

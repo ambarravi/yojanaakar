@@ -13,21 +13,18 @@ import "./styles/AdminViewEvent.css";
 
 function AdminEventDetails({ user, signOut }) {
   const location = useLocation();
-  let eventId;
-  console.log("location.state", location.state);
-  eventId = location.state?.eventId ?? null;
-
-  console.log(eventId);
-  //const eventId = location.state?.eventId;
-
+  const eventId = location.state?.eventId ?? null;
   const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
+    EventID: "",
+    readableEventID: "",
     eventTitle: "",
     dateTime: "",
     highlight: "",
     eventType: "",
     categoryID: "",
+    categoryName: "",
     cityID: "",
     location: "",
     eventMode: "",
@@ -39,12 +36,15 @@ function AdminEventDetails({ user, signOut }) {
     tags: "",
     audienceBenefits: ["", "", ""],
     images: [],
+    oldImages: [],
+    newImages: [],
+    OrganizerName: "",
+    EventStatus: "",
   });
 
-  const [uploadedFiles, setUploadedFiles] = useState([]); // Track uploaded files
-  const [showDropdown, setShowDropdown] = useState(false);
+  const [uploadedFiles, setUploadedFiles] = useState([]);
+  const [showDropdown, setShowDropdown] = useState(true);
   const [categories, setCategories] = useState([]);
-  //const [profile, setProfile] = useState([]);
   const [cities, setCities] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -56,7 +56,6 @@ function AdminEventDetails({ user, signOut }) {
       try {
         setIsLoading(true);
 
-        // Fetch category and city data concurrently
         const [categoryData, cityData] = await Promise.all([
           GetCategory(),
           GetCityList(),
@@ -65,31 +64,22 @@ function AdminEventDetails({ user, signOut }) {
         setCategories(categoryData);
         setCities(cityData);
 
-        // Fetch organizer profile details
-        //  const orgProfile = await fetchProfileDetails();
-        const mappedValue = true;
-        //   orgProfile?.record?.associatedCollegeUniversity?.BOOL || false;
-
-        setShowDropdown(mappedValue);
-        console.log("set Form data", eventId);
         if (eventId) {
-          // Fetch event details by event ID
           const eventResponse = await fetchEventDetailsByEventID(eventId);
           const eventDetails = eventResponse?.record;
           console.log("eventDetails:", eventDetails);
 
-          // Map event images to an array of objects with a `name` key
           const imagesArray = (eventDetails?.EventImages || []).map(
             (image) => ({
-              name: extractImageName(image), // Assuming extractImageName works for getting unique names
-              preview: image, // Assuming image is a valid preview URL or data
+              name: image.substring(image.lastIndexOf("/") + 1),
+              preview: image,
+              url: image,
             })
           );
 
-          // Update form data with fetched event details
           setFormData({
-            eventId: eventDetails.EventID,
-            readableEventID: eventDetails.ReadableEventID,
+            EventID: eventDetails.EventID || "",
+            readableEventID: eventDetails.ReadableEventID || "",
             eventTitle: eventDetails?.EventTitle || "",
             dateTime: eventDetails?.EventDate || "",
             highlight: eventDetails?.EventHighLight || "",
@@ -100,53 +90,34 @@ function AdminEventDetails({ user, signOut }) {
             location: eventDetails?.EventLocation || "",
             eventMode: eventDetails?.EventMode || "",
             eventDetails: eventDetails?.EventDetails || "",
-            ticketPrice: eventDetails?.Price || "0",
-            noOfSeats: eventDetails?.Seats || "0",
-            reserveSeats: eventDetails?.ReservedSeats || "0",
+            ticketPrice: String(eventDetails?.Price || "0"),
+            noOfSeats: String(eventDetails?.Seats || "0"),
+            reserveSeats: String(eventDetails?.ReservedSeats || "0"),
             additionalInfo: eventDetails?.AdditionalInfo || "",
             tags: eventDetails?.Tags || "",
-            audienceBenefits: eventDetails?.AudienceBenefits || "",
+            audienceBenefits: Array.isArray(eventDetails?.AudienceBenefits)
+              ? [
+                  eventDetails.AudienceBenefits[0] || "",
+                  eventDetails.AudienceBenefits[1] || "",
+                  eventDetails.AudienceBenefits[2] || "",
+                ]
+              : ["", "", ""],
             images: [],
-            imagesArray: imagesArray, // You can keep this as-is if it's needed elsewhere
+            oldImages: imagesArray.map((img) => ({ url: img.url })),
+            newImages: [],
+            OrganizerName: eventDetails?.OrganizerName || "",
+            EventStatus: eventDetails?.EventStatus || "UnderReview",
           });
 
-          // Handle uploaded files and avoid duplicates
-          console.log("imagesArray:", imagesArray);
-          if (imagesArray.length > 0) {
-            // Deduplicate new files based on the 'name' property before updating the state
-            const uniqueFiles = imagesArray.filter(
-              (file, index, self) =>
-                index === self.findIndex((f) => f.name === file.name)
-            );
-
-            // Update uploaded files state
-            setUploadedFiles((prevFiles) => {
-              // Combine previous files with unique new files, ensuring no duplicates
-              const updatedFiles = [
-                ...prevFiles,
-                ...uniqueFiles.filter(
-                  (file) => !prevFiles.some((f) => f.name === file.name)
-                ),
-              ];
-
-              return updatedFiles;
-            });
-
-            // Update form data state
-            setFormData((prevFormData) => ({
-              ...prevFormData,
-              images: [...prevFormData.images, ...uniqueFiles],
-            }));
-          }
-
+          setUploadedFiles(imagesArray);
           setIsSubmitDisabled(
             ["Cancelled", "Deleted"].includes(eventDetails?.EventStatus)
           );
         }
       } catch (error) {
         console.error("Error fetching data:", error);
-        alert("An error occurred, Please try again.");
-        navigate("/manage-event");
+        alert("An error occurred. Please try again.");
+        navigate("/admin-events");
       } finally {
         setIsLoading(false);
       }
@@ -155,18 +126,10 @@ function AdminEventDetails({ user, signOut }) {
     fetchData();
   }, [eventId, navigate]);
 
-  // Function to extract the image name from the URL
-  const extractImageName = (url) => {
-    return url.substring(url.lastIndexOf("/") + 1);
-  };
-
-  // Replace handleImageUpload function
   const handleImageUpload = (e) => {
     const files = Array.from(e.target.files);
-    const maxSizeInMB = 5; // Maximum file size in MB
-    const maxSizeInBytes = maxSizeInMB * 1024 * 1024; // Convert MB to bytes
-
-    const newFiles = files.slice(0, 3 - uploadedFiles.length); // Limit new uploads to stay within 3 files total
+    const maxSizeInBytes = 5 * 1024 * 1024; // 5MB
+    const newFiles = files.slice(0, 3 - uploadedFiles.length);
 
     if (uploadedFiles.length + newFiles.length > 3) {
       alert("You can upload a maximum of 3 files.");
@@ -178,45 +141,54 @@ function AdminEventDetails({ user, signOut }) {
         file.type
       );
       const isValidSize = file.size <= maxSizeInBytes;
-      if (!isValidType) {
-        alert(
-          `${file.name} is not a valid image file (only JPEG, PNG, or GIF allowed).`
-        );
-      } else if (!isValidSize) {
-        alert(
-          `${file.name} exceeds the maximum file size limit of ${maxSizeInMB} MB.`
-        );
-      }
+      if (!isValidType) alert(`${file.name} is not a valid image type.`);
+      if (!isValidSize) alert(`${file.name} exceeds 5MB limit.`);
       return isValidType && isValidSize;
     });
 
-    if (validFiles.length > 0) {
-      const filePreviews = validFiles.map((file) => ({
-        name: file.name,
-        preview: URL.createObjectURL(file),
-      }));
+    const filePreviews = validFiles.map((file) => ({
+      name: file.name,
+      preview: URL.createObjectURL(file),
+      status: "new",
+    }));
 
-      console.log("filePreviews:", filePreviews);
-      setUploadedFiles((prevFiles) => [...prevFiles, ...filePreviews]);
-
-      setFormData((prevFormData) => ({
-        ...prevFormData,
-        images: [...prevFormData.images, ...validFiles],
-      }));
-    } else {
-      alert(
-        "Please select valid image files (JPEG, PNG, or GIF) that are within the size limit."
-      );
-    }
+    setUploadedFiles((prev) => [...prev, ...filePreviews]);
+    setFormData((prev) => ({
+      ...prev,
+      images: [...prev.images, ...validFiles],
+      newImages: [
+        ...prev.newImages,
+        ...validFiles.map((file) => ({
+          name: file.name,
+          type: file.type,
+          status: "new",
+        })),
+      ],
+    }));
+    e.target.value = null;
   };
 
-  // const handleChange = (e) => {
-  //   const { name, value } = e.target;
-  //   setFormData({
-  //     ...formData,
-  //     [name]: value,
-  //   });
-  // };
+  const handleImageRemove = (index) => {
+    const fileToRemove = uploadedFiles[index];
+    setUploadedFiles((prev) => prev.filter((_, i) => i !== index));
+    setFormData((prev) => {
+      if (fileToRemove.url) {
+        return {
+          ...prev,
+          oldImages: prev.oldImages.filter(
+            (img) => img.url !== fileToRemove.url
+          ),
+        };
+      } else {
+        const newImagesIndex = index - prev.oldImages.length;
+        return {
+          ...prev,
+          images: prev.images.filter((_, i) => i !== newImagesIndex),
+          newImages: prev.newImages.filter((_, i) => i !== newImagesIndex),
+        };
+      }
+    });
+  };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -242,76 +214,87 @@ function AdminEventDetails({ user, signOut }) {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
-    console.log("formData:", formData);
-    // Validation checks
+
+    const errors = [];
     if (formData.eventTitle.length > 100) {
-      alert("Event Title should not exceed 100 characters.");
-      setIsSubmitting(false);
-      return;
+      errors.push("Event Title should not exceed 100 characters.");
     }
     if (formData.eventDetails.length > 300) {
-      alert("Event Details should not exceed 300 characters.");
-      setIsSubmitting(false);
-      return;
+      errors.push("Event Details should not exceed 300 characters.");
     }
-    if (!formData.eventType) {
-      alert("Please select the target audience for this event.");
-      setIsSubmitting(false);
-      return;
+    if (!formData.eventType && showDropdown) {
+      errors.push("Please select the target audience.");
     }
     if (new Date(formData.dateTime) <= new Date()) {
-      alert("Date and Time must be in the future.");
-      setIsSubmitting(false);
-      return;
+      errors.push("Date and Time must be in the future.");
     }
     if (!formData.categoryID) {
-      alert("Please select a category.");
-      setIsSubmitting(false);
-      return;
+      errors.push("Please select a category.");
     }
     if (!formData.highlight) {
-      alert("Please provide a highlight.");
-      setIsSubmitting(false);
-      return;
+      errors.push("Please provide a highlight.");
     }
     if (!formData.cityID) {
-      alert("Please select a city.");
-      setIsSubmitting(false);
-      return;
+      errors.push("Please select a city.");
     }
     if (!formData.location) {
-      alert("Please provide a location.");
-      setIsSubmitting(false);
-      return;
+      errors.push("Please provide a location.");
     }
-    if (parseFloat(formData.ticketPrice) < 0) {
-      alert("Ticket Price should be a non-negative number.");
-      setIsSubmitting(false);
-      return;
+    if (!formData.OrganizerName) {
+      errors.push("Organizer Name is required.");
     }
-    if (parseInt(formData.noOfSeats) < 25) {
-      alert("No of Seats should be greater than or equal to 25.");
-      setIsSubmitting(false);
-      return;
+    if (
+      isNaN(parseFloat(formData.ticketPrice)) ||
+      parseFloat(formData.ticketPrice) < 0
+    ) {
+      errors.push("Ticket Price should be non-negative.");
     }
-    if (parseFloat(formData.reserveSeats) < 0) {
-      alert("Reserve Seats should be a non-negative number.");
+    if (
+      isNaN(parseInt(formData.noOfSeats)) ||
+      parseInt(formData.noOfSeats) < 25
+    ) {
+      errors.push("No of Seats should be at least 25.");
+    }
+    if (
+      isNaN(parseFloat(formData.reserveSeats)) ||
+      parseFloat(formData.reserveSeats) < 0
+    ) {
+      errors.push("Reserve Seats should be non-negative.");
+    }
+    if (
+      !isNaN(parseInt(formData.reserveSeats)) &&
+      !isNaN(parseInt(formData.noOfSeats)) &&
+      parseInt(formData.reserveSeats) > parseInt(formData.noOfSeats)
+    ) {
+      errors.push("Reserve Seats should not exceed Number of Seats.");
+    }
+
+    if (errors.length > 0) {
+      alert(errors.join("\n"));
       setIsSubmitting(false);
       return;
     }
 
     try {
-      console.log("Submitting form data:", formData);
+      // Normalize numeric fields to strings and preserve EventStatus for Published events
+      const payload = {
+        ...formData,
+        ticketPrice: String(formData.ticketPrice),
+        noOfSeats: String(formData.noOfSeats),
+        reserveSeats: String(formData.reserveSeats),
+        EventStatus:
+          formData.EventStatus === "Published"
+            ? "Published"
+            : formData.EventStatus,
+      };
 
-      await submitEvent(formData);
-
-      //  await new Promise((resolve) => setTimeout(resolve, 2000));
+      console.log("Submitting payload:", payload);
+      await submitEvent(payload, formData.OrganizerName);
       alert("Form submitted successfully!");
-
       navigate("/admin-events", { replace: true });
     } catch (error) {
       console.error("Error submitting form:", error);
-      alert("Failed to submit the form. Please try again.");
+      alert(error.message || "Failed to submit the form. Please try again.");
     } finally {
       setIsSubmitting(false);
     }
@@ -322,7 +305,75 @@ function AdminEventDetails({ user, signOut }) {
   };
 
   const handleReset = () => {
-    navigate("/admin-events", { replace: true });
+    if (eventId) {
+      fetchEventDetailsByEventID(eventId).then((eventResponse) => {
+        const eventDetails = eventResponse?.record;
+        const imagesArray = (eventDetails?.EventImages || []).map((image) => ({
+          name: image.substring(image.lastIndexOf("/") + 1),
+          preview: image,
+          url: image,
+        }));
+        setFormData({
+          EventID: eventDetails.EventID || "",
+          readableEventID: eventDetails.ReadableEventID || "",
+          eventTitle: eventDetails?.EventTitle || "",
+          dateTime: eventDetails?.EventDate || "",
+          highlight: eventDetails?.EventHighLight || "",
+          eventType: eventDetails?.EventType || "",
+          categoryID: eventDetails?.CategoryID || "",
+          categoryName: eventDetails?.CategoryName || "",
+          cityID: eventDetails?.CityID || "",
+          location: eventDetails?.EventLocation || "",
+          eventMode: eventDetails?.EventMode || "",
+          eventDetails: eventDetails?.EventDetails || "",
+          ticketPrice: String(eventDetails?.Price || "0"),
+          noOfSeats: String(eventDetails?.Seats || "0"),
+          reserveSeats: String(eventDetails?.ReservedSeats || "0"),
+          additionalInfo: eventDetails?.AdditionalInfo || "",
+          tags: eventDetails?.Tags || "",
+          audienceBenefits: Array.isArray(eventDetails?.AudienceBenefits)
+            ? [
+                eventDetails.AudienceBenefits[0] || "",
+                eventDetails.AudienceBenefits[1] || "",
+                eventDetails.AudienceBenefits[2] || "",
+              ]
+            : ["", "", ""],
+          images: [],
+          oldImages: imagesArray.map((img) => ({ url: img.url })),
+          newImages: [],
+          OrganizerName: eventDetails?.OrganizerName || "",
+          EventStatus: eventDetails?.EventStatus || "UnderReview",
+        });
+        setUploadedFiles(imagesArray);
+      });
+    } else {
+      setFormData({
+        EventID: "",
+        readableEventID: "",
+        eventTitle: "",
+        dateTime: "",
+        highlight: "",
+        eventType: "",
+        categoryID: "",
+        categoryName: "",
+        cityID: "",
+        location: "",
+        eventMode: "",
+        eventDetails: "",
+        ticketPrice: "",
+        noOfSeats: "",
+        reserveSeats: "",
+        additionalInfo: "",
+        tags: "",
+        audienceBenefits: ["", "", ""],
+        images: [],
+        oldImages: [],
+        newImages: [],
+        OrganizerName: "",
+        EventStatus: "",
+      });
+      setUploadedFiles([]);
+    }
   };
 
   const toggleSidebar = () => {
@@ -345,7 +396,6 @@ function AdminEventDetails({ user, signOut }) {
           <div className="spinner"></div>
         </div>
       )}
-
       <button className="sidebar-toggle" onClick={toggleSidebar}>
         ☰
       </button>
@@ -385,34 +435,34 @@ function AdminEventDetails({ user, signOut }) {
               maxLength="300"
             />
           </div>
-
           <div className="form-group">
-            {showDropdown && ( // Conditionally render dropdown based on state
-              <>
-                <label>Target Audience for this event :</label>
-                <select
-                  name="eventType"
-                  value={formData.eventType}
-                  onChange={handleChange}
-                  required
-                >
-                  <option value="">Select</option>
-                  <option value="open">
-                    Open to all - Public event accessible to everyone.
-                  </option>
-                  <option value="inter">
-                    Inter-Colleges/Institutions: Open to attendees from any
-                    college or university.
-                  </option>
-                  <option value="private">
-                    Private to College/Institution: Restricted to attendees from
-                    the same institution as the organizer.
-                  </option>
-                </select>
-              </>
-            )}
+            <label>Organizer Name:</label>
+            <input
+              type="text"
+              name="OrganizerName"
+              value={formData.OrganizerName}
+              onChange={handleChange}
+              required
+            />
           </div>
-
+          {showDropdown && (
+            <div className="form-group">
+              <label>Target Audience:</label>
+              <select
+                name="eventType"
+                value={formData.eventType}
+                onChange={handleChange}
+                required
+              >
+                <option value="">Select</option>
+                <option value="open">
+                  Open to all - Public event accessible to everyone.
+                </option>
+                <option value="inter">Inter-Colleges/Institutions</option>
+                <option value="private">Private to College/Institution</option>
+              </select>
+            </div>
+          )}
           <div className="form-row">
             <div className="form-group">
               <label>Date and Time:</label>
@@ -450,7 +500,7 @@ function AdminEventDetails({ user, signOut }) {
                 value={formData.highlight}
                 onChange={handleChange}
                 required
-                placeholder="e.g., - 10% discount, Free Entry"
+                placeholder="e.g., 10% discount, Free Entry"
                 maxLength="20"
               />
             </div>
@@ -461,7 +511,7 @@ function AdminEventDetails({ user, signOut }) {
                 name="additionalInfo"
                 value={formData.additionalInfo}
                 onChange={handleChange}
-                placeholder="e.g., Please present 10 minutes before the event starts."
+                placeholder="e.g., Please arrive 10 minutes early"
               />
             </div>
           </div>
@@ -494,8 +544,6 @@ function AdminEventDetails({ user, signOut }) {
               />
             </div>
           </div>
-
-          {/* Mode Dropdown */}
           <div className="form-row">
             <div className="form-group">
               <label>Mode:</label>
@@ -510,10 +558,8 @@ function AdminEventDetails({ user, signOut }) {
                 <option value="Offline">Offline</option>
               </select>
             </div>
-
-            {/* Tags Input */}
             <div className="form-group">
-              <label>Tags:</label>{" "}
+              <label>Tags:</label>
               <input
                 type="text"
                 name="tags"
@@ -533,13 +579,9 @@ function AdminEventDetails({ user, signOut }) {
                 type="text"
                 name={`audienceBenefit${index}`}
                 value={benefit}
-                onChange={(e) => {
-                  const newBenefits = [...formData.audienceBenefits];
-                  newBenefits[index] = e.target.value;
-                  setFormData({ ...formData, audienceBenefits: newBenefits });
-                }}
+                onChange={handleChange}
                 maxLength="50"
-                placeholder="ex: Certificate , Interact with Host , Hands on experience "
+                placeholder="e.g., Certificate, Interaction with Host"
               />
             ))}
           </div>
@@ -592,7 +634,7 @@ function AdminEventDetails({ user, signOut }) {
                 accept="image/jpeg, image/png, image/gif"
                 multiple
                 onChange={handleImageUpload}
-              />{" "}
+              />
               <span className="upload-message">
                 Images will be used for Banner and thumbnails
               </span>
@@ -606,8 +648,8 @@ function AdminEventDetails({ user, signOut }) {
                   style={{
                     border: "1px solid black",
                     fontSize: "12px",
-                    borderCollapse: "collapse", // Ensures a clean table layout
-                    width: "80%", // Optional: Make the table responsive
+                    borderCollapse: "collapse",
+                    width: "80%",
                   }}
                 >
                   <thead>
@@ -653,45 +695,21 @@ function AdminEventDetails({ user, signOut }) {
                         <td style={{ border: "1px solid black" }}>
                           {file.name}
                         </td>
-
                         <td style={{ border: "1px solid black" }}>
-                          {formData.images[index] instanceof File ? (
-                            <img
-                              src={file.preview}
-                              alt={file.name}
-                              style={{
-                                width: "200PX",
-                                height: "200px",
-                                alignContent: "center",
-                              }}
-                            />
-                          ) : (
-                            <img
-                              src={formData.images[index].preview}
-                              alt={formData.images[index].preview}
-                              style={{
-                                width: "200PX",
-                                height: "200px",
-                                alignContent: "center",
-                              }}
-                            />
-                          )}
+                          <img
+                            src={file.preview}
+                            alt={file.name}
+                            style={{
+                              width: "200px",
+                              height: "200px",
+                              alignContent: "center",
+                            }}
+                          />
                         </td>
                         <td style={{ border: "1px solid black" }}>
                           <button
                             type="button"
-                            onClick={() => {
-                              const newFiles = uploadedFiles.filter(
-                                (_, i) => i !== index
-                              );
-                              setUploadedFiles(newFiles);
-                              setFormData((prevFormData) => ({
-                                ...prevFormData,
-                                images: prevFormData.images.filter(
-                                  (_, i) => i !== index
-                                ),
-                              }));
-                            }}
+                            onClick={() => handleImageRemove(index)}
                             style={{
                               backgroundColor: "transparent",
                               border: "none",
@@ -733,7 +751,6 @@ function AdminEventDetails({ user, signOut }) {
             >
               {isSubmitting ? "Submitting..." : "Submit"}
             </button>
-
             <button
               style={{
                 backgroundColor: "#D32F2F",
@@ -750,7 +767,6 @@ function AdminEventDetails({ user, signOut }) {
             >
               Cancel
             </button>
-
             <button
               style={{
                 backgroundColor: "#388E3C",
