@@ -43,7 +43,8 @@ function AdminEventDetails({ user, signOut }) {
   });
 
   const [uploadedFiles, setUploadedFiles] = useState([]);
-  const [showDropdown, setShowDropdown] = useState(true);
+  //const [showDropdown, setShowDropdown] = useState(true);
+  const showDropdown = true;
   const [categories, setCategories] = useState([]);
   const [cities, setCities] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
