@@ -4,10 +4,9 @@ import Sidebar from "./Sidebar";
 import { submitProfile, fetchProfileDetails } from "../api/organizerApi";
 import "../styles/OrgProfilePage.css";
 import { GetCollegeList } from "../api/eventApi";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faImage } from "@fortawesome/free-solid-svg-icons";
 import citiesData from "../data/cities.json";
 import { fetchAuthSession } from "@aws-amplify/auth";
+import { useDebouncedCallback } from "use-debounce";
 
 // Popup Component
 const Popup = ({ message, onClose }) => (
@@ -97,6 +96,7 @@ function OrgProfilePage({ user, signOut }) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isCitySelected, setIsCitySelected] = useState(false);
   const [showPopup, setShowPopup] = useState(false);
+  const [isCustomCollege, setIsCustomCollege] = useState(false);
 
   const navigate = useNavigate();
 
@@ -148,7 +148,8 @@ function OrgProfilePage({ user, signOut }) {
             (city) => city.cityId === cityID
           );
           const collegeID = record.collegeID?.S || "";
-          const isCustomCollege = collegeID && !collegeID.match(/^\d+$/);
+          const collegeName = record.collegeName?.S || "";
+          const isCustomCollege = !collegeID && collegeName;
 
           setFormData({
             name: record.OrganizerName?.S || "",
@@ -167,16 +168,16 @@ function OrgProfilePage({ user, signOut }) {
             associatedCollegeUniversity: mappedValue,
             termsAccepted: record.termsAccepted?.BOOL || false,
             logo: record.logoPath?.S || null,
-            collegeSearchText: record.collegeName?.S || "",
+            collegeSearchText: collegeName || collegeID || "",
             latitude: record.latitude?.S || "",
             longitude: record.longitude?.S || "",
           });
+          setIsCustomCollege(isCustomCollege);
           if (!matchedCity && cityID) {
             setIsOtherCity(true);
             setIsCitySelected(!!record.cityName?.S);
           }
         } else {
-          // New profile, set email from session
           setFormData((prev) => ({
             ...prev,
             contactEmail: email,
@@ -215,26 +216,29 @@ function OrgProfilePage({ user, signOut }) {
     }
   };
 
-  const fetchCollegeSuggestions = async (query) => {
-    if (!formData.cityName || !query) {
-      setCollegeSuggestions([]);
-      return;
-    }
-    setIsLoading(true);
-    try {
-      const collegeData = await GetCollegeList(
-        formData.cityName.toLowerCase(),
-        query.toLowerCase()
-      );
-
-      setCollegeSuggestions(collegeData || []);
-    } catch (error) {
-      console.error("Error fetching college suggestions:", error);
-      setCollegeSuggestions([]);
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  const debouncedFetchCollegeSuggestions = useDebouncedCallback(
+    async (query) => {
+      if (!formData.cityName || !query) {
+        setCollegeSuggestions([]);
+        return;
+      }
+      setIsLoading(true);
+      try {
+        const collegeData = await GetCollegeList(
+          formData.cityName.toLowerCase(),
+          query.toLowerCase()
+        );
+        setCollegeSuggestions(collegeData || []);
+      } catch (error) {
+        console.error("Error fetching college suggestions:", error);
+        setCollegeSuggestions([]);
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    300,
+    { leading: false, trailing: true }
+  );
 
   const handleCityChange = (e) => {
     const value = e.target.value;
@@ -277,7 +281,6 @@ function OrgProfilePage({ user, signOut }) {
 
   const handleOtherCityChange = (e) => {
     const text = e.target.value;
-
     setErrors({ ...errors, cityName: "" });
     setFormData({
       ...formData,
@@ -319,8 +322,9 @@ function OrgProfilePage({ user, signOut }) {
       collegeSearchText: text,
       collegeID: "",
     });
+    setIsCustomCollege(true);
     if (text.length > 2) {
-      fetchCollegeSuggestions(text);
+      debouncedFetchCollegeSuggestions(text);
     } else {
       setCollegeSuggestions([]);
     }
@@ -329,15 +333,15 @@ function OrgProfilePage({ user, signOut }) {
   const handleCollegeSuggestionSelect = (college) => {
     setFormData({
       ...formData,
-      collegeID: college.CollegeID,
+      collegeID: college.CollegeID.toString(),
       collegeSearchText: `${college.Name} (${college.Shortform})`,
     });
+    setIsCustomCollege(false);
     setCollegeSuggestions([]);
   };
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
-    // Prevent changes to contactEmail
     if (name === "contactEmail") return;
     setErrors({ ...errors, [name]: "" });
     setFormData({
@@ -392,9 +396,11 @@ function OrgProfilePage({ user, signOut }) {
     }
     if (
       formData.associatedCollegeUniversity === "Yes" &&
+      !formData.collegeID &&
       !formData.collegeSearchText.trim()
     ) {
-      errors.collegeSearchText = "Please enter or select a college name.";
+      errors.collegeSearchText =
+        "Please select a college or enter a valid college name.";
     }
     if (!formData.termsAccepted) {
       errors.termsAccepted = "You must agree to the Terms and Conditions.";
@@ -419,7 +425,14 @@ function OrgProfilePage({ user, signOut }) {
       cityID: formData.cityID,
       cityName: formData.cityName,
       state: formData.state,
-      collegeID: formData.collegeID || formData.collegeSearchText,
+      collegeID:
+        formData.associatedCollegeUniversity === "Yes" && !isCustomCollege
+          ? formData.collegeID
+          : "",
+      collegeName:
+        formData.associatedCollegeUniversity === "Yes" && isCustomCollege
+          ? formData.collegeSearchText.trim()
+          : "",
       address: formData.address,
       aboutOrganization: formData.aboutOrganization,
       associatedCollegeUniversity: formData.associatedCollegeUniversity,
@@ -576,9 +589,16 @@ function OrgProfilePage({ user, signOut }) {
                       maxWidth: isSmallScreen ? "100px" : "150px",
                       height: isSmallScreen ? "100px" : "150px",
                       fontSize: isSmallScreen ? "0.75rem" : "0.875rem",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      background: "#f3f4f6",
+                      border: "1px solid #ccc",
+                      borderRadius: "4px",
+                      textAlign: "center",
+                      color: "#888",
                     }}
                   >
-                    <FontAwesomeIcon icon={faImage} />
                     <span>No Logo Uploaded</span>
                   </div>
                 )}
