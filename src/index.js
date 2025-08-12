@@ -4,6 +4,7 @@ import "./styles/index.css";
 import App from "./App";
 import reportWebVitals from "./reportWebVitals";
 import { Amplify } from "aws-amplify";
+import * as serviceWorkerRegistration from "./serviceWorkerRegistration";
 
 Amplify.configure({
   Auth: {
@@ -48,6 +49,7 @@ Amplify.configure({
 // });
 
 //console.log("Amplify Config:", Amplify.configure());
+serviceWorkerRegistration.register();
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(

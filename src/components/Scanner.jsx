@@ -42,7 +42,10 @@ function Scanner({ user, signOut }) {
     Html5Qrcode.getCameras()
       .then((devices) => {
         if (devices && devices.length) {
-          const cameraId = devices[0].id;
+          const backCamera = devices.find((device) =>
+            /back|environment|rear/i.test(device.label)
+          );
+          const cameraId = backCamera ? backCamera.id : devices[0].id;
 
           html5QrCodeRef.current = new Html5Qrcode(qrCodeRegionId);
 
