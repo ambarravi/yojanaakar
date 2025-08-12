@@ -24,6 +24,7 @@ import OrganizerLandingPage from "./components/OrganizerLandingPage.jsx";
 import HostEvent from "./components/Hostevent.jsx";
 import ManageEvent from "./components/ManageEvents.jsx";
 import Subscription from "./components/Subscription.jsx";
+import Scanner from "./components/Scanner.jsx";
 import OrgProfile from "./components/OrgProfilePage.jsx";
 import BookingDetails from "./components/BookingDetails.jsx";
 import AdminBookingDetails from "./components/admin/AdminBookingDetails.jsx";
@@ -126,6 +127,7 @@ function AuthenticatedRoutes() {
               <Route path="/host-event" element={<HostEvent />} />
               <Route path="/manage-events" element={<ManageEvent />} />
               <Route path="/subscription" element={<Subscription />} />
+              <Route path="/scanner" element={<Scanner />} />
 
               <Route
                 path="/showBookingDetails/:eventId"
