@@ -6,13 +6,13 @@ body {
   background: #f3f4f6;
   color: #1f2937;
   font-size: 0.75rem;
+  margin: 0; /* Ensure no default body margin */
 }
 
 /* Page Layout */
 .scanner-page {
   display: flex;
   min-height: 100vh;
-  max-width: 100%;
   width: 100%;
   overflow-x: hidden;
   box-sizing: border-box;
@@ -106,8 +106,10 @@ body {
 @media (max-width: 767px) {
   .scanner-content {
     margin-left: 0;
+    max-width: 100%; /* Ensure full width on mobile */
     padding: 0.75rem;
     padding-top: 3rem;
+    width: 100%; /* Explicitly set width to 100% */
   }
 }
 
@@ -149,6 +151,10 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
+  width: 100%; /* Ensure full width */
+  max-width: 600px; /* Cap width for larger screens */
+  margin-left: auto;
+  margin-right: auto;
 }
 
 @media (min-width: 640px) {
@@ -167,12 +173,14 @@ body {
   border: 1px solid #ccc;
   border-radius: 4px;
   font-size: 1rem;
-  min-width: 200px;
+  width: 100%; /* Make select full-width on mobile */
+  max-width: 300px; /* Cap width for larger screens */
 }
 
 @media (max-width: 767px) {
   .event-select {
     font-size: 0.85rem;
+    max-width: 100%; /* Ensure select takes full available width */
   }
 }
 
@@ -182,11 +190,14 @@ body {
   flex-direction: column;
   align-items: center;
   margin-top: 1rem;
+  width: 100%; /* Ensure full width */
 }
 
 .qr-code-region {
-  width: 220px;
-  height: 220px;
+  width: 80vw; /* Use viewport width for responsiveness */
+  max-width: 240px; /* Cap for larger screens */
+  height: 80vw; /* Maintain square aspect ratio */
+  max-height: 240px;
   border: 2px solid #333;
   border-radius: 8px;
   overflow: hidden;
@@ -208,6 +219,9 @@ body {
   gap: 1rem;
   justify-content: center;
   z-index: 2;
+  flex-wrap: wrap; /* Allow buttons to wrap on smaller screens */
+  width: 100%; /* Ensure full width */
+  max-width: 600px; /* Cap for larger screens */
 }
 
 .capture-btn {
@@ -219,6 +233,8 @@ body {
   color: white;
   border: none;
   transition: background 0.2s ease;
+  flex: 1; /* Make buttons share space */
+  max-width: 150px; /* Cap button width */
 }
 
 .capture-btn:hover {
@@ -234,6 +250,8 @@ body {
   color: white;
   border: none;
   transition: background 0.2s ease;
+  flex: 1; /* Make buttons share space */
+  max-width: 150px; /* Cap button width */
 }
 
 .close-btn:hover {
@@ -244,6 +262,7 @@ body {
 .captured-details {
   margin-top: 1.5rem;
   text-align: center;
+  width: 100%; /* Ensure full width */
 }
 
 .captured-label {
@@ -253,8 +272,8 @@ body {
 }
 
 .scan-result-textarea {
-  width: 90%;
-  max-width: 400px;
+  width: 90%; /* Use most of available width */
+  max-width: 600px; /* Cap for larger screens */
   margin: 0 auto;
   padding: 0.5rem;
   font-size: 1rem;
@@ -306,5 +325,6 @@ body {
     margin-left: 0;
     padding: 0.5rem;
     background: #ffffff;
+    max-width: 100%; /* Ensure full width for printing */
   }
 }
