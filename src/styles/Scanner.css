@@ -6,7 +6,7 @@ body {
   background: #f3f4f6;
   color: #1f2937;
   font-size: 0.75rem;
-  margin: 0; /* Ensure no default body margin */
+  margin: 0; /* Prevent default body margin */
 }
 
 /* Page Layout */
@@ -107,9 +107,9 @@ body {
   .scanner-content {
     margin-left: 0;
     max-width: 100%; /* Ensure full width on mobile */
+    width: 100%; /* Explicitly set width to 100% */
     padding: 0.75rem;
     padding-top: 3rem;
-    width: 100%; /* Explicitly set width to 100% */
   }
 }
 
@@ -141,8 +141,8 @@ body {
   }
 }
 
-/* Event Details Section */
-.event-details {
+/* Scanner Event Details Section */
+.scanner-event-details {
   background: #ffffff;
   padding: 0.75rem;
   border-radius: 0.5rem;
@@ -158,17 +158,17 @@ body {
 }
 
 @media (min-width: 640px) {
-  .event-details {
+  .scanner-event-details {
     padding: 1rem;
   }
 }
 
-.event-label {
+.scanner-event-label {
   font-weight: bold;
   margin-right: 1rem;
 }
 
-.event-select {
+.scanner-event-select {
   padding: 0.5rem;
   border: 1px solid #ccc;
   border-radius: 4px;
@@ -178,14 +178,14 @@ body {
 }
 
 @media (max-width: 767px) {
-  .event-select {
+  .scanner-event-select {
     font-size: 0.85rem;
     max-width: 100%; /* Ensure select takes full available width */
   }
 }
 
-/* Scanner Section */
-.scanner-section {
+/* Scanner QR Section */
+.scanner-qr-section {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -213,8 +213,8 @@ body {
   }
 }
 
-/* Buttons Container */
-.buttons-container {
+/* Scanner Buttons Container */
+.scanner-buttons-container {
   display: flex;
   gap: 1rem;
   justify-content: center;
@@ -224,24 +224,7 @@ body {
   max-width: 600px; /* Cap for larger screens */
 }
 
-.capture-btn {
-  padding: 0.5rem 1.2rem;
-  font-size: 1rem;
-  border-radius: 4px;
-  cursor: pointer;
-  background-color: #0d9488;
-  color: white;
-  border: none;
-  transition: background 0.2s ease;
-  flex: 1; /* Make buttons share space */
-  max-width: 150px; /* Cap button width */
-}
-
-.capture-btn:hover {
-  background-color: #10b981;
-}
-
-.close-btn {
+.scanner-close-btn {
   padding: 0.5rem 1.2rem;
   font-size: 1rem;
   border-radius: 4px;
@@ -254,24 +237,24 @@ body {
   max-width: 150px; /* Cap button width */
 }
 
-.close-btn:hover {
+.scanner-close-btn:hover {
   background-color: #d32f2f;
 }
 
-/* Captured Details */
-.captured-details {
+/* Scanner Captured Details */
+.scanner-captured-details {
   margin-top: 1.5rem;
   text-align: center;
   width: 100%; /* Ensure full width */
 }
 
-.captured-label {
+.scanner-captured-label {
   font-weight: bold;
   display: block;
   margin-bottom: 0.5rem;
 }
 
-.scan-result-textarea {
+.scanner-result-textarea {
   width: 90%; /* Use most of available width */
   max-width: 600px; /* Cap for larger screens */
   margin: 0 auto;
@@ -281,6 +264,87 @@ body {
   border: 1px solid #ccc;
   resize: none;
   display: block;
+}
+
+/* Modal Styles */
+.scanner-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 2000; /* High z-index to ensure overlay is above other elements */
+  pointer-events: auto; /* Allow clicks on overlay */
+}
+
+.scanner-modal {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: #ffffff;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  max-width: 400px;
+  width: 90%;
+  text-align: center;
+  z-index: 2100; /* Higher than overlay */
+  pointer-events: auto; /* Ensure modal content is clickable */
+  border: 2px solid #0d9488; /* Debug: visible border to confirm positioning */
+  box-sizing: border-box;
+}
+
+.scanner-modal h3 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+}
+
+.scanner-modal p {
+  font-size: 1rem;
+  margin-bottom: 0.5rem;
+}
+
+.scanner-modal-icon {
+  font-size: 2rem;
+  margin-bottom: 10px;
+}
+
+.scanner-modal-btn {
+  padding: 10px 20px;
+  margin: 10px;
+  border-radius: 4px;
+  cursor: pointer;
+  border: none;
+  font-size: 1rem;
+  transition: background 0.2s ease;
+  pointer-events: auto; /* Ensure buttons are clickable */
+  position: relative; /* Ensure buttons establish their own stacking context */
+  z-index: 2200; /* Higher than modal */
+}
+
+.scanner-modal-btn.mark-attendance,
+.scanner-modal-btn.proceed {
+  background: #0d9488;
+  color: white;
+}
+
+.scanner-modal-btn.mark-attendance:hover,
+.scanner-modal-btn.proceed:hover {
+  background: #10b981;
+}
+
+.scanner-modal-btn.discard,
+.scanner-modal-btn.close {
+  background: #f44336;
+  color: white;
+}
+
+.scanner-modal-btn.discard:hover,
+.scanner-modal-btn.close:hover {
+  background: #d32f2f;
 }
 
 /* Loading Overlay */
