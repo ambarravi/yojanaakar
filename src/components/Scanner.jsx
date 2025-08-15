@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import Sidebar from "./Sidebar";
 import "../styles/Scanner.css";
 import { Html5Qrcode } from "html5-qrcode";
+import { fetchEventDetailsByOrgID, markAttendance } from "../api/eventApi";
 
 function Scanner({ user, signOut }) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -12,28 +13,45 @@ function Scanner({ user, signOut }) {
   const [ticketDetails, setTicketDetails] = useState(null);
   const [apiResult, setApiResult] = useState(null);
   const [isScanning, setIsScanning] = useState(false);
-
-  const mockEvents = [
-    { EventID: "evt001", EventTitle: "Concert Night" },
-    { EventID: "evt002", EventTitle: "Art Expo" },
-    { EventID: "evt003", EventTitle: "Tech Conference" },
-  ];
+  const [events, setEvents] = useState([]);
+  const [error, setError] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
 
   const html5QrCodeRef = useRef(null);
   const qrCodeRegionId = "qr-code-region";
 
-  // Mock API function
-  const mockApiCall = () => {
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        if (Math.random() < 0.8) {
-          resolve({ status: 200, message: "Attendance marked successfully!" });
-        } else {
-          resolve({ status: 404, message: "Ticket not found or invalid." });
-        }
-      }, 1000);
-    });
+  // Fetch events from API
+  const fetchEvents = async () => {
+    setIsLoading(true);
+    try {
+      const result = await fetchEventDetailsByOrgID();
+      console.log("API Response:", result.items); // Debug API data
+      // Filter events for Published status and today/tomorrow
+      const today = new Date();
+      const tomorrow = new Date(today);
+      tomorrow.setDate(today.getDate() + 1);
+      const filteredEvents = result.items.filter((event) => {
+        const eventDate = new Date(event.EventDate);
+        return (
+          event.EventStatus === "Published" &&
+          (eventDate.toDateString() === today.toDateString() ||
+            eventDate.toDateString() === tomorrow.toDateString())
+        );
+      });
+
+      console.log("filteredEvents", filteredEvents);
+      setEvents(filteredEvents);
+      setIsLoading(false);
+    } catch (error) {
+      console.error("Error fetching events:", error);
+      setError("Unable to load events. Please try again later.");
+      setIsLoading(false);
+    }
   };
+
+  useEffect(() => {
+    fetchEvents();
+  }, []);
 
   useEffect(() => {
     if (selectedEventID) {
@@ -53,18 +71,41 @@ function Scanner({ user, signOut }) {
       setModalPhase("loading");
       setApiResult(null);
       try {
-        const parsed = JSON.parse(scannedData);
+        // Parse QR code: uniqueId#eventName#bookingName#phoneNumber#seats#date#time#location#bookingID
+        const [
+          readableEventId,
+          eventTitle,
+          bookingName,
+          phoneNumber,
+          seats,
+          date,
+          time,
+          location,
+          bookingId,
+        ] = scannedData.split("#");
         setTicketDetails({
-          eventId: parsed.eventId,
-          name: parsed.name,
-          totalTickets: parsed.totalTickets,
+          readableEventId,
+          eventTitle,
+          bookingName,
+          phoneNumber: phoneNumber !== "N/A" ? phoneNumber : "Not provided",
+          seats,
+          date,
+          time,
+          location,
+          bookingId,
         });
       } catch (error) {
         console.error("Invalid QR code data:", error);
         setTicketDetails({
-          eventId: "Unknown",
-          name: "Unknown",
-          totalTickets: "Unknown",
+          readableEventId: "Unknown",
+          eventTitle: "Unknown",
+          bookingName: "Unknown",
+          phoneNumber: "Unknown",
+          seats: "Unknown",
+          date: "Unknown",
+          time: "Unknown",
+          location: "Unknown",
+          bookingId: "Unknown",
         });
       }
       setTimeout(() => {
@@ -147,11 +188,26 @@ function Scanner({ user, signOut }) {
 
   const handleMarkAttendance = async () => {
     console.log("Mark Attendance button clicked"); // Debug
-    const response = await mockApiCall();
-    setApiResult({
-      success: response.status === 200,
-      message: response.message,
-    });
+    try {
+      const response = await markAttendance({
+        eventId: selectedEventID,
+        bookingId: ticketDetails.bookingId,
+      });
+      setApiResult({
+        success: response.status === 200,
+        message:
+          response.message ||
+          (response.status === 200
+            ? "Attendance marked successfully!"
+            : "Failed to mark attendance."),
+      });
+    } catch (err) {
+      console.error("API error:", err);
+      setApiResult({
+        success: false,
+        message: err.message || "An error occurred while marking attendance.",
+      });
+    }
     setModalPhase("result");
   };
 
@@ -182,9 +238,14 @@ function Scanner({ user, signOut }) {
       content = (
         <>
           <h3>Ticket Details</h3>
-          <p>Event ID: {ticketDetails.eventId}</p>
-          <p>Name: {ticketDetails.name}</p>
-          <p>Total Tickets: {ticketDetails.totalTickets}</p>
+          <p>Readable Event ID: {ticketDetails.readableEventId}</p>
+          <p>Event Title: {ticketDetails.eventTitle}</p>
+          <p>Name: {ticketDetails.bookingName}</p>
+          <p>Phone Number: {ticketDetails.phoneNumber}</p>
+          <p>Number of Tickets: {ticketDetails.seats}</p>
+          <p>Date: {ticketDetails.date}</p>
+          <p>Time: {ticketDetails.time}</p>
+          <p>Location: {ticketDetails.location}</p>
           <button
             onClick={handleMarkAttendance}
             className="scanner-modal-btn mark-attendance"
@@ -250,6 +311,8 @@ function Scanner({ user, signOut }) {
         className={`scanner-content ${isSidebarOpen ? "sidebar-open" : ""}`}
       >
         <h2 className="scanner-title">Ticket Scanner</h2>
+        {error && <p className="error-message">{error}</p>}
+        {isLoading && <p>Loading events...</p>}
         <div className="scanner-event-details">
           <label htmlFor="event-select" className="scanner-event-label">
             Select Event:
@@ -260,9 +323,10 @@ function Scanner({ user, signOut }) {
             onChange={handleEventChange}
             className="scanner-event-select"
             aria-label="Select Event"
+            disabled={isLoading}
           >
             <option value="">-- Select an event --</option>
-            {mockEvents.map((event) => (
+            {events.map((event) => (
               <option key={event.EventID} value={event.EventID}>
                 {event.EventTitle}
               </option>

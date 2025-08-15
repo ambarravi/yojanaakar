@@ -231,6 +231,56 @@ export const submitEvent = (eventData, organizerName) => {
   });
 };
 
+export const markAttendance = async ({ eventId, bookingId }) => {
+  try {
+    console.log("Mark attendance started");
+
+    // Fetch the current session
+    const session = await fetchAuthSession(); // Retrieves the session object
+    const jwt = session.tokens.idToken.toString();
+
+    // Prepare the JSON object
+    const dataToSend = { eventId, bookingId };
+
+    console.log("dataToSend contents:", JSON.stringify(dataToSend));
+
+    const apiUrl =
+      process.env.REACT_APP_API_BASE_URL +
+      process.env.REACT_APP_STAGE +
+      "/mark-attendance";
+
+    // Make the API request to mark attendance
+    const response = await fetch(apiUrl, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${jwt}`, // Include the token
+        "Content-Type": "application/json", // Send as JSON
+      },
+      body: JSON.stringify(dataToSend),
+    });
+
+    const result = await response.json();
+
+    if (!response.ok) {
+      throw new Error(result.message || "Failed to mark attendance");
+    }
+
+    if (response.status === 200) {
+      console.log("Attendance marked successfully:", result);
+    } else {
+      console.log("Error in API Response:", result);
+    }
+
+    return {
+      status: response.status,
+      message: result.message || "Attendance marked successfully",
+    };
+  } catch (error) {
+    console.error("Error marking attendance:", error.message);
+    throw error;
+  }
+};
+
 export const fetchEventDetailsByOrgID = async () => {
   try {
     // Fetch the current session
