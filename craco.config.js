@@ -25,7 +25,7 @@ module.exports = {
           rule.exclude = exclude;
         }
       });
-      return webpackConfig;
+      return webpackConfig;skeletonEvent
     },
   },
 };

@@ -193,19 +193,29 @@ function Scanner({ user, signOut }) {
         eventId: selectedEventID,
         bookingId: ticketDetails.bookingId,
       });
-      setApiResult({
-        success: response.status === 200,
-        message:
-          response.message ||
-          (response.status === 200
-            ? "Attendance marked successfully!"
-            : "Failed to mark attendance."),
-      });
+
+      // Check if response is successful
+      if (response.status === 200) {
+        setApiResult({
+          success: true,
+          message: response.data.message || "Attendance marked successfully!",
+        });
+      } else {
+        // Handle error response from Lambda
+        setApiResult({
+          success: false,
+          message: response.data.errorMessage || "Failed to mark attendance.",
+        });
+      }
     } catch (err) {
       console.error("API error:", err);
+      // Handle network or unexpected errors
       setApiResult({
         success: false,
-        message: err.message || "An error occurred while marking attendance.",
+        message:
+          err.response?.data?.errorMessage ||
+          err.message ||
+          "An error occurred while marking attendance.",
       });
     }
     setModalPhase("result");
