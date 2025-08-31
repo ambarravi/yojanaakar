@@ -1,0 +1,467 @@
+import React, { useState, useEffect, useRef } from "react";
+import Sidebar from "./Sidebar";
+import { Pie, Doughnut } from "react-chartjs-2";
+import {
+  Chart as ChartJS,
+  ArcElement,
+  BarElement,
+  CategoryScale,
+  LinearScale,
+  Tooltip,
+  Legend,
+} from "chart.js";
+import Calendar from "react-calendar";
+import "react-calendar/dist/Calendar.css";
+import "../styles/OrganizerLandingPage.css";
+import { isSameDay } from "date-fns";
+import { fetchDashboardData } from "../api/eventApi";
+import lottie from "lottie-web";
+import { FaCalendarAlt, FaTicketAlt } from "react-icons/fa";
+
+ChartJS.register(
+  ArcElement,
+  BarElement,
+  CategoryScale,
+  LinearScale,
+  Tooltip,
+  Legend
+);
+
+function OrganizerLandingPage({ user, signOut }) {
+  const [dashboardData, setDashboardData] = useState(null);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [calendarDate, setCalendarDate] = useState(new Date());
+  const [animationData, setAnimationData] = useState(null);
+  const lottieContainer = useRef(null);
+
+  useEffect(() => {
+    const loadDashboardData = async () => {
+      try {
+        await new Promise((resolve) => setTimeout(resolve, 1000));
+        const data = await fetchDashboardData();
+        setDashboardData(data);
+      } catch (error) {
+        console.error("Failed to fetch dashboard data:", error.message);
+      }
+    };
+
+    loadDashboardData();
+  }, []);
+
+  useEffect(() => {
+    const loadAnimation = async () => {
+      try {
+        const response = await fetch(
+          "/animations/Isometric_data_analysis.json"
+        );
+        if (!response.ok) {
+          throw new Error(`Failed to fetch animation: ${response.statusText}`);
+        }
+        const data = await response.json();
+        setAnimationData(data);
+        //   console.log("Animation data loaded:", data);
+      } catch (error) {
+        console.error("Failed to load Lottie animation:", error.message);
+      }
+    };
+
+    loadAnimation();
+  }, []);
+
+  useEffect(() => {
+    if (lottieContainer.current && animationData) {
+      const anim = lottie.loadAnimation({
+        container: lottieContainer.current,
+        renderer: "svg",
+        loop: true,
+        autoplay: true,
+        animationData: animationData,
+      });
+
+      return () => {
+        anim.destroy();
+      };
+    }
+  }, [animationData]);
+
+  const toggleSidebar = () => {
+    setIsSidebarOpen(!isSidebarOpen);
+  };
+
+  const pieChartData = {
+    labels: dashboardData?.ticketSales?.labels || [],
+    datasets: [
+      {
+        data: dashboardData?.ticketSales?.data || [],
+        backgroundColor: ["#0d9488", "#34d399", "#10b981"],
+        borderWidth: 1,
+        borderColor: "#ffffff",
+      },
+    ],
+  };
+
+  const popularEventsData = {
+    labels: dashboardData?.popularEvents?.labels || [],
+    datasets: [
+      {
+        label: "Attendees",
+        data: dashboardData?.popularEvents?.data || [],
+        backgroundColor: ["#0d9488", "#34d399", "#10b981", "#6ee7b7"],
+        borderWidth: 1,
+        borderColor: "#ffffff",
+      },
+    ],
+  };
+
+  const handleSeeAllFeedback = () => {
+    console.log("See all feedback clicked");
+  };
+
+  return (
+    <div className="tikties-dashboard flex min-h-screen bg-gray-50 font-sans">
+      <button
+        className="dashboard-sidebar-toggle md:hidden p-3"
+        onClick={toggleSidebar}
+        aria-label={isSidebarOpen ? "Close sidebar" : "Open sidebar"}
+      >
+        ☰
+      </button>
+      <Sidebar user={user} signOut={signOut} isOpen={isSidebarOpen} />
+      <main
+        className={`dashboard-content flex-1 p-4 sm:p-6 ${
+          isSidebarOpen ? "sidebar-open" : ""
+        }`}
+      >
+        <header className="dashboard-header mb-6">
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
+            Hi, Welcome back!
+          </h1>
+        </header>
+        {/* <hr className="border-gray-300 mb-6" /> */}
+        <div className="dashboard-container">
+          {/* {!dashboardData ? (
+            <div className="dashboard-loading">
+              <div ref={lottieContainer} className="lottie-animation"></div>
+              {!animationData && (
+                <span className="loading-text">Loading dashboard...</span>
+              )}
+            </div>
+          ) : ( */}
+          {!dashboardData ? (
+            <div className="dashboard-loading">
+              <div className="skeleton-card grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+                {[...Array(3)].map((_, i) => (
+                  <div
+                    key={i}
+                    className="skeleton-box bg-gray-200 animate-pulse h-24 rounded-lg"
+                  ></div>
+                ))}
+              </div>
+              <span className="loading-text">Loading dashboard...</span>
+            </div>
+          ) : (
+            <section className="dashboard-main">
+              <div className="dashboard-cards grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-6">
+                <div className="dashboard-card bg-white p-4 sm:p-5 rounded-lg shadow-md border border-gray-200">
+                  <h3 className="text-sm sm:text-base font-semibold text-gray-600">
+                    Total Events
+                  </h3>
+                  <p className="text-2xl sm:text-3xl font-bold text-indigo-600">
+                    {dashboardData.totalEvents}
+                  </p>
+                </div>
+                <div className="dashboard-card bg-white p-4 sm:p-5 rounded-lg shadow-md border border-gray-200">
+                  <h3 className="text-sm sm:text-base font-semibold text-gray-600">
+                    Total Followers
+                  </h3>
+                  <p className="text-2xl sm:text-3xl font-bold text-indigo-600">
+                    {dashboardData.totalFollowers}
+                  </p>
+                </div>
+                <div className="dashboard-card bg-white p-4 sm:p-5 rounded-lg shadow-md border border-gray-200">
+                  <h3 className="text-sm sm:text-base font-semibold text-gray-600">
+                    Total Engagement
+                  </h3>
+                  <p className="text-2xl sm:text-3xl font-bold text-indigo-600">
+                    {dashboardData.totalEngagement}
+                  </p>
+                </div>
+              </div>
+
+              {/* <hr className="border-gray-300 mb-6" /> */}
+              <div className="ticket-sales-grid grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 mb-6">
+                <div className="flex flex-col gap-2">
+                  <div className="dashboard-card ticket-sales bg-white p-4 sm:p-5 rounded-lg shadow-md border border-gray-200 h-full">
+                    <h3 className="text-base sm:text-lg font-semibold text-gray-600 mb-4">
+                      Total Ticket Sales
+                    </h3>
+                    <div className="chart-container w-full h-40">
+                      <Pie
+                        data={pieChartData}
+                        options={{
+                          maintainAspectRatio: false,
+                          plugins: {
+                            legend: {
+                              position: "bottom",
+                              labels: {
+                                boxWidth: 12,
+                                padding: 10,
+                                font: {
+                                  size: window.innerWidth < 640 ? 10 : 12,
+                                },
+                              },
+                            },
+                            tooltip: {
+                              enabled: true,
+                              backgroundColor: "#0d9488",
+                              titleColor: "#ffffff",
+                              bodyColor: "#ffffff",
+                            },
+                          },
+                        }}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="dashboard-card bg-white p-4 sm:p-5 rounded-lg shadow-md border border-gray-200 h-full">
+                    <h3 className="text-base sm:text-lg font-semibold text-gray-600 mb-4">
+                      Event Calendar
+                    </h3>
+                    <div className="chart-container w-full max-w-[400px] mx-auto h-40">
+                      <Calendar
+                        onChange={setCalendarDate}
+                        value={calendarDate}
+                        tileClassName={({ date }) =>
+                          dashboardData.eventDates?.some((eventDate) =>
+                            isSameDay(date, new Date(eventDate))
+                          )
+                            ? "event-date"
+                            : ""
+                        }
+                        tileContent={({ date }) => {
+                          const event = dashboardData.eventDates?.find(
+                            (eventDate) => isSameDay(date, new Date(eventDate))
+                          );
+                          return event ? (
+                            <span
+                              className="event-indicator"
+                              title="Event"
+                            ></span>
+                          ) : null;
+                        }}
+                        className="custom-calendar w-full"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex flex-col gap-2">
+                  <div className="dashboard-card bg-white p-4 sm:p-5 rounded-lg shadow-md border border-gray-200 h-full">
+                    <h3 className="text-base sm:text-lg font-semibold text-gray-600 mb-4">
+                      Popular Events
+                    </h3>
+                    <div className="chart-container w-full h-40">
+                      <Doughnut
+                        key={Date.now()}
+                        data={popularEventsData}
+                        options={{
+                          maintainAspectRatio: false,
+                          plugins: {
+                            legend: {
+                              position: "bottom",
+                              labels: {
+                                boxWidth: 12,
+                                padding: 10,
+                                font: {
+                                  size: window.innerWidth < 640 ? 10 : 12,
+                                },
+                              },
+                            },
+                            tooltip: {
+                              enabled: true,
+                              backgroundColor: "#0d9488",
+                              titleColor: "#ffffff",
+                              bodyColor: "#ffffff",
+                            },
+                          },
+                        }}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="dashboard-card bg-white p-4 sm:p-5 rounded-lg shadow-md border border-gray-200 h-full">
+                    <h3 className="text-base sm:text-lg font-semibold text-gray-600 mb-4">
+                      Upcoming Events
+                    </h3>
+                    <div className="chart-container w-full h-40 sm:h-48">
+                      <table className="dashboard-table upcoming-events w-full text-left text-sm sm:text-base">
+                        <thead className="table-header">
+                          <tr>
+                            <th scope="col" className="py-3 px-4">
+                              <FaTicketAlt className="text-icon" /> Event Title
+                            </th>
+                            <th scope="col" className="py-3 px-4">
+                              <FaCalendarAlt className="text-icon" /> Date
+                            </th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {dashboardData.upcomingEventsList
+                            ?.slice(0, 4)
+                            .map((event, index) => (
+                              <tr
+                                key={index}
+                                className={
+                                  index % 2 === 0 ? "row-even" : "row-odd"
+                                }
+                              >
+                                <td className="py-2 px-4">{event.title}</td>
+                                <td className="py-2 px-4 text-gray-600">
+                                  {event.date}
+                                </td>
+                              </tr>
+                            ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* <div className="ticket-sales-grid grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 mb-6">
+                <div className="flex flex-col gap-2">
+                  <div className="dashboard-card ticket-sales bg-white p-4 sm:p-5 rounded-lg shadow-md border border-gray-200">
+                    <h3 className="text-base sm:text-lg font-semibold text-gray-600 mb-4">
+                      Total Ticket Sales
+                    </h3>
+                    <div className="w-full h-32 sm:h-40">
+                      <Pie
+                        data={pieChartData}
+                        options={{
+                          maintainAspectRatio: false,
+                          plugins: {
+                            legend: {
+                              position: "bottom",
+                            },
+                          },
+                        }}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="dashboard-card bg-white p-4 sm:p-5 rounded-lg shadow-md border border-gray-200">
+                    <h3 className="text-base sm:text-lg font-semibold text-gray-600 mb-4">
+                      Event Calendar
+                    </h3>
+                    <div className="w-full max-w-[400px] mx-auto h-32 sm:h-40">
+                      <Calendar
+                        onChange={setCalendarDate}
+                        value={calendarDate}
+                        tileClassName={({ date }) =>
+                          dashboardData.eventDates?.some((eventDate) =>
+                            isSameDay(date, new Date(eventDate))
+                          )
+                            ? "event-date"
+                            : ""
+                        }
+                        tileContent={({ date }) => {
+                          const event = dashboardData.eventDates?.find(
+                            (eventDate) => isSameDay(date, new Date(eventDate))
+                          );
+                          return event ? (
+                            <span
+                              className="event-indicator"
+                              title="Event"
+                            ></span>
+                          ) : null;
+                        }}
+                        className="custom-calendar w-full"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex flex-col gap-2">
+                  <div className="dashboard-card bg-white p-4 sm:p-5 rounded-lg shadow-md border border-gray-200">
+                    <h3 className="text-base sm:text-lg font-semibold text-gray-600 mb-4">
+                      Popular Events
+                    </h3>
+                    <div className="w-full h-32 sm:h-40">
+                      <Doughnut
+                        key={Date.now()}
+                        data={popularEventsData}
+                        options={{
+                          maintainAspectRatio: false,
+                          plugins: {
+                            legend: {
+                              position: "bottom",
+                              labels: {
+                                boxWidth: 12,
+                                padding: 10,
+                              },
+                              font: {
+                                size: window.innerWidth < 640 ? 10 : 12, // Responsive font size
+                              },
+                            },
+                          },
+                        }}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="dashboard-card bg-white p-4 sm:p-5 rounded-lg shadow-md border border-gray-200">
+                    <h3 className="text-base sm:text-lg font-semibold text-gray-600 mb-4">
+                      Upcoming Events
+                    </h3>
+                    <table className="dashboard-table upcoming-events w-full text-left text-sm sm:text-base">
+                      <tbody>
+                        {dashboardData.upcomingEventsList?.map(
+                          (event, index) => (
+                            <tr
+                              key={index}
+                              className="border-b border-gray-200"
+                            >
+                              <td className="py-2 pr-2">{event.title}</td>
+                              <td className="py-2 text-gray-600">
+                                {event.date}
+                              </td>
+                            </tr>
+                          )
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div> */}
+
+              <div className="dashboard-card feedback-card bg-white p-4 sm:p-5 rounded-lg shadow-md border border-gray-200 mb-6">
+                <h3 className="text-base sm:text-lg font-semibold text-gray-600 mb-4">
+                  What Attendees Are Saying
+                </h3>
+                <table className="dashboard-table feedback-table w-full text-left text-sm">
+                  <tbody>
+                    {dashboardData.feedback?.map((item, index) => (
+                      <tr key={index}>
+                        <td className="py-2 pr-2">{item.comment}</td>
+                        <td className="py-2 text-gray-500">{item.event}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+                <button
+                  className="see-all-link text-sm font-medium mt-4 inline-block text-indigo-600 hover:text-indigo-800 transition-colors"
+                  onClick={handleSeeAllFeedback}
+                  aria-label="See all feedback"
+                >
+                  See all
+                </button>
+              </div>
+            </section>
+          )}
+        </div>
+      </main>
+    </div>
+  );
+}
+
+export default OrganizerLandingPage;

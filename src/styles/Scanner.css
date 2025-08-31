@@ -1,0 +1,394 @@
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap");
+
+/* Base Styles */
+body {
+  font-family: "Inter", sans-serif;
+  background: #f3f4f6;
+  color: #1f2937;
+  font-size: 0.75rem;
+  margin: 0; /* Prevent default body margin */
+}
+
+/* Page Layout */
+.scanner-page {
+  display: flex;
+  min-height: 100vh;
+  width: 100%;
+  overflow-x: hidden;
+  box-sizing: border-box;
+}
+
+/* Sidebar */
+.scanner-page .sidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 260px;
+  height: 100vh;
+  background: #1f2937;
+  padding: 1rem;
+  z-index: 1100;
+  overflow-y: auto;
+  overflow-x: hidden;
+  box-sizing: border-box;
+  transition: transform 0.3s ease;
+}
+
+.scanner-page .sidebar.open {
+  transform: translateX(0);
+}
+
+@media (max-width: 767px) {
+  .scanner-page .sidebar {
+    transform: translateX(-100%);
+  }
+  .scanner-page .sidebar.open {
+    transform: translateX(0);
+  }
+}
+
+@media (min-width: 768px) {
+  .scanner-page .sidebar {
+    transform: translateX(0);
+  }
+}
+
+/* Sidebar Toggle Button */
+.sidebar-toggle {
+  display: none;
+  position: fixed;
+  top: 0.75rem;
+  left: 0.75rem;
+  background: #0d9488;
+  color: #ffffff;
+  border: none;
+  padding: 0.5rem 1rem;
+  font-size: 1rem;
+  cursor: pointer;
+  z-index: 1200;
+  border-radius: 0.375rem;
+  transition: background 0.2s ease;
+}
+
+.sidebar-toggle:hover {
+  background: #10b981;
+}
+
+@media (max-width: 767px) {
+  .sidebar-toggle {
+    display: block;
+  }
+}
+
+@media (min-width: 768px) {
+  .sidebar-toggle {
+    display: none !important;
+  }
+}
+
+/* Main Content */
+.scanner-content {
+  flex: 1;
+  margin-left: 260px;
+  padding: 0.75rem;
+  transition: margin-left 0.3s ease;
+  max-width: calc(100% - 260px);
+  box-sizing: border-box;
+  background: #f3f4f6;
+  overflow-y: auto;
+}
+
+.scanner-content.sidebar-open {
+  margin-left: 0;
+  max-width: 100%;
+}
+
+@media (max-width: 767px) {
+  .scanner-content {
+    margin-left: 0;
+    max-width: 100%; /* Ensure full width on mobile */
+    width: 100%; /* Explicitly set width to 100% */
+    padding: 0.75rem;
+    padding-top: 3rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .scanner-content {
+    padding: 0.5rem;
+    padding-top: 3rem;
+  }
+}
+
+/* Title */
+.scanner-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #1f2937;
+  text-align: center;
+  margin-bottom: 0.75rem;
+}
+
+@media (min-width: 640px) {
+  .scanner-title {
+    font-size: 1.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .scanner-title {
+    font-size: 1rem;
+  }
+}
+
+/* Scanner Event Details Section */
+.scanner-event-details {
+  background: #ffffff;
+  padding: 0.75rem;
+  border-radius: 0.5rem;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  margin-bottom: 0.75rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%; /* Ensure full width */
+  max-width: 600px; /* Cap width for larger screens */
+  margin-left: auto;
+  margin-right: auto;
+}
+
+@media (min-width: 640px) {
+  .scanner-event-details {
+    padding: 1rem;
+  }
+}
+
+.scanner-event-label {
+  font-weight: bold;
+  margin-right: 1rem;
+}
+
+.scanner-event-select {
+  padding: 0.5rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 1rem;
+  width: 100%; /* Make select full-width on mobile */
+  max-width: 300px; /* Cap width for larger screens */
+}
+
+@media (max-width: 767px) {
+  .scanner-event-select {
+    font-size: 0.85rem;
+    max-width: 100%; /* Ensure select takes full available width */
+  }
+}
+
+/* Scanner QR Section */
+.scanner-qr-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 1rem;
+  width: 100%; /* Ensure full width */
+}
+
+.qr-code-region {
+  width: 80vw; /* Use viewport width for responsiveness */
+  max-width: 240px; /* Cap for larger screens */
+  height: 80vw; /* Maintain square aspect ratio */
+  max-height: 240px;
+  border: 2px solid #333;
+  border-radius: 8px;
+  overflow: hidden;
+  position: relative;
+  z-index: 1;
+  margin-bottom: 1.5rem;
+}
+
+@media (min-width: 768px) {
+  .qr-code-region {
+    width: 240px;
+    height: 240px;
+  }
+}
+
+/* Scanner Buttons Container */
+.scanner-buttons-container {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  z-index: 2;
+  flex-wrap: wrap; /* Allow buttons to wrap on smaller screens */
+  width: 100%; /* Ensure full width */
+  max-width: 600px; /* Cap for larger screens */
+}
+
+.scanner-close-btn {
+  padding: 0.5rem 1.2rem;
+  font-size: 1rem;
+  border-radius: 4px;
+  cursor: pointer;
+  background-color: #f44336;
+  color: white;
+  border: none;
+  transition: background 0.2s ease;
+  flex: 1; /* Make buttons share space */
+  max-width: 150px; /* Cap button width */
+}
+
+.scanner-close-btn:hover {
+  background-color: #d32f2f;
+}
+
+/* Scanner Captured Details */
+.scanner-captured-details {
+  margin-top: 1.5rem;
+  text-align: center;
+  width: 100%; /* Ensure full width */
+}
+
+.scanner-captured-label {
+  font-weight: bold;
+  display: block;
+  margin-bottom: 0.5rem;
+}
+
+.scanner-result-textarea {
+  width: 90%; /* Use most of available width */
+  max-width: 600px; /* Cap for larger screens */
+  margin: 0 auto;
+  padding: 0.5rem;
+  font-size: 1rem;
+  border-radius: 4px;
+  border: 1px solid #ccc;
+  resize: none;
+  display: block;
+}
+
+/* Modal Styles */
+.scanner-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 2000; /* High z-index to ensure overlay is above other elements */
+  pointer-events: auto; /* Allow clicks on overlay */
+}
+
+.scanner-modal {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: #ffffff;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  max-width: 400px;
+  width: 90%;
+  text-align: center;
+  z-index: 2100; /* Higher than overlay */
+  pointer-events: auto; /* Ensure modal content is clickable */
+  border: 2px solid #0d9488; /* Debug: visible border to confirm positioning */
+  box-sizing: border-box;
+}
+
+.scanner-modal h3 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+}
+
+.scanner-modal p {
+  font-size: 1rem;
+  margin-bottom: 0.5rem;
+}
+
+.scanner-modal-icon {
+  font-size: 2rem;
+  margin-bottom: 10px;
+}
+
+.scanner-modal-btn {
+  padding: 10px 20px;
+  margin: 10px;
+  border-radius: 4px;
+  cursor: pointer;
+  border: none;
+  font-size: 1rem;
+  transition: background 0.2s ease;
+  pointer-events: auto; /* Ensure buttons are clickable */
+  position: relative; /* Ensure buttons establish their own stacking context */
+  z-index: 2200; /* Higher than modal */
+}
+
+.scanner-modal-btn.mark-attendance,
+.scanner-modal-btn.proceed {
+  background: #0d9488;
+  color: white;
+}
+
+.scanner-modal-btn.mark-attendance:hover,
+.scanner-modal-btn.proceed:hover {
+  background: #10b981;
+}
+
+.scanner-modal-btn.discard,
+.scanner-modal-btn.close {
+  background: #f44336;
+  color: white;
+}
+
+.scanner-modal-btn.discard:hover,
+.scanner-modal-btn.close:hover {
+  background: #d32f2f;
+}
+
+/* Loading Overlay */
+.loading-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1100;
+}
+
+.spinner {
+  border: 4px solid rgba(255, 255, 255, 0.3);
+  border-top: 4px solid #0d9488;
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+/* Print Styles */
+@media print {
+  .sidebar-toggle,
+  .sidebar {
+    display: none;
+  }
+  .scanner-content {
+    margin-left: 0;
+    padding: 0.5rem;
+    background: #ffffff;
+    max-width: 100%; /* Ensure full width for printing */
+  }
+}

@@ -1,0 +1,81 @@
+name: Deploy Application
+
+on:
+  push:
+    branches:
+      - dev
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: ${{ github.ref == 'refs/heads/main' && 'Prod' || 'Dev' }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: "20"
+
+      - name: Check AWS credentials
+        run: |
+
+      - name: Set up AWS CLI
+        uses: aws-actions/configure-aws-credentials@v2 # Use v2 for latest support
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ github.ref == 'refs/heads/main' && 'us-west-2' || 'eu-west-1' }}
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Debug Secret Existence
+        run: |
+          if [ -z "${{ github.ref == 'refs/heads/main' && secrets.PROD_COGNITO_USER_POOL_ID || secrets.COGNITO_USER_POOL_ID }}" ]; then echo "COGNITO_USER_POOL_ID is missing"; else echo "COGNITO_USER_POOL_ID is set"; fi
+          if [ -z "${{ github.ref == 'refs/heads/main' && secrets.PROD_POOL_CLIENT_ID || secrets.POOL_CLIENT_ID }}" ]; then echo "POOL_CLIENT_ID is missing"; else echo "POOL_CLIENT_ID is set"; fi
+          if [ -z "${{ github.ref == 'refs/heads/main' && secrets.PROD_COGNITO_DOMAIN || secrets.COGNITO_DOMAIN }}" ]; then echo "COGNITO_DOMAIN is missing"; else echo "COGNITO_DOMAIN is set"; fi
+          if [ -z "${{ github.ref == 'refs/heads/main' && secrets.PROD_BASE_API_URL || secrets.BASE_API_URL }}" ]; then echo "BASE_API_URL is missing"; else echo "BASE_API_URL is set"; fi
+
+      - name: Set up Environment Variables
+        run: |
+          echo "REACT_APP_COGNITO_USER_POOL_ID=${{ github.ref == 'refs/heads/main' && secrets.PROD_COGNITO_USER_POOL_ID || secrets.COGNITO_USER_POOL_ID }}" >> $GITHUB_ENV
+          echo "REACT_APP_POOL_CLIENT_ID=${{ github.ref == 'refs/heads/main' && secrets.PROD_POOL_CLIENT_ID || secrets.POOL_CLIENT_ID }}" >> $GITHUB_ENV
+          echo "REACT_APP_COGNITO_OAUTH_DOMAIN=${{ github.ref == 'refs/heads/main' && secrets.PROD_COGNITO_DOMAIN || secrets.COGNITO_DOMAIN }}" >> $GITHUB_ENV
+          echo "REACT_APP_COGNITO_REDIRECT_SIGN_IN=${{ github.ref == 'refs/heads/main' && secrets.PROD_COGNITO_REDIRECTSIGNIN || secrets.COGNITO_REDIRECTSIGNIN }}" >> $GITHUB_ENV
+          echo "REACT_APP_COGNITO_REDIRECT_SIGN_OUT=${{ github.ref == 'refs/heads/main' && secrets.PROD_COGNITO_REDIRECTSIGNOUT || secrets.COGNITO_REDIRECTSIGNOUT }}" >> $GITHUB_ENV
+          echo "REACT_APP_API_BASE_URL=${{ github.ref == 'refs/heads/main' && secrets.PROD_BASE_API_URL || secrets.BASE_API_URL }}" >> $GITHUB_ENV
+          echo "REACT_APP_STAGE=${{ github.ref == 'refs/heads/main' && 'prod' || 'dev' }}" >> $GITHUB_ENV
+
+      - name: Build React app
+        env:
+          REACT_APP_COGNITO_USER_POOL_ID: ${{ github.ref == 'refs/heads/main' && secrets.PROD_COGNITO_USER_POOL_ID || secrets.COGNITO_USER_POOL_ID }}
+          REACT_APP_POOL_CLIENT_ID: ${{ github.ref == 'refs/heads/main' && secrets.PROD_POOL_CLIENT_ID || secrets.POOL_CLIENT_ID }}
+          REACT_APP_COGNITO_OAUTH_DOMAIN: ${{ github.ref == 'refs/heads/main' && secrets.PROD_COGNITO_DOMAIN || secrets.COGNITO_DOMAIN }}
+          REACT_APP_COGNITO_REDIRECT_SIGN_IN: ${{ github.ref == 'refs/heads/main' && secrets.PROD_COGNITO_REDIRECTSIGNIN || secrets.COGNITO_REDIRECTSIGNIN }}
+          REACT_APP_COGNITO_REDIRECT_SIGN_OUT: ${{ github.ref == 'refs/heads/main' && secrets.PROD_COGNITO_REDIRECTSIGNOUT || secrets.COGNITO_REDIRECTSIGNOUT }}
+          REACT_APP_API_BASE_URL: ${{ github.ref == 'refs/heads/main' && secrets.PROD_BASE_API_URL || secrets.BASE_API_URL }}
+          REACT_APP_STAGE: ${{ github.ref == 'refs/heads/main' && 'prod' || 'dev' }}
+        run: npm run build
+
+      - name: Debug Environment Variables
+        run: |
+          echo "REACT_APP_COGNITO_USER_POOL_ID: $REACT_APP_COGNITO_USER_POOL_ID"
+          echo "REACT_APP_POOL_CLIENT_ID: $REACT_APP_POOL_CLIENT_ID"
+          echo "REACT_APP_COGNITO_OAUTH_DOMAIN: $REACT_APP_COGNITO_OAUTH_DOMAIN"
+          echo "REACT_APP_COGNITO_REDIRECT_SIGN_IN: $REACT_APP_COGNITO_REDIRECT_SIGN_IN"
+          echo "REACT_APP_COGNITO_REDIRECT_SIGN_OUT: $REACT_APP_COGNITO_REDIRECT_SIGN_OUT"
+          echo "REACT_APP_API_BASE_URL: $REACT_APP_API_BASE_URL"
+          echo "REACT_APP_STAGE: $REACT_APP_STAGE"
+
+      - name: Deploy to S3
+        run: |
+          aws s3 sync build/ s3://${{ github.ref == 'refs/heads/main' && secrets.PROD_S3_BUCKET_NAME || secrets.S3_BUCKET_NAME }} --delete
+
+      - name: Invalidate CloudFront Cache
+        if: github.ref == 'refs/heads/main' # Optional: Only for prod
+        run: |
+          aws cloudfront create-invalidation --distribution-id ${{ secrets.PROD_CLOUDFRONT_DISTRIBUTION_ID }} --paths "/*"

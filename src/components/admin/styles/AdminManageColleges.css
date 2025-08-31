@@ -1,0 +1,298 @@
+/* Base Styles */
+body {
+  font-family: "Inter", sans-serif;
+  background: linear-gradient(180deg, #f9fafb, #e5e7eb);
+  color: #1f2937;
+  font-size: 0.95rem;
+}
+
+/* Page Layout */
+.admin-manage-colleges-page {
+  display: flex;
+  min-height: 100vh;
+}
+
+/* Main Content */
+.colleges-content {
+  flex: 1;
+  margin-left: 260px; /* Sidebar open by default */
+  padding: 2.5rem;
+  transition: all 0.3s ease;
+}
+
+.colleges-content.sidebar-open {
+  margin-left: 0; /* Sidebar collapsed */
+}
+
+/* Title */
+.colleges-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #1f2937;
+  text-align: center;
+  margin-bottom: 2.5rem;
+  text-transform: uppercase;
+}
+
+/* Search Bar */
+.search-bar {
+  margin-bottom: 2rem;
+  display: flex;
+  justify-content: center;
+}
+
+.search-input {
+  padding: 0.75rem;
+  width: 100%;
+  max-width: 400px;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  transition: border-color 0.3s ease;
+}
+
+.search-input:focus {
+  outline: none;
+  border-color: #374151;
+}
+
+/* Card Section */
+.colleges-section {
+  background: #ffffff;
+  padding: 2rem;
+  border-radius: 12px;
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+  margin-bottom: 2.5rem;
+  border-left: 4px solid #374151;
+}
+
+/* Subtitle */
+.colleges-subtitle {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #374151;
+  margin-bottom: 1.5rem;
+  text-transform: uppercase;
+}
+
+/* Table Wrapper */
+.table-wrapper {
+  overflow-x: auto;
+  margin-bottom: 2.5rem;
+}
+
+/* Table Styles */
+.colleges-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+}
+
+.colleges-table th,
+.colleges-table td {
+  padding: 1.25rem;
+  border-bottom: 1px solid #e5e7eb;
+  border-right: 1px solid #e5e7eb;
+  text-align: left;
+  font-size: 0.95rem;
+}
+
+.colleges-table th:last-child,
+.colleges-table td:last-child {
+  border-right: none;
+}
+
+.colleges-table th {
+  background: #374151;
+  color: #ffffff;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+.colleges-table th:hover {
+  background: #4b5563;
+}
+
+.colleges-table tr:nth-child(even) {
+  background: #f9fafb;
+}
+
+.colleges-table tr:hover {
+  background: #e5e7eb;
+}
+
+/* Action Buttons */
+.action-buttons {
+  display: flex;
+  gap: 0.75rem;
+  justify-content: center;
+}
+
+.action-btn {
+  padding: 0.75rem;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  color: #ffffff;
+  font-size: 0.95rem;
+}
+
+.action-btn:hover {
+  transform: scale(1.05);
+}
+
+.view-btn {
+  background: #6b7280;
+}
+
+.view-btn:hover {
+  background: #4b5563;
+}
+
+.edit-btn {
+  background: #2563eb;
+}
+
+.edit-btn:hover {
+  background: #1e40af;
+}
+
+.delete-btn {
+  background: #dc2626;
+}
+
+.delete-btn:hover {
+  background: #b91c1c;
+}
+
+/* Footer Buttons */
+.footer-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 1.5rem;
+  margin-top: 2.5rem;
+}
+
+.footer-btn {
+  padding: 0.75rem 1.5rem;
+  background: #374151;
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 0.95rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.footer-btn:hover:not(:disabled) {
+  background: #4b5563;
+}
+
+.footer-btn:disabled {
+  background: #9ca3af;
+  cursor: not-allowed;
+}
+
+/* Loading Overlay */
+.loading-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1100;
+}
+
+.spinner {
+  border: 4px solid rgba(255, 255, 255, 0.3);
+  border-top: 4px solid #374151;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+/* Sidebar Toggle Button */
+.sidebar-toggle {
+  display: none;
+  position: fixed;
+  top: 1rem;
+  left: 1rem;
+  background: #374151;
+  color: #ffffff;
+  border: none;
+  padding: 0.75rem 1.25rem;
+  font-size: 1rem;
+  cursor: pointer;
+  z-index: 1200;
+  border-radius: 8px;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .colleges-content {
+    margin-left: 0;
+    padding: 2rem;
+    padding-top: 4rem; /* Space for toggle button */
+  }
+
+  .sidebar-toggle {
+    display: block;
+  }
+
+  .colleges-table th,
+  .colleges-table td {
+    padding: 1rem;
+    font-size: 0.9rem;
+  }
+
+  .action-buttons {
+    flex-wrap: wrap;
+  }
+
+  .search-input {
+    width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .colleges-content {
+    padding: 1.5rem;
+    padding-top: 4rem;
+  }
+
+  .colleges-title {
+    font-size: 1.25rem;
+  }
+
+  .action-btn {
+    padding: 0.5rem;
+    font-size: 0.9rem;
+  }
+
+  .footer-btn {
+    padding: 0.5rem 1rem;
+    font-size: 0.9rem;
+  }
+}

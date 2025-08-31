@@ -1,0 +1,497 @@
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap");
+
+/* Base Styles */
+body {
+  font-family: "Inter", sans-serif;
+  background: #f3f4f6;
+  color: #1f2937;
+  font-size: 0.75rem;
+  margin: 0;
+}
+
+/* Profile Page Layout */
+.profile-page {
+  display: flex;
+  min-height: 100vh;
+  max-width: 100%;
+  width: 100%;
+  overflow-x: hidden;
+  box-sizing: border-box;
+}
+
+/* Sidebar */
+.profile-page .sidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 260px;
+  height: 100vh;
+  background: #1f2937;
+  padding: 1rem;
+  z-index: 1100;
+  overflow-y: auto;
+  overflow-x: hidden;
+  box-sizing: border-box;
+  transition: transform 0.3s ease;
+}
+
+.profile-page .sidebar {
+  overflow: visible; /* Prevent clipping of suggestions-list */
+}
+
+.profile-page .sidebar.open {
+  transform: translateX(0);
+}
+
+/* Main Content */
+.profile-content {
+  flex: 1;
+  margin-left: 260px;
+  padding: 0.75rem;
+  transition: margin-left 0.3s ease;
+  max-width: calc(100% - 260px);
+  box-sizing: border-box;
+  background: #f3f4f6;
+}
+
+.profile-content.sidebar-open {
+  margin-left: 0;
+  max-width: 100%;
+}
+
+/* Title */
+.profile-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #1f2937;
+  text-align: center;
+  margin-bottom: 0.75rem;
+  padding-left: 0.25rem;
+}
+
+/* Form Styles */
+.profile-form {
+  background: #ffffff;
+  padding: 0.75rem;
+  border-radius: 0.5rem;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  max-width: 100%;
+  margin: 0;
+  max-height: 600px;
+  overflow-y: auto;
+}
+
+/* Form Grid */
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.75rem;
+}
+
+/* Form Group */
+.form-group {
+  display: flex;
+  flex-direction: column;
+  position: relative; /* Ensure suggestions-list positions relative to this */
+}
+
+.form-group label {
+  font-weight: 500;
+  margin-bottom: 0.5rem;
+  color: #1f2937;
+  font-size: 0.875rem;
+}
+
+.form-group input,
+.form-group textarea,
+.form-group select {
+  padding: 0.5rem;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.375rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  transition: border-color 0.2s ease;
+  background: #f9fafb;
+}
+
+.form-group input:focus,
+.form-group textarea:focus,
+.form-group select:focus {
+  border-color: #0d9488;
+  outline: none;
+}
+
+.form-group input.error,
+.form-group textarea.error,
+.form-group select.error {
+  border-color: #dc2626;
+}
+
+.form-group textarea {
+  resize: vertical;
+  min-height: 80px;
+}
+
+.form-group.full-width {
+  grid-column: 1 / -1;
+}
+
+/* Logo Group */
+.form-group.logo-group {
+  text-align: center;
+}
+
+.logo-container {
+  margin-bottom: 0.75rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.logo-preview {
+  width: 80px;
+  height: 80px;
+  object-fit: cover;
+  border-radius: 50%;
+  border: 2px solid #e5e7eb;
+}
+
+.logo-placeholder {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: #e5e7eb;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: #6b7280;
+  font-size: 0.75rem;
+  gap: 0.25rem;
+}
+
+.logo-placeholder svg {
+  font-size: 1.5rem;
+}
+
+/* Form Note */
+.form-note {
+  margin-bottom: 0.75rem;
+}
+
+.form-note p {
+  font-size: 0.75rem;
+  color: #dc2626;
+  font-style: italic;
+}
+
+.form-note .required {
+  color: #dc2626;
+  font-weight: 700;
+}
+
+.form-message {
+  font-size: 0.75rem;
+  margin-top: 0.25rem;
+}
+
+.form-message.error {
+  color: #dc2626;
+}
+
+.form-message.success {
+  color: #15803d;
+}
+
+/* Error Messages */
+.form-group .error {
+  font-size: 0.75rem;
+  color: #dc2626;
+  margin-top: 0.25rem;
+}
+
+/* Terms Checkbox */
+.form-group.terms label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.form-group.terms input[type="checkbox"] {
+  width: 1rem;
+  height: 1rem;
+}
+
+/* Character Count */
+.char-count {
+  font-size: 0.75rem;
+  color: #6b7280;
+  margin-top: 0.25rem;
+}
+
+/* Suggestions */
+.city-input,
+.college-input {
+  width: 100%;
+  padding: 0.5rem;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.375rem;
+  font-size: 0.875rem;
+}
+
+.suggestions-list {
+  position: absolute;
+  top: 100%; /* Align directly below the input */
+  left: 0;
+  width: 100%;
+  max-height: 150px;
+  overflow-y: auto;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.375rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  list-style: none;
+  padding: 0;
+  margin: 0.25rem 0 0;
+  z-index: 1200; /* Higher than sidebar's z-index: 1100 */
+}
+
+.suggestion-item {
+  padding: 0.5rem;
+  border-bottom: 1px solid #e5e7eb;
+  cursor: pointer;
+  font-size: 0.75rem;
+  transition: background 0.2s ease;
+}
+
+.suggestion-item:last-child {
+  border-bottom: none;
+}
+
+.suggestion-item:hover {
+  background: #e5e7eb;
+}
+
+/* Submit Button */
+.submit-btn {
+  display: block;
+  width: 100%;
+  padding: 0.5rem 1rem;
+  background: #0d9488;
+  color: #ffffff;
+  font-weight: 500;
+  font-size: 0.75rem;
+  border: none;
+  border-radius: 0.375rem;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.submit-btn:hover {
+  background: #10b981;
+}
+
+.submit-btn:disabled {
+  background: #9ca3af;
+  cursor: not-allowed;
+}
+
+/* Loading Overlay */
+.loading-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1100;
+}
+
+.spinner {
+  border: 4px solid rgba(255, 255, 255, 0.3);
+  border-top: 4px solid #0d9488;
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+/* Popup Styles */
+.popup-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1300; /* Above sidebar (1100) and suggestions (1200) */
+}
+
+.popup-content {
+  background: #ffffff;
+  padding: 1.5rem;
+  border-radius: 0.5rem;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  text-align: center;
+  max-width: 400px;
+  width: 90%;
+}
+
+.popup-message {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #1f2937;
+  margin-bottom: 1rem;
+  font-family: "Inter", sans-serif;
+}
+
+.popup-btn {
+  display: inline-block;
+  padding: 0.5rem 1rem;
+  background: #0d9488;
+  color: #ffffff;
+  font-weight: 500;
+  font-size: 0.875rem;
+  border: none;
+  border-radius: 0.375rem;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.popup-btn:hover {
+  background: #10b981;
+}
+
+/* Responsive Design */
+@media (min-width: 640px) {
+  .profile-title {
+    font-size: 1.5rem;
+  }
+
+  .profile-form {
+    padding: 1rem;
+  }
+
+  /* .form-group label {
+    font-size: 1rem;
+  } */
+
+  .form-group input,
+  .form-group textarea,
+  .form-group select {
+    padding: 0.75rem;
+    font-size: 1rem;
+  }
+
+  .city-input,
+  .college-input {
+    padding: 0.75rem;
+    font-size: 1rem;
+  }
+
+  .suggestion-item {
+    font-size: 0.875rem;
+  }
+
+  .submit-btn {
+    font-size: 0.875rem;
+  }
+
+  .popup-message {
+    font-size: 1rem;
+  }
+
+  .popup-btn {
+    font-size: 1rem;
+    padding: 0.75rem 1.5rem;
+  }
+}
+
+@media (max-width: 767px) {
+  .profile-page .sidebar {
+    transform: translateX(-100%);
+  }
+
+  .profile-page .sidebar.open {
+    transform: translateX(0);
+  }
+
+  .profile-content {
+    margin-left: 0;
+    padding: 0.75rem;
+    padding-top: 3rem;
+  }
+
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .popup-content {
+    padding: 1rem;
+    width: 95%;
+  }
+
+  .popup-message {
+    font-size: 0.75rem;
+  }
+
+  .popup-btn {
+    font-size: 0.75rem;
+    padding: 0.4rem 0.8rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .profile-content {
+    padding: 0.5rem;
+    padding-top: 3rem;
+  }
+
+  .profile-title {
+    font-size: 1rem;
+  }
+
+  .profile-form {
+    padding: 0.5rem;
+  }
+
+  .popup-content {
+    padding: 0.75rem;
+  }
+}
+
+/* Print Styles */
+@media print {
+  .sidebar-toggle,
+  .sidebar {
+    display: none;
+  }
+  .profile-content {
+    margin-left: 0;
+    padding: 0.5rem;
+    background: #ffffff;
+  }
+
+  .popup-overlay,
+  .popup-content {
+    display: none; /* Hide popup when printing */
+  }
+}

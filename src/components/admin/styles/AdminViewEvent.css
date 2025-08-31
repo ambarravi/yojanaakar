@@ -1,0 +1,320 @@
+/* hostEvent.css */
+.host-event-page {
+  display: flex;
+  /* font-family: "Roboto", sans-serif; */
+}
+
+.sidebar {
+  width: 250px;
+  background-color: #333;
+  color: #fff;
+  padding: 20px;
+  box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+  position: fixed;
+  height: 100%;
+  transition: transform 0.3s ease;
+  z-index: 1000; /* Ensure sidebar is above other content */
+}
+
+.sidebar.collapsed {
+  transform: translateX(-100%);
+}
+
+.sidebar h2 {
+  color: #fff;
+  margin-bottom: 20px;
+}
+
+.sidebar ul {
+  list-style: none;
+  padding: 0;
+}
+
+.sidebar ul li {
+  margin-bottom: 15px;
+}
+
+.sidebar ul li a {
+  color: #fff;
+  text-decoration: none;
+  font-size: 14px;
+}
+
+.sidebar ul li a:hover {
+  text-decoration: underline;
+}
+
+.host-event-container {
+  flex: 1;
+  padding: 20px;
+  margin-left: 250px; /* Adjust for sidebar width */
+  background-color: #f9f9f9; /* Light gray */
+  color: #333; /* Dark gray for text */
+  transition: margin-left 0.3s ease;
+}
+
+.host-event-container.collapsed {
+  margin-left: 0;
+}
+
+.header-logo-container {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.header-logo {
+  width: 100px;
+  height: 100px;
+  object-fit: contain;
+  border-radius: 50%;
+  border: 1px solid #ccc;
+}
+
+.content-container {
+  flex: 1;
+  padding: 6%;
+}
+
+.host-event-page-title {
+  font-family: "Playfair Display", serif;
+  font-size: 30px;
+  font-weight: bold;
+  color: #4b0082; /* Darker lavender for text */
+  background-color: #e6e6fa; /* Lavender solid */
+  text-align: center;
+  padding: 10px 20px;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  margin: 1% 0;
+}
+
+.upload-message {
+  font-size: 0.9rem; /* Adjust font size for message */
+  color: gray; /* Optional: Add a muted color */
+}
+
+.host-event-form {
+  background: #fff;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 15px;
+}
+
+.form-group label {
+  font-weight: bold;
+  margin-bottom: 5px;
+  color: #555;
+}
+
+.form-group input,
+.form-group textarea,
+.form-group select {
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 14px;
+}
+
+.form-group textarea {
+  resize: none;
+}
+
+.form-group.full-width {
+  width: 100%;
+}
+
+.form-group.terms {
+  align-items: center;
+}
+
+.form-group p {
+  font-size: 12px;
+  color: #888;
+  margin-top: 5px;
+}
+
+.btn {
+  background: #007bff;
+  color: #fff;
+  padding: 10px 15px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.btn:hover {
+  background: #0056b3;
+}
+
+@media (max-width: 768px) {
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .host-event-container {
+    margin-left: 0;
+  }
+
+  .sidebar {
+    transform: translateX(-100%);
+  }
+
+  .sidebar.collapsed {
+    transform: translateX(0);
+  }
+
+  .sidebar-toggle {
+    display: block;
+  }
+}
+
+.form-group.terms label {
+  display: flex;
+  align-items: center;
+  font-size: 14px; /* Optional: Adjust font size */
+  color: #555; /* Optional: Adjust text color */
+}
+
+.form-group.terms input[type="checkbox"] {
+  margin-right: 10px; /* Add spacing between checkbox and text */
+}
+
+.form-group.terms span {
+  line-height: 1.5; /* Ensures text aligns well with the checkbox */
+}
+
+.form-group.note p {
+  font-size: 12px; /* Smaller font size for the note */
+  color: #d9534f; /* Optional: Use a red shade for emphasis */
+  margin-bottom: 5px; /* Space below the note */
+  text-align: left; /* Align the text to the left */
+  font-style: italic; /* Optional: Italicize for better distinction */
+}
+
+.loading-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  flex-direction: column;
+}
+
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5); /* Semi-transparent background */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000; /* Ensure it's above other content */
+}
+
+.spinner {
+  border: 4px solid rgba(0, 0, 0, 0.1);
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  border-left-color: #4caf50;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+/* Adjust form-group for two-column layout */
+.form-row {
+  display: flex;
+  gap: 20px; /* Gap between columns */
+}
+
+.form-group {
+  flex: 1; /* Take equal width of each column */
+  display: flex;
+  flex-direction: column;
+}
+
+.form-group label {
+  font-weight: bold;
+  margin-bottom: 5px;
+  color: #555;
+}
+
+.form-group input,
+.form-group textarea,
+.form-group select {
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 14px;
+}
+
+.form-group textarea {
+  resize: none;
+}
+
+.form-group.full-width {
+  width: 100%;
+}
+
+.form-group.terms {
+  align-items: center;
+}
+
+.form-group p {
+  font-size: 12px;
+  color: #888;
+  margin-top: 5px;
+}
+
+@media (max-width: 768px) {
+  .form-row {
+    flex-direction: column; /* Stack columns vertically on smaller screens */
+  }
+  .form-group {
+    flex: 1; /* Adjust width for single-column form */
+  }
+}
+
+.form-group.terms label {
+  display: flex;
+  align-items: center;
+  font-size: 14px; /* Optional: Adjust font size */
+  color: #555; /* Optional: Adjust text color */
+}
+
+.form-group.terms input[type="checkbox"] {
+  margin-right: 10px; /* Add spacing between checkbox and text */
+}
+
+.form-group.terms span {
+  line-height: 1.5; /* Ensures text aligns well with the checkbox */
+}
+
+.form-group.note p {
+  font-size: 12px; /* Smaller font size for the note */
+  color: #d9534f; /* Optional: Use a red shade for emphasis */
+  margin-bottom: 5px; /* Space below the note */
+  text-align: left; /* Align the text to the left */
+  font-style: italic; /* Optional: Italicize for better distinction */
+}
