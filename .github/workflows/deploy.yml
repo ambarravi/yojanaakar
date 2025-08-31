@@ -12,52 +12,49 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3 # Use the latest v3 version
+        uses: actions/checkout@v3
 
       - name: Set up Node.js
-        uses: actions/setup-node@v3 # Use v3 for latest support
+        uses: actions/setup-node@v3
         with:
-          node-version: "20" # Explicitly set Node.js version 20
+          node-version: "20"
 
-      - name: Check AWS credentials
-        run: |
-
-      - name: Set up AWS CLI
-        uses: aws-actions/configure-aws-credentials@v2 # Use v2 for latest support
+      - name: Configure AWS credentials (OIDC)
+        uses: aws-actions/configure-aws-credentials@v2
         with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ github.ref == 'refs/heads/main' && 'us-west-2' || 'eu-west-1' }}
+          role-to-assume: arn:aws:iam::756157886151:role/GitHubActionsDeploymentRole-yk-user-management
+          role-session-name: GitHubActionsSession
+          aws-region: ${{ github.ref == 'refs/heads/main' && 'ap-south-1' || 'eu-west-1' }}
 
       - name: Install dependencies
         run: npm install
 
       - name: Debug Secret Existence
         run: |
-          if [ -z "${{ secrets.COGNITO_USER_POOL_ID }}" ]; then echo "COGNITO_USER_POOL_ID is missing"; else echo "COGNITO_USER_POOL_ID is set"; fi
-          if [ -z "${{ secrets.POOL_CLIENT_ID }}" ]; then echo "POOL_CLIENT_ID is missing"; else echo "POOL_CLIENT_ID is set"; fi
-          if [ -z "${{ secrets.COGNITO_DOMAIN }}" ]; then echo "COGNITO_DOMAIN is missing"; else echo "COGNITO_DOMAIN is set"; fi
-          if [ -z "${{ secrets.BASE_API_URL }}" ]; then echo "BASE_API_URL is missing"; else echo "BASE_API_URL is set"; fi
+          if [ -z "${{ github.ref == 'refs/heads/main' && secrets.PROD_COGNITO_USER_POOL_ID || secrets.COGNITO_USER_POOL_ID }}" ]; then echo "COGNITO_USER_POOL_ID is missing"; else echo "COGNITO_USER_POOL_ID is set"; fi
+          if [ -z "${{ github.ref == 'refs/heads/main' && secrets.PROD_POOL_CLIENT_ID || secrets.POOL_CLIENT_ID }}" ]; then echo "POOL_CLIENT_ID is missing"; else echo "POOL_CLIENT_ID is set"; fi
+          if [ -z "${{ github.ref == 'refs/heads/main' && secrets.PROD_COGNITO_DOMAIN || secrets.COGNITO_DOMAIN }}" ]; then echo "COGNITO_DOMAIN is missing"; else echo "COGNITO_DOMAIN is set"; fi
+          if [ -z "${{ github.ref == 'refs/heads/main' && secrets.PROD_BASE_API_URL || secrets.BASE_API_URL }}" ]; then echo "BASE_API_URL is missing"; else echo "BASE_API_URL is set"; fi
 
       - name: Set up Environment Variables
         run: |
-          echo "REACT_APP_COGNITO_USER_POOL_ID=${{ secrets.COGNITO_USER_POOL_ID }}" >> $GITHUB_ENV
-          echo "REACT_APP_POOL_CLIENT_ID=${{ secrets.POOL_CLIENT_ID }}" >> $GITHUB_ENV
-          echo "REACT_APP_COGNITO_OAUTH_DOMAIN=${{ secrets.COGNITO_DOMAIN }}" >> $GITHUB_ENV
-          echo "REACT_APP_COGNITO_REDIRECT_SIGN_IN=${{ secrets.COGNITO_REDIRECTSIGNIN }}" >> $GITHUB_ENV
-          echo "REACT_APP_COGNITO_REDIRECT_SIGN_OUT=${{ secrets.COGNITO_REDIRECTSIGNOUT }}" >> $GITHUB_ENV
-          echo "REACT_APP_API_BASE_URL=${{ secrets.BASE_API_URL }}" >> $GITHUB_ENV
-          echo "REACT_APP_STAGE=${{ secrets.APP_STAGE }}" >> $GITHUB_ENV
+          echo "REACT_APP_COGNITO_USER_POOL_ID=${{ github.ref == 'refs/heads/main' && secrets.PROD_COGNITO_USER_POOL_ID || secrets.COGNITO_USER_POOL_ID }}" >> $GITHUB_ENV
+          echo "REACT_APP_POOL_CLIENT_ID=${{ github.ref == 'refs/heads/main' && secrets.PROD_POOL_CLIENT_ID || secrets.POOL_CLIENT_ID }}" >> $GITHUB_ENV
+          echo "REACT_APP_COGNITO_OAUTH_DOMAIN=${{ github.ref == 'refs/heads/main' && secrets.PROD_COGNITO_DOMAIN || secrets.COGNITO_DOMAIN }}" >> $GITHUB_ENV
+          echo "REACT_APP_COGNITO_REDIRECT_SIGN_IN=${{ github.ref == 'refs/heads/main' && secrets.PROD_COGNITO_REDIRECTSIGNIN || secrets.COGNITO_REDIRECTSIGNIN }}" >> $GITHUB_ENV
+          echo "REACT_APP_COGNITO_REDIRECT_SIGN_OUT=${{ github.ref == 'refs/heads/main' && secrets.PROD_COGNITO_REDIRECTSIGNOUT || secrets.COGNITO_REDIRECTSIGNOUT }}" >> $GITHUB_ENV
+          echo "REACT_APP_API_BASE_URL=${{ github.ref == 'refs/heads/main' && secrets.PROD_BASE_API_URL || secrets.BASE_API_URL }}" >> $GITHUB_ENV
+          echo "REACT_APP_STAGE=${{ github.ref == 'refs/heads/main' && 'prod' || 'dev' }}" >> $GITHUB_ENV
 
       - name: Build React app
         env:
-          REACT_APP_COGNITO_USER_POOL_ID: ${{ secrets.COGNITO_USER_POOL_ID }}
-          REACT_APP_POOL_CLIENT_ID: ${{ secrets.POOL_CLIENT_ID }}
-          REACT_APP_COGNITO_OAUTH_DOMAIN: ${{ secrets.COGNITO_DOMAIN }}
-          REACT_APP_COGNITO_REDIRECT_SIGN_IN: ${{ secrets.COGNITO_REDIRECTSIGNIN }}
-          REACT_APP_COGNITO_REDIRECT_SIGN_OUT: ${{ secrets.COGNITO_REDIRECTSIGNOUT }}
-          REACT_APP_API_BASE_URL: ${{ secrets.BASE_API_URL }}
-          REACT_APP_STAGE: ${{ secrets.APP_STAGE }}
+          REACT_APP_COGNITO_USER_POOL_ID: ${{ github.ref == 'refs/heads/main' && secrets.PROD_COGNITO_USER_POOL_ID || secrets.COGNITO_USER_POOL_ID }}
+          REACT_APP_POOL_CLIENT_ID: ${{ github.ref == 'refs/heads/main' && secrets.PROD_POOL_CLIENT_ID || secrets.POOL_CLIENT_ID }}
+          REACT_APP_COGNITO_OAUTH_DOMAIN: ${{ github.ref == 'refs/heads/main' && secrets.PROD_COGNITO_DOMAIN || secrets.COGNITO_DOMAIN }}
+          REACT_APP_COGNITO_REDIRECT_SIGN_IN: ${{ github.ref == 'refs/heads/main' && secrets.PROD_COGNITO_REDIRECTSIGNIN || secrets.COGNITO_REDIRECTSIGNIN }}
+          REACT_APP_COGNITO_REDIRECT_SIGN_OUT: ${{ github.ref == 'refs/heads/main' && secrets.PROD_COGNITO_REDIRECTSIGNOUT || secrets.COGNITO_REDIRECTSIGNOUT }}
+          REACT_APP_API_BASE_URL: ${{ github.ref == 'refs/heads/main' && secrets.PROD_BASE_API_URL || secrets.BASE_API_URL }}
+          REACT_APP_STAGE: ${{ github.ref == 'refs/heads/main' && 'prod' || 'dev' }}
         run: npm run build
 
       - name: Debug Environment Variables
@@ -72,9 +69,9 @@ jobs:
 
       - name: Deploy to S3
         run: |
-          aws s3 sync build/ s3://${{ secrets.S3_BUCKET_NAME }} --delete
+          aws s3 sync build/ s3://${{ github.ref == 'refs/heads/main' && secrets.PROD_S3_BUCKET_NAME || secrets.S3_BUCKET_NAME }} --delete
 
-      - name: Deploy to AWS
+      - name: Invalidate CloudFront Cache
+        if: github.ref == 'refs/heads/main' # Optional: Only for prod
         run: |
-          # Example: AWS CLI commands to deploy to Lambda, API Gateway, or other services
-          # aws cloudformation deploy --template-file cloudformation.yml --stack-name yojanaakar
+          aws cloudfront create-invalidation --distribution-id ${{ secrets.PROD_CLOUDFRONT_DISTRIBUTION_ID }} --paths "/*"

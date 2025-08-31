@@ -193,18 +193,19 @@ function Scanner({ user, signOut }) {
         eventId: selectedEventID,
         bookingId: ticketDetails.bookingId,
       });
+      console.log("Reponse", response);
 
       // Check if response is successful
       if (response.status === 200) {
         setApiResult({
           success: true,
-          message: response.data.message || "Attendance marked successfully!",
+          message: response.message || "Attendance marked successfully!",
         });
       } else {
         // Handle error response from Lambda
         setApiResult({
           success: false,
-          message: response.data.errorMessage || "Failed to mark attendance.",
+          message: response.errorMessage || "Failed to mark attendance.",
         });
       }
     } catch (err) {

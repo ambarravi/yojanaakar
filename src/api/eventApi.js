@@ -260,9 +260,10 @@ export const markAttendance = async ({ eventId, bookingId }) => {
     });
 
     const result = await response.json();
+    console.log("result from API " + JSON.stringify(result));
 
     if (!response.ok) {
-      throw new Error(result.message || "Failed to mark attendance");
+      throw new Error(result.errorMessage || "Failed to mark attendance");
     }
 
     if (response.status === 200) {
