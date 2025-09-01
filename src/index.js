@@ -28,6 +28,12 @@ Amplify.configure({
   },
 });
 
+console.log(process.env.REACT_APP_POOL_CLIENT_ID);
+console.log(process.env.REACT_APP_COGNITO_USER_POOL_ID);
+console.log(process.env.REACT_APP_COGNITO_OAUTH_DOMAIN);
+console.log(process.env.REACT_APP_COGNITO_REDIRECT_SIGN_IN);
+console.log(process.env.REACT_APP_COGNITO_REDIRECT_SIGN_OUT);
+
 // Amplify.configure({
 //   Auth: {
 //     Cognito: {
