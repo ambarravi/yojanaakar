@@ -163,12 +163,19 @@ const Sidebar = ({ user: propUser, signOut: propSignOut, isOpen }) => {
               <i className={`bi bi-qr-code-scan ${styles.icon}`}></i> Scanner
             </Link>
           </li>
-          {/* <li className={styles.navItem}>
+          <li className={styles.navItem}>
             <Link to="/subscription" className={styles.navLink}>
               <i className={`bi bi-speedometer2 ${styles.icon}`}></i>{" "}
               Subscription
             </Link>
-          </li> */}
+          </li>
+          <li className={styles.navItem}>
+            <Link to="/certificate" className={styles.navLink}>
+              <i className={`bi bi-award ${styles.icon}`}></i> Issue
+              Certificates
+            </Link>
+          </li>
+
           <li className={styles.navItem}>
             <Link to="/host-profile" className={styles.navLink}>
               <i className={`bi bi-person-circle ${styles.icon}`}></i> Profile

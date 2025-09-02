@@ -344,6 +344,7 @@ export const fetchDashboardData = async () => {
     const jwt = session.tokens.idToken.toString();
     const orgID = session.tokens.idToken.payload["cognito:username"];
 
+    console.log("jwt", jwt);
     const dataToSend = { orgID }; // Payload to send
 
     const apiUrl =
