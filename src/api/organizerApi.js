@@ -74,7 +74,7 @@ export const submitProfile = async (profileData, logo) => {
       dataToSend.logoFileType = logo.type;
     }
 
-    //  console.log("dataToSend contents:", JSON.stringify(dataToSend));
+    console.log("dataToSend contents:", JSON.stringify(dataToSend));
 
     const apiUrl =
       process.env.REACT_APP_API_BASE_URL +
