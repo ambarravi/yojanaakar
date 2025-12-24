@@ -275,6 +275,8 @@ function OrgProfilePage({ user, signOut }) {
     []
   );
 
+  // We want this to run only on mount; majorCities is stable via useMemo.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     const loadProfile = async () => {
       setIsLoading(true);
