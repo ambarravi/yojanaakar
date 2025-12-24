@@ -522,3 +522,112 @@ export const fetchBookingDetailsEventID = async (eventID) => {
     throw error;
   }
 };
+
+export const issueCertificates = async (payload) => {
+  try {
+    console.log("Certificate issuance request started");
+
+    // Fetch the current session
+    const session = await fetchAuthSession(); // Assumes fetchAuthSession is available (e.g., from AWS Amplify)
+    const jwt = session.tokens.idToken.toString();
+
+    const orgID = session.tokens.idToken.payload["cognito:username"];
+    // console.log("userName", orgID);
+
+    // Prepare the JSON object
+
+    payload.orgID = orgID;
+    // Prepare the API URL
+    const apiUrl =
+      process.env.REACT_APP_API_BASE_URL +
+      process.env.REACT_APP_STAGE +
+      "/issue-certificates";
+
+    // Make the API request to issue certificates
+    const response = await fetch(apiUrl, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${jwt}`, // Include Cognito JWT token
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(payload),
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      console.error("Error issuing certificates:", error);
+      throw new Error(error.message || "Failed to issue certificates");
+    }
+
+    const result = await response.json();
+    console.log("result from API " + JSON.stringify(result));
+
+    if (response.status === 202) {
+      console.log("Certificate request accepted:", result);
+    } else {
+      console.log("Error in API response:", result);
+    }
+
+    return result; // Return the response (e.g., { message: "Certificate request accepted" })
+  } catch (error) {
+    console.error("Error issuing certificates:", error.message);
+    throw error;
+  }
+};
+
+export const fetchColleges = async (city, searchQuery = "") => {
+  // return "Event updated";
+
+  const session = await fetchAuthSession(); // Retrieves the session object
+  const jwt = session.tokens.idToken.toString();
+
+  const query = searchQuery ? `&search=${encodeURIComponent(searchQuery)}` : "";
+
+  const apiUrl =
+    process.env.REACT_APP_API_BASE_URL +
+    process.env.REACT_APP_STAGE +
+    `/get-college?city=${encodeURIComponent(city.toLowerCase())}${query}`;
+
+  const response = await fetch(apiUrl, {
+    method: "GET",
+    headers: {
+      Authorization: `Bearer ${jwt}`,
+      "Content-Type": "application/json",
+    },
+  });
+
+  if (!response.ok) {
+    throw new Error("Failed to update event status");
+  }
+
+  return await response.json();
+};
+
+export const validateCollege = async (collegeName, city) => {
+  // return "Event updated";
+
+  const session = await fetchAuthSession(); // Retrieves the session object
+  const jwt = session.tokens.idToken.toString();
+
+  //  const query = searchQuery ? `&search=${encodeURIComponent(searchQuery)}` : "";
+
+  const apiUrl =
+    process.env.REACT_APP_API_BASE_URL +
+    process.env.REACT_APP_STAGE +
+    "/validate-college";
+
+  const response = await fetch(apiUrl, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${jwt}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ collegeName, city }),
+  });
+
+  if (!response.ok) {
+    throw new Error("Failed to update event status");
+  }
+
+  return await response.json();
+};

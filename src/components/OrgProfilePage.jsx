@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import Sidebar from "./Sidebar";
 import { submitProfile, fetchProfileDetails } from "../api/organizerApi";
 import "../styles/OrgProfilePage.css";
-import { GetCollegeList } from "../api/eventApi";
+import { fetchColleges, validateCollege } from "../api/eventApi"; // Assuming validateCollege is added to eventApi or import from services/api
 import citiesData from "../data/cities.json";
 import { fetchAuthSession } from "@aws-amplify/auth";
 import { useDebouncedCallback } from "use-debounce";
@@ -68,6 +68,147 @@ const Popup = ({ message, onClose }) => (
   </div>
 );
 
+// AI Suggestions Modal Component
+const AiSuggestionsModal = ({
+  originalCollegeName,
+  aiResponse,
+  onSelect,
+  onProceedOriginal,
+  onCancel,
+  isSmallScreen,
+}) => (
+  <div
+    style={{
+      position: "fixed",
+      top: 0,
+      left: 0,
+      width: "100%",
+      height: "100%",
+      background: "rgba(0, 0, 0, 0.5)",
+      display: "flex",
+      justifyContent: "center",
+      alignItems: "center",
+      zIndex: 1300,
+    }}
+  >
+    <div
+      style={{
+        background: "#ffffff",
+        padding: "1.5rem",
+        borderRadius: "0.5rem",
+        boxShadow: "0 4px 8px rgba(0, 0, 0, 0.2)",
+        maxWidth: "500px",
+        width: "90%",
+        maxHeight: "80vh",
+        overflowY: "auto",
+        fontFamily: "'Inter', sans-serif",
+      }}
+    >
+      <h3
+        style={{
+          fontSize: isSmallScreen ? "1rem" : "1.25rem",
+          fontWeight: 600,
+          color: "#1f2937",
+          marginBottom: "1rem",
+          textAlign: "center",
+        }}
+      >
+        AI Suggestions for "{originalCollegeName}"
+      </h3>
+      <p
+        style={{
+          fontSize: isSmallScreen ? "0.875rem" : "1rem",
+          color: "#4b5563",
+          marginBottom: "1rem",
+          padding: "0.5rem",
+          background: "#f3f4f6",
+          borderRadius: "0.25rem",
+        }}
+      >
+        {aiResponse.reason}
+      </p>
+      {aiResponse.suggestions && aiResponse.suggestions.length > 0 && (
+        <ul
+          style={{
+            listStyle: "none",
+            padding: 0,
+            marginBottom: "1rem",
+            maxHeight: "200px",
+            overflowY: "auto",
+            border: "1px solid #d1d5db",
+            borderRadius: "0.25rem",
+          }}
+        >
+          {aiResponse.suggestions.map((suggestion, index) => (
+            <li
+              key={index}
+              onClick={() => onSelect(suggestion)}
+              style={{
+                padding: "0.75rem",
+                cursor: "pointer",
+                borderBottom: "1px solid #e5e7eb",
+                transition: "background-color 0.2s ease",
+                fontSize: isSmallScreen ? "0.875rem" : "1rem",
+              }}
+              onMouseOver={(e) => (e.target.style.background = "#f9fafb")}
+              onMouseOut={(e) => (e.target.style.background = "#ffffff")}
+            >
+              {suggestion}
+            </li>
+          ))}
+        </ul>
+      )}
+      <div
+        style={{
+          display: "flex",
+          flexDirection: isSmallScreen ? "column" : "row",
+          gap: "0.5rem",
+          justifyContent: "space-between",
+        }}
+      >
+        <button
+          onClick={() => onProceedOriginal(originalCollegeName)}
+          style={{
+            flex: 1,
+            padding: "0.5rem 1rem",
+            background: "#e6f4ea",
+            color: "#2e7d32",
+            fontWeight: 500,
+            fontSize: isSmallScreen ? "0.875rem" : "1rem",
+            border: "1px solid #bbf7d0",
+            borderRadius: "0.375rem",
+            cursor: "pointer",
+            transition: "background-color 0.2s ease",
+          }}
+          onMouseOver={(e) => (e.target.style.background = "#d1fae5")}
+          onMouseOut={(e) => (e.target.style.background = "#e6f4ea")}
+        >
+          Proceed with "{originalCollegeName}"
+        </button>
+        <button
+          onClick={onCancel}
+          style={{
+            flex: 1,
+            padding: "0.5rem 1rem",
+            background: "#fee2e2",
+            color: "#dc2626",
+            fontWeight: 500,
+            fontSize: isSmallScreen ? "0.875rem" : "1rem",
+            border: "1px solid #fecaca",
+            borderRadius: "0.375rem",
+            cursor: "pointer",
+            transition: "background-color 0.2s ease",
+          }}
+          onMouseOver={(e) => (e.target.style.background = "#fecaca")}
+          onMouseOut={(e) => (e.target.style.background = "#fee2e2")}
+        >
+          Cancel
+        </button>
+      </div>
+    </div>
+  </div>
+);
+
 function OrgProfilePage({ user, signOut }) {
   const [formData, setFormData] = useState({
     name: "",
@@ -92,11 +233,15 @@ function OrgProfilePage({ user, signOut }) {
   const [citySuggestions, setCitySuggestions] = useState([]);
   const [isOtherCity, setIsOtherCity] = useState(false);
   const [collegeSuggestions, setCollegeSuggestions] = useState([]);
+  const [selectedCollege, setSelectedCollege] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isCitySelected, setIsCitySelected] = useState(false);
   const [showPopup, setShowPopup] = useState(false);
   const [isCustomCollege, setIsCustomCollege] = useState(false);
+  const [showAiModal, setShowAiModal] = useState(false);
+  const [aiResponse, setAiResponse] = useState(null);
+  const [originalCollegeName, setOriginalCollegeName] = useState("");
 
   const navigate = useNavigate();
 
@@ -168,11 +313,21 @@ function OrgProfilePage({ user, signOut }) {
             associatedCollegeUniversity: mappedValue,
             termsAccepted: record.termsAccepted?.BOOL || false,
             logo: record.logoPath?.S || null,
-            collegeSearchText: collegeName || collegeID || "",
+            collegeSearchText: collegeName || "",
             latitude: record.latitude?.S || "",
             longitude: record.longitude?.S || "",
           });
           setIsCustomCollege(isCustomCollege);
+          if (formData.associatedCollegeUniversity === "Yes") {
+            if (collegeID) {
+              setSelectedCollege({ CollegeID: collegeID, Name: collegeName });
+            } else if (collegeName) {
+              setSelectedCollege({
+                Name: collegeName,
+                source: "ai_suggestions",
+              });
+            }
+          }
           if (!matchedCity && cityID) {
             setIsOtherCity(true);
             setIsCitySelected(!!record.cityName?.S);
@@ -224,11 +379,15 @@ function OrgProfilePage({ user, signOut }) {
       }
       setIsLoading(true);
       try {
-        const collegeData = await GetCollegeList(
+        const collegeData = await fetchColleges(
           formData.cityName.toLowerCase(),
           query.toLowerCase()
         );
-        setCollegeSuggestions(collegeData || []);
+        let allResults = collegeData || [];
+        if (query && allResults.length === 0) {
+          allResults.push({ Name: query, CollegeID: null, Shortform: "" });
+        }
+        setCollegeSuggestions(allResults);
       } catch (error) {
         console.error("Error fetching college suggestions:", error);
         setCollegeSuggestions([]);
@@ -236,7 +395,7 @@ function OrgProfilePage({ user, signOut }) {
         setIsLoading(false);
       }
     },
-    300,
+    500,
     { leading: false, trailing: true }
   );
 
@@ -257,7 +416,7 @@ function OrgProfilePage({ user, signOut }) {
         latitude: "",
         longitude: "",
       });
-      setCitySuggestions([]);
+      setSelectedCollege(null);
       setCollegeSuggestions([]);
     } else {
       const selectedCity = majorCities.find((city) => city.cityId === value);
@@ -274,7 +433,7 @@ function OrgProfilePage({ user, signOut }) {
         latitude: selectedCity?.latitude || "",
         longitude: selectedCity?.longitude || "",
       });
-      setCitySuggestions([]);
+      setSelectedCollege(null);
       setCollegeSuggestions([]);
     }
   };
@@ -293,6 +452,7 @@ function OrgProfilePage({ user, signOut }) {
       latitude: "",
       longitude: "",
     });
+    setSelectedCollege(null);
     setIsCitySelected(false);
     fetchCitySuggestions(text);
   };
@@ -309,6 +469,7 @@ function OrgProfilePage({ user, signOut }) {
       latitude: suggestion.latitude,
       longitude: suggestion.longitude,
     });
+    setSelectedCollege(null);
     setCitySuggestions([]);
     setIsCitySelected(true);
     setCollegeSuggestions([]);
@@ -322,6 +483,7 @@ function OrgProfilePage({ user, signOut }) {
       collegeSearchText: text,
       collegeID: "",
     });
+    setSelectedCollege(null);
     setIsCustomCollege(true);
     if (text.length > 2) {
       debouncedFetchCollegeSuggestions(text);
@@ -330,14 +492,89 @@ function OrgProfilePage({ user, signOut }) {
     }
   };
 
-  const handleCollegeSuggestionSelect = (college) => {
+  const handleCollegeSuggestionSelect = async (college) => {
+    if (college.CollegeID) {
+      // Existing college - select normally
+      setFormData({
+        ...formData,
+        collegeID: college.CollegeID.toString(),
+        collegeSearchText: college.Name,
+      });
+      setSelectedCollege(college);
+      setIsCustomCollege(false);
+      setCollegeSuggestions([]);
+      return;
+    }
+
+    // New college - validate via API
+    const inputName = college.Name.trim();
+    setOriginalCollegeName(inputName);
+    setIsLoading(true);
+    try {
+      const response = await validateCollege(inputName, formData.cityName);
+      console.log("AI Response:", response);
+      if (!response.valid) {
+        // Invalid: show error in label
+        setErrors({
+          ...errors,
+          collegeSearchText: response.reason || "College name not recognized.",
+        });
+      } else if (response.suggestions && response.suggestions.length > 0) {
+        // Valid with suggestions: show modal
+        setAiResponse(response);
+        setShowAiModal(true);
+      } else {
+        // Valid, no suggestions: proceed with original
+        setFormData({
+          ...formData,
+          collegeID: "",
+          collegeSearchText: inputName,
+        });
+        setSelectedCollege({ Name: inputName, source: "ai_suggestions" });
+        setIsCustomCollege(true);
+        setErrors({ ...errors, collegeSearchText: "" });
+      }
+    } catch (error) {
+      console.error("Error validating college:", error);
+      const errorMessage = "College name not recognized, try again.";
+      setErrors({ ...errors, collegeSearchText: errorMessage });
+    } finally {
+      setIsLoading(false);
+      setCollegeSuggestions([]);
+    }
+  };
+
+  const handleAiSuggestionSelect = (suggestion) => {
     setFormData({
       ...formData,
-      collegeID: college.CollegeID.toString(),
-      collegeSearchText: `${college.Name} (${college.Shortform})`,
+      collegeSearchText: suggestion,
+      collegeID: "",
     });
-    setIsCustomCollege(false);
-    setCollegeSuggestions([]);
+    setSelectedCollege({ Name: suggestion, source: "ai_suggestions" });
+    setIsCustomCollege(true);
+    setShowAiModal(false);
+    setErrors({ ...errors, collegeSearchText: "" });
+  };
+
+  const handleProceedWithOriginal = (name) => {
+    setFormData({
+      ...formData,
+      collegeSearchText: name,
+      collegeID: "",
+    });
+    setSelectedCollege({ Name: name, source: "ai_suggestions" });
+    setIsCustomCollege(true);
+    setShowAiModal(false);
+    setErrors({ ...errors, collegeSearchText: "" });
+  };
+
+  const handleAiModalCancel = () => {
+    setShowAiModal(false);
+    setAiResponse(null);
+    setOriginalCollegeName("");
+    // Optionally clear input
+    setFormData((prev) => ({ ...prev, collegeSearchText: "" }));
+    setSelectedCollege(null);
   };
 
   const handleChange = (e) => {
@@ -348,6 +585,16 @@ function OrgProfilePage({ user, signOut }) {
       ...formData,
       [name]: type === "checkbox" ? checked : value,
     });
+    if (name === "associatedCollegeUniversity" && value !== "Yes") {
+      setFormData((prev) => ({
+        ...prev,
+        collegeID: "",
+        collegeSearchText: "",
+      }));
+      setSelectedCollege(null);
+      setCollegeSuggestions([]);
+      setIsCustomCollege(false);
+    }
   };
 
   const handleFileChange = (e) => {
@@ -391,7 +638,7 @@ function OrgProfilePage({ user, signOut }) {
     if (!formData.logo) {
       errors.logo = "Logo upload is required.";
     }
-    if (!formData.cityID) {
+    if (!formData.cityID && !formData.cityName) {
       errors.cityID = "Please select a valid city.";
     }
     if (
@@ -413,6 +660,67 @@ function OrgProfilePage({ user, signOut }) {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!validateForm()) return;
+
+    // College validation logic if associated with college
+    let collegeIDToSubmit = "";
+    let collegeNameToSubmit = "";
+    let collegeSource = "";
+    if (formData.associatedCollegeUniversity === "Yes") {
+      const inputName = formData.collegeSearchText.trim();
+      if (!inputName) {
+        setErrors({
+          ...errors,
+          collegeSearchText: "Please enter or select a college.",
+        });
+        return;
+      }
+
+      let collegeDetails = selectedCollege || { Name: inputName };
+      let finalCollegeDetails = collegeDetails;
+
+      // Exact match check for typed input or non-AI selection without CollegeID
+      if (!collegeDetails.CollegeID && !collegeDetails.source) {
+        try {
+          const searchResults = await fetchColleges(
+            formData.cityName.toLowerCase(),
+            inputName.toLowerCase()
+          );
+          const lowerInput = inputName.toLowerCase();
+          const matchedCollege = searchResults.find(
+            (college) =>
+              college.Name?.toLowerCase() === lowerInput ||
+              college.Shortform?.toLowerCase() === lowerInput
+          );
+          if (matchedCollege && matchedCollege.CollegeID) {
+            finalCollegeDetails = matchedCollege;
+          }
+        } catch (error) {
+          console.error("Error in exact match check:", error);
+        }
+      }
+
+      // Scenario 1: Existing College
+      if (finalCollegeDetails.CollegeID) {
+        collegeIDToSubmit = finalCollegeDetails.CollegeID.toString();
+        collegeNameToSubmit = "";
+      }
+      // Scenario 2: New College (AI Validation) - Already handled on selection, so skip if source exists
+      else if (
+        !finalCollegeDetails.CollegeID &&
+        finalCollegeDetails.source === "ai_suggestions"
+      ) {
+        collegeIDToSubmit = "";
+        collegeNameToSubmit = finalCollegeDetails.Name;
+        collegeSource = finalCollegeDetails.source;
+      } else {
+        setErrors({
+          ...errors,
+          collegeSearchText: "Invalid college selection. Please try again.",
+        });
+        return;
+      }
+    }
+
     setIsLoading(true);
     const formDataToSubmit = new FormData();
     const fieldsToSubmit = {
@@ -425,20 +733,16 @@ function OrgProfilePage({ user, signOut }) {
       cityID: formData.cityID,
       cityName: formData.cityName,
       state: formData.state,
-      collegeID:
-        formData.associatedCollegeUniversity === "Yes" && !isCustomCollege
-          ? formData.collegeID
-          : "",
-      collegeName:
-        formData.associatedCollegeUniversity === "Yes" && isCustomCollege
-          ? formData.collegeSearchText.trim()
-          : "",
+      collegeID: collegeIDToSubmit,
+      collegeName: collegeNameToSubmit,
+      collegeSource: collegeSource,
       address: formData.address,
       aboutOrganization: formData.aboutOrganization,
       associatedCollegeUniversity: formData.associatedCollegeUniversity,
       termsAccepted: formData.termsAccepted,
       latitude: formData.latitude,
       longitude: formData.longitude,
+      isCustomCollege: isCustomCollege,
     };
 
     Object.keys(fieldsToSubmit).forEach((key) => {
@@ -487,6 +791,16 @@ function OrgProfilePage({ user, signOut }) {
       )}
       {showPopup && (
         <Popup message="Profile Updated" onClose={handlePopupClose} />
+      )}
+      {showAiModal && aiResponse && (
+        <AiSuggestionsModal
+          originalCollegeName={originalCollegeName}
+          aiResponse={aiResponse}
+          onSelect={handleAiSuggestionSelect}
+          onProceedOriginal={handleProceedWithOriginal}
+          onCancel={handleAiModalCancel}
+          isSmallScreen={isSmallScreen}
+        />
       )}
       <button className="sidebar-toggle md:hidden" onClick={toggleSidebar}>
         ☰
@@ -881,6 +1195,8 @@ function OrgProfilePage({ user, signOut }) {
                       boxSizing: "border-box",
                       fontSize: isSmallScreen ? "0.75rem" : "0.875rem",
                       position: "absolute",
+                      top: "45px",
+                      left: 0,
                       background: "white",
                       border: "1px solid #ccc",
                       listStyle: "none",
@@ -1014,6 +1330,7 @@ function OrgProfilePage({ user, signOut }) {
                   flex: isMobile ? "1 1 100%" : "1 1 45%",
                   maxWidth: "100%",
                   padding: isSmallScreen ? "0.5rem 0" : "0.75rem 0",
+                  position: "relative",
                 }}
               >
                 <label
@@ -1026,7 +1343,7 @@ function OrgProfilePage({ user, signOut }) {
                   name="collegeSearchText"
                   value={formData.collegeSearchText}
                   onChange={handleCollegeSearchChange}
-                  placeholder="Type college name..."
+                  placeholder="Type college name or short form..."
                   className={`college-input ${
                     errors.collegeSearchText ? "error" : ""
                   }`}
@@ -1035,8 +1352,22 @@ function OrgProfilePage({ user, signOut }) {
                     maxWidth: "100%",
                     boxSizing: "border-box",
                     fontSize: isSmallScreen ? "0.75rem" : "0.875rem",
+                    height: "45px",
+                    border: "1px solid #CED4DA",
+                    borderRadius: "8px",
+                    padding: "0 12px",
                   }}
                 />
+                {isLoading && (
+                  <div
+                    style={{
+                      marginBottom: "10px",
+                      fontSize: isSmallScreen ? "0.75rem" : "0.875rem",
+                    }}
+                  >
+                    Loading...
+                  </div>
+                )}
                 {collegeSuggestions.length > 0 && (
                   <ul
                     className="suggestions-list"
@@ -1045,12 +1376,14 @@ function OrgProfilePage({ user, signOut }) {
                       boxSizing: "border-box",
                       fontSize: isSmallScreen ? "0.75rem" : "0.875rem",
                       position: "absolute",
+                      top: "45px",
+                      left: "0",
                       background: "white",
                       border: "1px solid #ccc",
                       listStyle: "none",
-                      padding: 0,
-                      margin: 0,
-                      zIndex: 1000,
+                      padding: "0",
+                      margin: "0",
+                      zIndex: "1000",
                       maxHeight: "200px",
                       overflowY: "auto",
                       width: "100%",
@@ -1059,7 +1392,7 @@ function OrgProfilePage({ user, signOut }) {
                   >
                     {collegeSuggestions.map((college) => (
                       <li
-                        key={college.CollegeID}
+                        key={college.CollegeID || college.Name}
                         onClick={() => handleCollegeSuggestionSelect(college)}
                         className="suggestion-item"
                         style={{
@@ -1070,7 +1403,9 @@ function OrgProfilePage({ user, signOut }) {
                           whiteSpace: "nowrap",
                         }}
                       >
-                        {`${college.Name} (${college.Shortform})`}
+                        {`${college.Name}${
+                          !college.CollegeID ? " (New)" : ""
+                        } (${college.Shortform || ""})`}
                       </li>
                     ))}
                   </ul>

@@ -38,6 +38,8 @@ import TermsAndConditions from "./components/TermsAndConditions.jsx";
 
 import { AuthProvider } from "./context/AuthContext.js";
 import { updateRole } from "./api/userApi";
+import "@fontsource/playfair-display"; // default 400
+import "@fontsource/playfair-display/700.css"; // bold
 
 function AuthenticatedRoutes() {
   const navigate = useNavigate();
