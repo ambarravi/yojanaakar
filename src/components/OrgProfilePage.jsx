@@ -275,8 +275,10 @@ function OrgProfilePage({ user, signOut }) {
     []
   );
 
-  // We want this to run only on mount; majorCities is stable via useMemo.
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+  /* =====================================================
+     EFFECT 1 — LOAD PROFILE (runs on mount)
+     ===================================================== */
+
   useEffect(() => {
     const loadProfile = async () => {
       setIsLoading(true);
@@ -285,18 +287,18 @@ function OrgProfilePage({ user, signOut }) {
         const email = session.tokens.idToken.payload.email;
 
         const profile = await fetchProfileDetails();
-        if (profile && profile.record) {
+
+        if (profile?.record) {
           const record = profile.record;
-          const mappedValue = record.associatedCollegeUniversity?.BOOL
-            ? "Yes"
-            : "No";
+
           const cityID = record.cityID?.S || "";
           const matchedCity = majorCities.find(
             (city) => city.cityId === cityID
           );
+
           const collegeID = record.collegeID?.S || "";
           const collegeName = record.collegeName?.S || "";
-          const isCustomCollege = !collegeID && collegeName;
+          const customCollege = !collegeID && collegeName;
 
           setFormData({
             name: record.OrganizerName?.S || "",
@@ -305,31 +307,26 @@ function OrgProfilePage({ user, signOut }) {
             contactNumber: record.contactNumber?.S || "",
             alternateNumber: record.alternateNumber?.S || "",
             aboutOrganization: record.aboutOrganization?.S || "",
-            cityID: cityID,
+            cityID,
             cityName: matchedCity
               ? matchedCity.cityName
               : record.cityName?.S || "",
             state: matchedCity ? matchedCity.state : record.state?.S || "",
-            collegeID: isCustomCollege ? "" : collegeID,
+            collegeID: customCollege ? "" : collegeID,
             address: record.address?.S || "",
-            associatedCollegeUniversity: mappedValue,
+            associatedCollegeUniversity: record.associatedCollegeUniversity
+              ?.BOOL
+              ? "Yes"
+              : "No",
             termsAccepted: record.termsAccepted?.BOOL || false,
             logo: record.logoPath?.S || null,
             collegeSearchText: collegeName || "",
             latitude: record.latitude?.S || "",
             longitude: record.longitude?.S || "",
           });
-          setIsCustomCollege(isCustomCollege);
-          if (formData.associatedCollegeUniversity === "Yes") {
-            if (collegeID) {
-              setSelectedCollege({ CollegeID: collegeID, Name: collegeName });
-            } else if (collegeName) {
-              setSelectedCollege({
-                Name: collegeName,
-                source: "ai_suggestions",
-              });
-            }
-          }
+
+          setIsCustomCollege(customCollege);
+
           if (!matchedCity && cityID) {
             setIsOtherCity(true);
             setIsCitySelected(!!record.cityName?.S);
@@ -340,16 +337,108 @@ function OrgProfilePage({ user, signOut }) {
             contactEmail: email,
           }));
         }
-      } catch (error) {
-        setErrors({
-          general: "Error fetching profile details.",
-        });
+      } catch (err) {
+        setErrors({ general: "Error fetching profile details." });
       } finally {
         setIsLoading(false);
       }
     };
+
     loadProfile();
   }, [majorCities]);
+
+  /* =====================================================
+     EFFECT 2 — HANDLE COLLEGE ASSOCIATION CHANGE
+     ===================================================== */
+
+  useEffect(() => {
+    if (formData.associatedCollegeUniversity !== "Yes") {
+      setFormData((prev) => ({
+        ...prev,
+        collegeID: "",
+        collegeSearchText: "",
+      }));
+      setSelectedCollege(null);
+      setCollegeSuggestions([]);
+      setIsCustomCollege(false);
+    }
+  }, [formData.associatedCollegeUniversity]);
+
+  // // We want this to run only on mount; majorCities is stable via useMemo.
+  // // eslint-disable-next-line react-hooks/exhaustive-deps
+  // useEffect(() => {
+  //   const loadProfile = async () => {
+  //     setIsLoading(true);
+  //     try {
+  //       const session = await fetchAuthSession();
+  //       const email = session.tokens.idToken.payload.email;
+
+  //       const profile = await fetchProfileDetails();
+  //       if (profile && profile.record) {
+  //         const record = profile.record;
+  //         const mappedValue = record.associatedCollegeUniversity?.BOOL
+  //           ? "Yes"
+  //           : "No";
+  //         const cityID = record.cityID?.S || "";
+  //         const matchedCity = majorCities.find(
+  //           (city) => city.cityId === cityID
+  //         );
+  //         const collegeID = record.collegeID?.S || "";
+  //         const collegeName = record.collegeName?.S || "";
+  //         const isCustomCollege = !collegeID && collegeName;
+
+  //         setFormData({
+  //           name: record.OrganizerName?.S || "",
+  //           contactPerson: record.contactPerson?.S || "",
+  //           contactEmail: record.contactEmail?.S || email,
+  //           contactNumber: record.contactNumber?.S || "",
+  //           alternateNumber: record.alternateNumber?.S || "",
+  //           aboutOrganization: record.aboutOrganization?.S || "",
+  //           cityID: cityID,
+  //           cityName: matchedCity
+  //             ? matchedCity.cityName
+  //             : record.cityName?.S || "",
+  //           state: matchedCity ? matchedCity.state : record.state?.S || "",
+  //           collegeID: isCustomCollege ? "" : collegeID,
+  //           address: record.address?.S || "",
+  //           associatedCollegeUniversity: mappedValue,
+  //           termsAccepted: record.termsAccepted?.BOOL || false,
+  //           logo: record.logoPath?.S || null,
+  //           collegeSearchText: collegeName || "",
+  //           latitude: record.latitude?.S || "",
+  //           longitude: record.longitude?.S || "",
+  //         });
+  //         setIsCustomCollege(isCustomCollege);
+  //         if (formData.associatedCollegeUniversity === "Yes") {
+  //           if (collegeID) {
+  //             setSelectedCollege({ CollegeID: collegeID, Name: collegeName });
+  //           } else if (collegeName) {
+  //             setSelectedCollege({
+  //               Name: collegeName,
+  //               source: "ai_suggestions",
+  //             });
+  //           }
+  //         }
+  //         if (!matchedCity && cityID) {
+  //           setIsOtherCity(true);
+  //           setIsCitySelected(!!record.cityName?.S);
+  //         }
+  //       } else {
+  //         setFormData((prev) => ({
+  //           ...prev,
+  //           contactEmail: email,
+  //         }));
+  //       }
+  //     } catch (error) {
+  //       setErrors({
+  //         general: "Error fetching profile details.",
+  //       });
+  //     } finally {
+  //       setIsLoading(false);
+  //     }
+  //   };
+  //   loadProfile();
+  // }, [majorCities]);
 
   const fetchCitySuggestions = (query) => {
     if (query.length > 2) {
